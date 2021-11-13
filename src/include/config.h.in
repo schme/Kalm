@@ -1,0 +1,20 @@
+#pragma once
+
+#include "common.h"
+
+//#cmakedefine HAS_EDITOR
+
+namespace ks {
+struct Config
+{
+
+	LogLevel logLevel = LogLevel::Info;
+
+
+	static Config &get() {
+		static Config config;
+		return config;
+	}
+};
+
+}

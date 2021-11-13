@@ -1,0 +1,28 @@
+#pragma once
+
+#include <glad/gl.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
+#include "maths.h"
+
+namespace ks {
+
+struct Gui {
+	bool init(GLFWwindow *window);
+	void run();
+	void terminate();
+
+	static Gui &get() {
+		static Gui gui;
+		return gui;
+	}
+
+	math::vec3 clear_color = math::vec3(0.05f, 0.05f, 0.05f);
+	GLFWwindow *window = nullptr;
+
+	bool optShowDemoWindow = false;
+	bool optShowTimeline = true;
+};
+
+}

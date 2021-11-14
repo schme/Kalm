@@ -7,6 +7,8 @@
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
 
+#include "Timeline.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -16,31 +18,42 @@ namespace ks {
 	{
 		float x, y, z;
 		float r, g, b;
-	} vertices[3] =
+        float u, v;
+	} vertices[6] =
 	{
-		{ -0.6f, -0.4f, 0.f, 1.f, 0.f, 0.f },
-		{  0.6f, -0.4f, 0.f, 0.f, 1.f, 0.f },
-		{   0.f,  0.6f, 0.f, 0.f, 0.f, 1.f }
+		{ -0.8f, -0.8f, 0.f, 1.f, 0.f, 0.f, 0.0f, 1.0f },
+		{ -0.8f,  0.8f, 0.f, 0.f, 1.f, 0.f, 0.0f, 0.0f },
+		{  0.8f, -0.8f, 0.f, 0.f, 0.f, 1.f, 1.0f, 1.0f },
+		{ -0.8f,  0.8f, 0.f, 1.f, 0.f, 0.f, 0.0f, 0.0f },
+		{  0.8f,  0.8f, 0.f, 0.f, 1.f, 0.f, 1.0f, 0.0f },
+		{  0.8f, -0.8f, 0.f, 0.f, 0.f, 1.f, 1.0f, 1.0f }
 	};
 
 	static const char* vertex_shader_text =
 		"#version 460\n"
 		"uniform mat4 MVP;\n"
-		"attribute vec3 vCol;\n"
-		"attribute vec3 vPos;\n"
-		"varying vec3 color;\n"
+        "uniform float time;\n"
+		"in vec3 vPos;\n"
+		"in vec3 vCol;\n"
+		"in vec2 uv;\n"
+		"out vec3 color;\n"
+        "out vec2 tex;\n"
 		"void main()\n"
 		"{\n"
 		"    gl_Position = MVP * vec4(vPos, 1.0);\n"
-		"    color = vCol;\n"
+        "    color = vCol;\n"
+		"    tex = uv;\n"
 		"}\n";
 
 	static const char* fragment_shader_text =
 		"#version 460\n"
-		"varying vec3 color;\n"
+        "uniform float time;\n"
+		"in vec3 color;\n"
+        "in vec2 tex;\n"
+        "out vec4 FragColor;\n"
 		"void main()\n"
 		"{\n"
-		"    gl_FragColor = vec4(color, 1.0);\n"
+		"    FragColor = vec4( 0.5f + sin(time) / 2.0f, tex.x, tex.y, 1.0);\n"
 		"}\n";
 
 	static void error_callback(int error, const char* description)
@@ -55,6 +68,9 @@ namespace ks {
 
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
+        if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
+            Timeline::get().togglePlayback(glfwGetTime());
+        }
 	}
 
 } // namespace ks
@@ -91,14 +107,14 @@ int main(int, char**)
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( render::openGlMessageCallback, 0);
 
-	GLuint vbo, vao;
-	GLint vpos_location, vcol_location;
-
 	Shader shader;
 	shader
 		.attach(vertex_shader_text, Shader::Type::Vert)
 		.attach(fragment_shader_text, Shader::Type::Frag)
 		.link();
+
+	GLuint vbo, vao;
+	GLint vpos_location, vcol_location, uv_location;
 
 	glGenVertexArrays(1, &vao);
 	glGenBuffers(1, &vbo);
@@ -108,6 +124,7 @@ int main(int, char**)
 
 	vpos_location = glGetAttribLocation(shader.get(), "vPos");
 	vcol_location = glGetAttribLocation(shader.get(), "vCol");
+	uv_location = glGetAttribLocation(shader.get(), "uv");
 
 	glEnableVertexAttribArray(vpos_location);
 	glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
@@ -115,14 +132,15 @@ int main(int, char**)
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
 			sizeof(vertices[0]), (void*) (sizeof(float) * 3));
+	glEnableVertexAttribArray(uv_location);
+	glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE,
+			sizeof(vertices[0]), (void*) (sizeof(float) * 6));
 
-
-	static int maxFrames = 120;
-	static int currentFrame = 0;
-	static float playbackRate = 1.0f;
 
 	Gui &gui = Gui::get();
-	gui.init(window, currentFrame, maxFrames, playbackRate);
+	gui.init(window);
+    Timeline &timeline = Timeline::get();
+    timeline.init();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -130,8 +148,8 @@ int main(int, char**)
 		glfwPollEvents();
 
 		// logic
-		float time = (float)gui.timelineGui->currentFrame * 1.0f/60.0f;
 
+        float time = timeline.timestep(glfwGetTime());
 
 		// render
 
@@ -156,7 +174,8 @@ int main(int, char**)
 
 		shader.use();
 		shader.bind("MVP", mvp);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		shader.bind("time", time);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 
 		Gui::get().run();
 		Gui::get().render();

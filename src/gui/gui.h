@@ -12,7 +12,7 @@
 namespace ks {
 
 struct Gui {
-	bool init(GLFWwindow *window, int currentFrame, int maxFrames, float playbackRate);
+	bool init(GLFWwindow *window);
 	void run();
 	void render();
 	void terminate();
@@ -24,8 +24,6 @@ struct Gui {
 
 	math::vec3 clear_color = math::vec3(0.05f, 0.05f, 0.05f);
 	GLFWwindow *window = nullptr;
-
-	std::unique_ptr<TimelineGui> timelineGui;
 
 	bool optShowDemoWindow = false;
 	bool optShowTimeline = true;

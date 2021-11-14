@@ -1,8 +1,6 @@
 #pragma once
 
-#include "common.h"
-
-//#cmakedefine HAS_EDITOR
+#include "include/common.h"
 
 namespace ks {
 struct Config

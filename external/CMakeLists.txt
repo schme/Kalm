@@ -31,23 +31,39 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw glm)
 
-if (HAS_EDITOR)
 message( STATUS "Fetching imgui...")
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY git@github.com:ocornut/imgui.git
-    GIT_TAG 55d35d8387c15bf0cfd71861df67af8cfbda7456 #1.85
+    GIT_TAG dc8c3618e8f8e2dada23daa1aa237626af341fd8 #1.86 wip docking
 )
+message( STATUS "Fetching imgui extension ImGuizmo...")
+FetchContent_Declare(
+    imgui-imguizmo
+    GIT_REPOSITORY git@github.com:CedricGuillemet/ImGuizmo.git
+    GIT_TAG 82a626f9db7dbc0c8c7a3c9353e2104cb75d8749
+)
+
 FetchContent_Populate(imgui)
+FetchContent_Populate(imgui-imguizmo)
+
+message (STATUS "imgui source directory: ${imgui_SOURCE_DIR}")
+message (STATUS "imgui-guizmo source directory: ${imgui-imguizmo_SOURCE_DIR}")
+
 set (IMGUI_HEADERS
 	${imgui_SOURCE_DIR}/imgui.h
-	${imgui_SOURCE_DIR}/imgui_draw.h
-	${imgui_SOURCE_DIR}/imgui_demo.h
 	${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.h
 	${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.h
 	${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.h
+    ${imgui-imguizmo_SOURCE_DIR}/GraphEditor.h
+    ${imgui-imguizmo_SOURCE_DIR}/ImCurveEdit.h
+    ${imgui-imguizmo_SOURCE_DIR}/ImGradient.h
+    ${imgui-imguizmo_SOURCE_DIR}/ImGuizmo.h
+    ${imgui-imguizmo_SOURCE_DIR}/ImSequencer.h
+    ${imgui-imguizmo_SOURCE_DIR}/ImZoomSlider.h
 )
 set (IMGUI_SOURCES
+    ${IMGUI_HEADERS}
 	${imgui_SOURCE_DIR}/imgui.cpp
 	${imgui_SOURCE_DIR}/imgui_draw.cpp
 	${imgui_SOURCE_DIR}/imgui_demo.cpp
@@ -56,16 +72,22 @@ set (IMGUI_SOURCES
 	${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
 	${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 	${imgui_SOURCE_DIR}/misc/cpp/imgui_stdlib.cpp
+    ${imgui-imguizmo_SOURCE_DIR}/GraphEditor.cpp
+    ${imgui-imguizmo_SOURCE_DIR}/ImCurveEdit.cpp
+    ${imgui-imguizmo_SOURCE_DIR}/ImGradient.cpp
+    ${imgui-imguizmo_SOURCE_DIR}/ImGuizmo.cpp
+    ${imgui-imguizmo_SOURCE_DIR}/ImSequencer.cpp
 )
 
 add_library(imgui STATIC ${IMGUI_SOURCES})
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR})
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR}/backends)
-target_include_directories(imgui PUBLIC ${imgui_SOURCE_DIR}/misc/cpp)
+target_include_directories(imgui
+    PUBLIC
+        ${imgui_SOURCE_DIR}
+        ${imgui_SOURCE_DIR}/backends
+        ${imgui_SOURCE_DIR}/misc/cpp
+        ${imgui-imguizmo_SOURCE_DIR}
+)
 
-target_include_directories(imgui PRIVATE glfw)
 target_link_libraries(imgui PRIVATE glfw)
+
 install (FILES ${IMGUI_HEADERS} DESTINATION include)
-
-endif()
-

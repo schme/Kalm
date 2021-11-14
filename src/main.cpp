@@ -2,8 +2,8 @@
 
 #include "gui/gui.h"
 
-#include "common.h"
-#include "maths.h"
+#include "include/common.h"
+#include "include/maths.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
 
@@ -14,24 +14,24 @@ namespace ks {
 
 	static const struct
 	{
-		float x, y;
+		float x, y, z;
 		float r, g, b;
 	} vertices[3] =
 	{
-		{ -0.6f, -0.4f, 1.f, 0.f, 0.f },
-		{  0.6f, -0.4f, 0.f, 1.f, 0.f },
-		{   0.f,  0.6f, 0.f, 0.f, 1.f }
+		{ -0.6f, -0.4f, 0.f, 1.f, 0.f, 0.f },
+		{  0.6f, -0.4f, 0.f, 0.f, 1.f, 0.f },
+		{   0.f,  0.6f, 0.f, 0.f, 0.f, 1.f }
 	};
 
 	static const char* vertex_shader_text =
 		"#version 460\n"
 		"uniform mat4 MVP;\n"
 		"attribute vec3 vCol;\n"
-		"attribute vec2 vPos;\n"
+		"attribute vec3 vPos;\n"
 		"varying vec3 color;\n"
 		"void main()\n"
 		"{\n"
-		"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+		"    gl_Position = MVP * vec4(vPos, 1.0);\n"
 		"    color = vCol;\n"
 		"}\n";
 
@@ -110,17 +110,30 @@ int main(int, char**)
 	vcol_location = glGetAttribLocation(shader.get(), "vCol");
 
 	glEnableVertexAttribArray(vpos_location);
-	glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE,
+	glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
 			sizeof(vertices[0]), (void*) 0);
 	glEnableVertexAttribArray(vcol_location);
 	glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE,
-			sizeof(vertices[0]), (void*) (sizeof(float) * 2));
+			sizeof(vertices[0]), (void*) (sizeof(float) * 3));
 
-	Gui::get().init(window);
+
+	static int maxFrames = 120;
+	static int currentFrame = 0;
+	static float playbackRate = 1.0f;
+
+	Gui &gui = Gui::get();
+	gui.init(window, currentFrame, maxFrames, playbackRate);
 
 	while (!glfwWindowShouldClose(window))
 	{
+		// input
 		glfwPollEvents();
+
+		// logic
+		float time = (float)gui.timelineGui->currentFrame * 1.0f/60.0f;
+
+
+		// render
 
 		float ratio;
 		int width, height;
@@ -137,7 +150,7 @@ int main(int, char**)
 		math::mat4 m, p, mvp;
 
 		m = math::mat4(1.0f);
-		m = math::rotate(m, (float)glfwGetTime(), math::vec3(0.f, 0.f, 1.f));
+		m = math::rotate(m, time, math::vec3(0.f, 0.f, 1.f));
 		p = math::ortho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
 		mvp = m * p;
 
@@ -146,6 +159,7 @@ int main(int, char**)
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 		Gui::get().run();
+		Gui::get().render();
 
 		glfwSwapBuffers(window);
 	}

@@ -6,9 +6,11 @@ project(
 set(GUI_SOURCES
 	gui.cpp
 	gui.h
+	TimelineGui.cpp
+	TimelineGui.h
 )
 
 add_library(kalm-gui STATIC ${GUI_SOURCES})
 
-target_include_directories(kalm-gui PRIVATE imgui glfw glad)
-target_link_libraries(kalm-gui PRIVATE imgui glfw glad)
+target_link_libraries(kalm-gui PRIVATE glfw glad
+	PUBLIC imgui) 

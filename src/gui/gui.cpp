@@ -1,12 +1,13 @@
 #include "gui.h"
 
 #include "imgui.h"
+#include "ImGuizmo.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
 namespace ks {
 
-bool Gui::init(GLFWwindow *window)
+bool Gui::init(GLFWwindow *window, int currentFrame, int maxFrames, float playbackRate)
 {
 	const char *glsl_version = "#version 460";
 	IMGUI_CHECKVERSION();
@@ -16,6 +17,33 @@ bool Gui::init(GLFWwindow *window)
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
+
+	// imgui settings
+	{
+		ImGuiIO &io = ImGui::GetIO();
+		io.ConfigDockingWithShift = true;
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	}
+
+	if (!timelineGui) {
+		timelineGui = std::make_unique<TimelineGui>(new TimelineGui);
+
+		timelineGui->frameMax = maxFrames;
+		timelineGui->currentFrame = currentFrame;
+
+		timelineGui->items.push_back({0, 2, 0});
+		timelineGui->items.push_back({10, 18, 0});
+		timelineGui->items.push_back({0, 30, 0});
+		timelineGui->items.push_back({42, 58, 0});
+
+		timelineGui->sequenceOptions =
+			ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_EDIT_ALL
+			| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_ADD
+			| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_DEL
+			| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_COPYPASTE
+		;
+
+	}
 
 	return true;
 }
@@ -45,6 +73,20 @@ static void showMainMenuBar(Gui &gui)
 
 static void showTimeline(Gui &gui)
 {
+	ImGuiWindowFlags windowFlags =
+		ImGuiWindowFlags_NoTitleBar
+		| ImGuiWindowFlags_NoBackground
+		| ImGuiWindowFlags_NoDecoration
+		| ImGuiWindowFlags_NoMove
+		| ImGuiWindowFlags_NoCollapse
+	;
+
+	ImGui::Begin("Timeline", nullptr, windowFlags);
+	TimelineGui &timeline = *gui.timelineGui;
+	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(gui.timelineGui.get());
+	ImSequencer::Sequencer(sequencer, &timeline.currentFrame, &timeline.expanded, &timeline.selectedEntry, &timeline.firstFrame, timeline.sequenceOptions);
+
+	ImGui::End();
 }
 
 void Gui::run()
@@ -53,16 +95,22 @@ void Gui::run()
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	showMainMenuBar(*this);
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
+			ImGuiDockNodeFlags_PassthruCentralNode
+			| ImGuiDockNodeFlags_NoDockingInCentralNode);
 
-	if (optShowDemoWindow)
-		ImGui::ShowDemoWindow(&optShowDemoWindow);
+	showMainMenuBar(*this);
 
 	if (optShowTimeline)
 		showTimeline(*this);
 
-	ImGui::Render();
+	if (optShowDemoWindow)
+		ImGui::ShowDemoWindow(&optShowDemoWindow);
+}
 
+void Gui::render()
+{
+	ImGui::Render();
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 

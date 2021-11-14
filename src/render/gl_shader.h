@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "maths.h"
+#include "include/maths.h"
 
 namespace ks {
 	struct Shader {

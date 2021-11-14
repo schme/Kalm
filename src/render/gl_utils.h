@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <glad/gl.h>
 
-#include "common.h"
-#include "config.h"
+#include "include/common.h"
+#include "include/config.h"
 
 namespace ks::render {
 

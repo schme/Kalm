@@ -29,7 +29,14 @@ FetchContent_Declare(
     GIT_TAG bf71a834948186f4097caa076cd2663c69a10e1e #0.9.8
 )
 
-FetchContent_MakeAvailable(glfw glm)
+message( STATUS "Fetching assimp...")
+FetchContent_Declare(
+    assimp
+    GIT_REPOSITORY git@github.com:assimp/assimp.git
+    GIT_TAG 05115b07b4d7ca12a52b9fd0e0534029ac8f2cb6 #5.1.0
+)
+
+FetchContent_MakeAvailable(glfw glm assimp)
 
 message( STATUS "Fetching imgui...")
 FetchContent_Declare(

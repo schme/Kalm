@@ -20,7 +20,6 @@ bool Gui::init(GLFWwindow *window)
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	// imgui settings
 	{
 		ImGuiIO &io = ImGui::GetIO();
 		io.ConfigDockingWithShift = true;

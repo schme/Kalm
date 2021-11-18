@@ -5,6 +5,6 @@ set(RENDER_SOURCES
 	gl_utils.h
 )
 
-add_library(render STATIC ${RENDER_SOURCES})
-target_include_directories(render PRIVATE glad)
-target_link_libraries(render PRIVATE glad)
+add_library(kalm-render STATIC ${RENDER_SOURCES})
+target_include_directories(kalm-render PRIVATE glad)
+target_link_libraries(kalm-render PRIVATE glad)

@@ -29,6 +29,7 @@ void TimelineGui::Get(int index, int** start, int** end, int* type, unsigned int
 	if (type)
 		*type = item.type;
 }
+
 #if 0
 void TimelineGui::CustomDraw(int index, ImDrawList* drawList, const ImRect& rc, const ImRect& legendRect, const ImRect& clippingRect, const ImRect& legendClippingRect)
 {

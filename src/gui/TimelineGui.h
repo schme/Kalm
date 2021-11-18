@@ -23,6 +23,7 @@ public:
 	int GetItemCount() const override;
 
 	void Get(int index, int** start, int** end, int* type, unsigned int* color) override;
+
 #if 0
 	void CustomDraw(int /*index*/, ImDrawList* /*draw_list*/, const ImRect& /*rc*/, const ImRect& /*legendRect*/, const ImRect& /*clippingRect*/, const ImRect& /*legendClippingRect*/) override;
 	void CustomDrawCompact(int /*index*/, ImDrawList* /*draw_list*/, const ImRect& /*rc*/, const ImRect& /*clippingRect*/) override;

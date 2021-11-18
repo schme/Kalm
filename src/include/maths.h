@@ -10,4 +10,10 @@
  
 namespace ks::math {
 	using namespace glm;
+
+	struct AABB {
+		vec3 min;
+		vec3 max;
+	};
+
 }

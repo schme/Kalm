@@ -1,13 +1,11 @@
 
-
+#include "Timeline.h"
 #include "gui/gui.h"
-
 #include "include/common.h"
 #include "include/maths.h"
+#include "mesh/MeshManager.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
-
-#include "Timeline.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -136,11 +134,17 @@ int main(int, char**)
 	glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE,
 			sizeof(vertices[0]), (void*) (sizeof(float) * 6));
 
+	MeshManager &mm = MeshManager::get();
+	mm.init("assets/");
+	mm.readFile("ico.dae");
 
 	Gui &gui = Gui::get();
 	gui.init(window);
+
     Timeline &timeline = Timeline::get();
     timeline.init();
+
+	mm.readFile("ico.dae");
 
 	while (!glfwWindowShouldClose(window))
 	{

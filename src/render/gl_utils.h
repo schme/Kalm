@@ -23,10 +23,10 @@ static void GLAPIENTRY openGlMessageCallback(
 	LogLevel logLevel = Config::get().logLevel;
 	if (logLevel >= LogLevel::Error) {
 
-		if (logLevel <= LogLevel::Error && type != GL_DEBUG_TYPE_ERROR) {
+		if (logLevel <= LogLevel::Trace && type != GL_DEBUG_TYPE_ERROR) {
 			return;
 		}
-		else if (logLevel < LogLevel::Trace) {
+		else if (logLevel < LogLevel::Error && type == GL_DEBUG_TYPE_ERROR) {
 			return;
 		}
 

@@ -3,7 +3,7 @@
 namespace ks {
 
 enum LogLevel : int {
-	Fatal,
+	Fatal = 0,
 	Error,
 	Warning,
 	Info,

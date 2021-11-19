@@ -4,8 +4,6 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#include <memory>
-
 #include "include/maths.h"
 #include "gui/TimelineGui.h"
 
@@ -17,16 +15,17 @@ struct Gui {
 	void render();
 	void terminate();
 
-	static Gui &get() {
-		static Gui gui;
-		return gui;
-	}
-
 	math::vec3 clear_color = math::vec3(0.05f, 0.05f, 0.05f);
 	GLFWwindow *window = nullptr;
 
 	bool optShowDemoWindow = false;
 	bool optShowTimeline = true;
+
+	static Gui &get() {
+		static Gui gui;
+		return gui;
+	}
+
 };
 
 }

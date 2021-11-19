@@ -24,16 +24,16 @@ struct BufferDescriptor {
 };
 
 struct MeshDescriptor {
-	std::vector<BufferDescriptor> buffers = {};
 	int stride = 0;
+	std::vector<BufferDescriptor> buffers = {};
 };
 
 struct Mesh {
+	math::AABB bounds;
+	MeshDescriptor descriptor;
 	std::string name = "";
 	std::vector<float> vertices;
 	std::vector<unsigned> indices;
-	MeshDescriptor descriptor;
-	math::AABB bounds;
 };
 
 struct Model {

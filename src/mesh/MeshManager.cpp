@@ -51,7 +51,7 @@ static void fillMeshDescriptors(const aiMesh &mesh, MeshDescriptor &descriptor)
 
 static void fillVertex(const BufferDescriptor &desc, const int stride, const aiMesh &mesh, std::vector<float> &out)
 {
-	int offset = desc.offset;
+	int offset = desc.offset / sizeof(float);
 	for (unsigned i=0; i < mesh.mNumVertices; ++i) {
 		auto vert = mesh.mVertices[i];
 		out[offset] = vert.x;
@@ -62,7 +62,7 @@ static void fillVertex(const BufferDescriptor &desc, const int stride, const aiM
 }
 static void fillColors(const BufferDescriptor &desc, const int stride, const aiMesh &mesh, std::vector<float> &out)
 {
-	int offset = desc.offset;
+	int offset = desc.offset / sizeof(float);
 	for (unsigned i=0; i < mesh.mNumVertices; ++i) {
 		auto vert = mesh.mColors[0][i];
 		out[offset] = vert.r;
@@ -74,7 +74,7 @@ static void fillColors(const BufferDescriptor &desc, const int stride, const aiM
 }
 static void fillNormals(const BufferDescriptor &desc, const int stride, const aiMesh &mesh, std::vector<float> &out)
 {
-	int offset = desc.offset;
+	int offset = desc.offset / sizeof(float);
 	for (unsigned i=0; i < mesh.mNumVertices; ++i) {
 		auto vert = mesh.mNormals[i];
 		out[offset] = vert.x;
@@ -85,7 +85,7 @@ static void fillNormals(const BufferDescriptor &desc, const int stride, const ai
 }
 static void fillTexcoords(const BufferDescriptor &desc, const int stride, const int index, const aiMesh &mesh, std::vector<float> &out)
 {
-	int offset = desc.offset;
+	int offset = desc.offset / sizeof(float);
 	for (unsigned i=0; i < mesh.mNumVertices; ++i) {
 		auto vert = mesh.mTextureCoords[index][i];
 		out[offset] = vert.x;
@@ -98,11 +98,9 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 {
 	MeshDescriptor descriptor;
 	Mesh out = {};
-	out.vertices = std::vector<float>();
-	out.indices = std::vector<unsigned>();
 
 	const aiMesh &mesh = *scene->mMeshes[index];
-	out.name = scene->mName.C_Str();
+	out.name = mesh.mName.C_Str();
 
 	assert(mesh.mPrimitiveTypes == aiPrimitiveType_TRIANGLE);
 
@@ -113,31 +111,33 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 
 	out.vertices.resize(numVertices);
 
+	int elemStride = descriptor.stride / sizeof(float);
+
 	for (const BufferDescriptor &desc : descriptor.buffers) {
 		// assumes all possible elements are the size of a float
 		switch (desc.type) {
 			case BufferType::Vertex: {
-				fillVertex(desc, descriptor.stride, mesh, out.vertices);
+				fillVertex(desc, elemStride, mesh, out.vertices);
 				break;
 			}
 			case BufferType::Color: {
-				fillColors(desc, descriptor.stride, mesh, out.vertices);
+				fillColors(desc, elemStride, mesh, out.vertices);
 				break;
 			}
 			case BufferType::Normal: {
-				fillNormals(desc, descriptor.stride, mesh, out.vertices);
+				fillNormals(desc, elemStride, mesh, out.vertices);
 				break;
 			}
 			case BufferType::Texcoord0: {
-				fillTexcoords(desc, descriptor.stride, 0, mesh, out.vertices);
+				fillTexcoords(desc, elemStride, 0, mesh, out.vertices);
 				break;
 			}
 			case BufferType::Texcoord1: {
-				fillTexcoords(desc, descriptor.stride, 1, mesh, out.vertices);
+				fillTexcoords(desc, elemStride, 1, mesh, out.vertices);
 				break;
 			}
 			case BufferType::Texcoord2: {
-				fillTexcoords(desc, descriptor.stride, 2, mesh, out.vertices);
+				fillTexcoords(desc, elemStride, 2, mesh, out.vertices);
 				break;
 			}
 		}
@@ -157,6 +157,10 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 			}
 		}
 	}
+	out.bounds = math::AABB{
+		{mesh.mAABB.mMin.x, mesh.mAABB.mMin.y, mesh.mAABB.mMin.z},
+		{mesh.mAABB.mMax.x, mesh.mAABB.mMax.y, mesh.mAABB.mMax.z}};
+
 	model.meshes.push_back(std::move(out));
 }
 
@@ -192,9 +196,15 @@ bool MeshManager::readFile(const std::string &filename)
 	fprintf(stderr, "Importing...\n");
 
 	Model model = {};
-	importScene(scene, model);
-	auto p = std::pair<std::string, Model>(scene->mName.length == 0 ? filename : scene->mName.C_Str(), std::move(model));
-	models.emplace(p);
+
+	if (scene->HasMeshes()) {
+		for (unsigned i=0; i < scene->mNumMeshes; ++i) {
+			importMesh(scene, i, model);
+		}
+	}
+
+	std::string sceneName = scene->mName.length == 0 ? filename : scene->mName.C_Str();
+	models.insert(std::make_pair(sceneName, std::move(model)));
 
 	return true;
 }

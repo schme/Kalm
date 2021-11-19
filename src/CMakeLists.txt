@@ -7,6 +7,8 @@ set(MAIN_SOURCES
 	main.cpp
 	Timeline.h
 	Timeline.cpp
+    Camera.h
+    Camera.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

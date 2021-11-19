@@ -1,4 +1,5 @@
 
+#include "Camera.h"
 #include "Timeline.h"
 #include "glad/gl.h"
 #include "gui/gui.h"
@@ -8,23 +9,12 @@
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
 
+#include "imgui.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 
 namespace ks {
-
-	float vertices[] =
-	{
-		-0.8f, -0.8f, 0.f, 1.f, 0.f, 0.f, 1.f, 0.0f, 1.0f, 
-		-0.8f,  0.8f, 0.f, 0.f, 1.f, 0.f, 1.f, 0.0f, 0.0f,
-		 0.8f, -0.8f, 0.f, 0.f, 0.f, 1.f, 1.f, 1.0f, 1.0f,
-		 0.8f,  0.8f, 0.f, 0.f, 1.f, 0.f, 1.f, 1.0f, 0.0f,
-	};
-	unsigned int indices[] = 
-	{
-		0, 1, 2,
-		1, 3, 2,
-	};
 
 	static const char* vertex_shader_text =
 		"#version 460\n"
@@ -217,49 +207,13 @@ int main(int, char**)
     Timeline &timeline = Timeline::get();
     timeline.init();
 
-#if 0
-	Shader shader;
-	shader
-		.attach(vertex_shader_text, Shader::Type::Vert)
-		.attach(fragment_shader_text, Shader::Type::Frag)
-		.link();
-
-	GLuint vbo, vao, ebo;
-	GLint vpos_location, vcol_location, uv_location;
-
-	glGenVertexArrays(1, &vao);
-	glGenBuffers(1, &vbo);
-	glGenBuffers(1, &ebo);
-	// 1) bind vao, 2) bind and set vertex buffers 3) configure vertex attributes
-	glBindVertexArray(vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-	vpos_location = glGetAttribLocation(shader.get(), "vPos");
-	vcol_location = glGetAttribLocation(shader.get(), "vCol");
-	uv_location = glGetAttribLocation(shader.get(), "uv");
-
-	glEnableVertexAttribArray(vpos_location);
-	glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
-			8 * sizeof(float), (void*) 0);
-	glEnableVertexAttribArray(vcol_location);
-	glVertexAttribPointer(vcol_location, 4, GL_FLOAT, GL_FALSE,
-			8 * sizeof(float), (void*) (sizeof(float) * 3));
-	glEnableVertexAttribArray(uv_location);
-	glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE,
-			8 * sizeof(float), (void*) (sizeof(float) * 7));
-
-#endif
-
 	ModelRenderAttributes attributes;
 
 	Model *model = mm.find("ico.dae");
 	assert(model);
 	setupModel(*model, attributes);
+
+    Camera camera;
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -284,26 +238,36 @@ int main(int, char**)
 		glClearColor(clear_color.r, clear_color.g, clear_color.b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		math::mat4 m, p, mvp;
+		math::mat4 m, v, p, mvp;
 
 		m = math::mat4(1.0f);
-		m = math::rotate(m, time, math::vec3(0.f, 0.f, 1.f));
-		p = math::perspective(90.f, ratio, 1.f, -100.f);
+        v = math::lookAt(camera.position, camera.target, camera.up);
+		p = math::perspective(math::radians(camera.lens.fov),
+                camera.lens.aspect, camera.lens.near, camera.lens.far);
+
 		//p = math::ortho(-ratio, ratio, 1.f, -1.f);
-		mvp = m * p;
-
-#if 0
-		shader.use();
-		shader.bind("MVP", mvp);
-		shader.bind("time", time);
-
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-#endif
+		mvp = m * v * p;
 
 		renderModel(attributes, mvp, time);
 
 		Gui::get().run();
+
+        ImGui::Begin("Camera");
+        ImGui::InputFloat3("position", math::value_ptr(camera.position));
+        ImGui::InputFloat3("target", math::value_ptr(camera.target));
+        ImGui::InputFloat3("up", math::value_ptr(camera.up));
+        ImGui::InputFloat3("front", math::value_ptr(camera.front));
+        ImGui::InputFloat3("right", math::value_ptr(camera.right));
+
+        ImGui::InputFloat("fov", &camera.lens.fov, 0.f, 360.f, "%.3f");
+        ImGui::InputFloat("aspect", &camera.lens.aspect, 0.f, 3.f, "%.3f");
+        ImGui::InputFloat("near", &camera.lens.near, -1000.f, 1000.f, "%.3f");
+        ImGui::InputFloat("far", &camera.lens.far, -1000.f, 1000.f, "%.3f");
+
+
+        ImGui::End();
+
+
 		Gui::get().render();
 
 		glfwSwapBuffers(window);

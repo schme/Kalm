@@ -173,6 +173,12 @@ void MeshManager::importScene(const aiScene *scene, Model &model)
 	}
 }
 
+// true if string was edited
+static inline void removeExtension(std::string &filename)
+{
+	filename = filename.substr(0, filename.find_last_of("."));
+}
+
 bool MeshManager::readFile(const std::string &filename)
 {
 	std::string filepath = defaultMeshPath + filename;
@@ -204,6 +210,7 @@ bool MeshManager::readFile(const std::string &filename)
 	}
 
 	std::string sceneName = scene->mName.length == 0 ? filename : scene->mName.C_Str();
+	removeExtension(sceneName);
 	models.insert(std::make_pair(sceneName, std::move(model)));
 
 	return true;

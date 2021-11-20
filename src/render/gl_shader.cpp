@@ -9,11 +9,6 @@ namespace ks {
 		return *this;
 	}
 
-	void Shader::unuse()
-	{
-		glUseProgram(0);
-	}
-
     void Shader::bind(unsigned int location, float value)
 	{
 		glUniform1f(location, value);

@@ -9,6 +9,7 @@
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
 #include "Input.h"
+#include "Scene.h"
 
 #include "imgui.h"
 
@@ -78,6 +79,7 @@ int main(int, char**)
 	glEnable(GL_DEPTH_TEST);
 	glDebugMessageCallback( render::openGlMessageCallback, 0);
 
+	ShaderManager::get().createDefault();
 	MeshManager &mm = MeshManager::get();
 	mm.init("assets/");
 	mm.readFile("ico.dae");
@@ -89,15 +91,13 @@ int main(int, char**)
     Timeline &timeline = Timeline::get();
     timeline.init();
 
-	ModelRenderAttributes icoAttributes;
-	ModelRenderAttributes buddhaAttributes;
+	Scene mainScene;
+	mainScene.name = "Start";
 
-	Model *icoModel = mm.find("ico.dae");
-	Model *buddhaModel = mm.find("HappyBuddha.obj");
-	assert(icoModel);
-	assert(buddhaModel);
-	setupModel(*icoModel, icoAttributes);
-	setupModel(*buddhaModel, buddhaAttributes);
+	mainScene.addModel("ico");
+	mainScene.addModel("HappyBuddha");
+
+	mainScene.setupModels();
 
     Camera camera;
 
@@ -115,6 +115,7 @@ int main(int, char**)
 		frameStart = glfwGetTime();
 
 		// logic
+
 		float time = timeline.timestep(frameStart);
 		handleInput(window, getCurrentInputState(), getLastInputState(), camera, delta);
 
@@ -132,22 +133,13 @@ int main(int, char**)
 		glClearColor(clear_color.r, clear_color.g, clear_color.b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-		math::mat4 m, v, p, mvp;
+		math::mat4 v, p;
 
-		m = math::mat4(1.0f);
         v = math::lookAt(camera.position, camera.position + camera.front, camera.up);
 		p = math::perspective(math::radians(camera.lens.fov),
                 camera.lens.aspect, camera.lens.near, camera.lens.far);
 
-		mvp = p * v * m;
-
-		renderModel(icoAttributes, mvp, time);
-
-		m = math::translate(m, math::vec3(5.f, 0.f, 5.f));
-		m = math::scale(m, math::vec3(5));
-		mvp = p * v * m;
-
-		renderModel(buddhaAttributes, mvp, time);
+		mainScene.renderModels(v, p, time);
 
 		Gui::get().run();
 

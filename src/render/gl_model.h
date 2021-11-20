@@ -12,36 +12,6 @@
 namespace ks {
 
 
-static const char* vertex_shader_text =
-	"#version 460\n"
-	"uniform mat4 MVP;\n"
-	"uniform float time;\n"
-	"in vec3 vPos;\n"
-	"in vec4 vCol;\n"
-	"in vec3 vNorm;\n"
-	"in vec2 uv;\n"
-	"out vec4 color;\n"
-	"out vec2 tex;\n"
-	"void main()\n"
-	"{\n"
-	"    color = vec4(vNorm.x, vNorm.y, 0.5 + sin(time) / 2.0, vCol.a);\n"
-	"    tex = uv;\n"
-	"    gl_Position = MVP * vec4(vPos, 1.0);\n"
-	"}\n";
-
-static const char* fragment_shader_text =
-	"#version 460\n"
-	"uniform mat4 MVP;\n"
-	"uniform float time;\n"
-	"in vec4 color;\n"
-	"in vec2 tex;\n"
-	"out vec4 fragColor;\n"
-	"void main()\n"
-	"{\n"
-	"    fragColor = color;\n"
-	"}\n";
-
-
 struct MeshRenderAttributes {
 	std::string name;
 	GLuint vao, vbo, ebo, shader;
@@ -51,16 +21,18 @@ struct MeshRenderAttributes {
 struct ModelRenderAttributes {
 	std::string name;
 	std::vector<MeshRenderAttributes> attr;
-	Shader shader;
+	Shader *shader = nullptr;
 };
 
 static void setupModel(const Model &model, ModelRenderAttributes &mra)
 {
-	Shader &shader = mra.shader;
-	shader
-		.attach(vertex_shader_text, Shader::Type::Vert)
-		.attach(fragment_shader_text, Shader::Type::Frag)
-		.link();
+	if (!mra.shader) {
+		mra.shader = ShaderManager::get().find("default");
+	}
+
+	assert(mra.shader && "No shader was found for model");
+
+	Shader &shader = *mra.shader;
 
 	GLuint vbo, vao, ebo;
 	GLint vpos_location, vcol_location, vnorm_location, uv_location;
@@ -126,7 +98,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	}
 }
 
-void renderModel(ModelRenderAttributes &mra, math::mat4 &mvp, float time)
+inline void renderModel(ModelRenderAttributes &mra, math::mat4 &mvp, float time)
 {
 	for (const auto &attr: mra.attr) {
 
@@ -135,9 +107,9 @@ void renderModel(ModelRenderAttributes &mra, math::mat4 &mvp, float time)
 		glBindBuffer(GL_ARRAY_BUFFER, attr.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
 
-		mra.shader.use();
-		mra.shader.bind("MVP", mvp);
-		mra.shader.bind("time", time);
+		mra.shader->use();
+		mra.shader->bind("MVP", mvp);
+		mra.shader->bind("time", time);
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

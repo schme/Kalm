@@ -10,6 +10,7 @@ set(MAIN_SOURCES
     Camera.h
     Camera.cpp
 	Input.h
+	Scene.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

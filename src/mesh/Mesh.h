@@ -32,12 +32,16 @@ struct Mesh {
 	math::AABB bounds;
 	MeshDescriptor descriptor;
 	std::string name = "";
+	math::vec3 position;
+	math::vec3 scale;
 	std::vector<float> vertices;
 	std::vector<unsigned> indices;
 };
 
 struct Model {
 	std::string name = "";
+	math::vec3 position = math::vec3(0.f, 0.f, 0.f);
+	math::vec3 scale = math::vec3(1.f, 1.f, 1.f);
 	std::vector<Mesh> meshes = {};
 };
 

@@ -5,6 +5,7 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 
+#include <glm/gtx/norm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
  
@@ -15,5 +16,14 @@ namespace ks::math {
 		vec3 min;
 		vec3 max;
 	};
+
+	inline bool isAboutZero(const math::vec3 &vec)
+	{
+		return math::length2(vec) < 0.0001f;
+	}
+	inline bool isAboutZero(float val)
+	{
+		return (val * val) < 0.0001f;
+	}
 
 }

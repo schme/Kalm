@@ -9,6 +9,7 @@ set(MAIN_SOURCES
 	Timeline.cpp
     Camera.h
     Camera.cpp
+	Input.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

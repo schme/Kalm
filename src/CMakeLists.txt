@@ -5,12 +5,14 @@ project(
 
 set(MAIN_SOURCES
 	main.cpp
+	main.h
 	Timeline.h
 	Timeline.cpp
     Camera.h
     Camera.cpp
 	Input.h
 	Scene.h
+	Scene.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

@@ -3,6 +3,7 @@
 #include "include/maths.h"
 #include "include/common.h"
 
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>

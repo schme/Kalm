@@ -1,6 +1,6 @@
 #include "MeshManager.h"
-#include "assimp/mesh.h"
 
+#include <assimp/mesh.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -211,9 +211,50 @@ bool MeshManager::readFile(const std::string &filename)
 
 	std::string sceneName = scene->mName.length == 0 ? filename : scene->mName.C_Str();
 	removeExtension(sceneName);
+	model.name = sceneName;
 	models.insert(std::make_pair(sceneName, std::move(model)));
 
 	return true;
+}
+
+Model * MeshManager::addMesh(const std::string &name, Model &&model)
+{
+	auto it = models.find(name);
+	if (it == models.end()) {
+		auto val = models.insert(std::make_pair(name, std::move(model)));
+		return &val.first->second;
+	}
+	return nullptr;
+}
+
+Model * MeshManager::addMesh(const std::string &name, Model &model)
+{
+	auto it = models.find(name);
+	if (it == models.end()) {
+		auto val = models.insert(std::make_pair(name, std::move(model)));
+		return &val.first->second;
+	}
+	return nullptr;
+}
+
+Model * MeshManager::addMeshRename(const std::string &name, Model &&model)
+{
+	std::string newName;
+
+	Model *addedMesh = addMesh(name, model);
+	int counter = 0;
+	while (!addedMesh) {
+		newName = name + std::to_string(counter);
+		addedMesh = addMesh(newName, model);
+	}
+	return addedMesh;
+}
+
+Model *MeshManager::addPrimitive(PrimitiveType type)
+{
+	Model primitive = createPrimitive(type);
+	Model *model = addMeshRename(toStr(type), std::move(primitive));
+	return model;
 }
 
 }

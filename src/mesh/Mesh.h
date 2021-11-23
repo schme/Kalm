@@ -32,8 +32,7 @@ struct Mesh {
 	math::AABB bounds;
 	MeshDescriptor descriptor;
 	std::string name = "";
-	math::vec3 position;
-	math::vec3 scale;
+	math::vec3 position = math::vec3(0.f, 0.f, 0.f);
 	std::vector<float> vertices;
 	std::vector<unsigned> indices;
 };

@@ -9,9 +9,11 @@
 
 namespace ks {
 
+struct EditorState;
+
 struct Gui {
 	bool init(GLFWwindow *window);
-	void run();
+	void run(EditorState &state);
 	void render();
 	void terminate();
 
@@ -20,6 +22,8 @@ struct Gui {
 
 	bool optShowDemoWindow = false;
 	bool optShowTimeline = true;
+	bool optShowCameraWindow = false;
+	bool optShowSceneWindow = true;
 
 	static Gui &get() {
 		static Gui gui;

@@ -1,28 +1,13 @@
 #pragma once
 
 
+#include "main.h"
 #include "mesh/Mesh.h"
 #include "gl_shader.h"
-#include "glad/gl.h"
+#include "RenderAttributes.h"
 
-#include <cstddef>
-#include <string>
-#include <vector>
 
 namespace ks {
-
-
-struct MeshRenderAttributes {
-	std::string name;
-	GLuint vao, vbo, ebo, shader;
-	size_t indexCount;
-};
-
-struct ModelRenderAttributes {
-	std::string name;
-	std::vector<MeshRenderAttributes> attr;
-	Shader *shader = nullptr;
-};
 
 static void setupModel(const Model &model, ModelRenderAttributes &mra)
 {
@@ -98,8 +83,26 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	}
 }
 
-inline void renderModel(ModelRenderAttributes &mra, math::mat4 &mvp, float time)
+inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::mat4 &mvp, float time)
 {
+
+	// TODO: yea this doesn't scale
+	auto meshNameIt = state.reloadMeshes.begin();
+	while (meshNameIt != state.reloadMeshes.end()) {
+		MeshManager &mm = MeshManager::get();
+		Model *model = mm.find(mra.name);
+		auto mesh = model->meshes.begin();
+		bool found = false;
+		while (mesh != model->meshes.end() && !found) {
+			if (mesh->name == *meshNameIt) {
+				glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(float), mesh->vertices.data(), GL_STATIC_DRAW);
+				state.reloadMeshes.erase(meshNameIt);
+				found = true;
+			}
+		}
+		if (found) break;
+	}
+
 	for (const auto &attr: mra.attr) {
 
 		glBindVertexArray(attr.vao);
@@ -110,6 +113,7 @@ inline void renderModel(ModelRenderAttributes &mra, math::mat4 &mvp, float time)
 		mra.shader->use();
 		mra.shader->bind("MVP", mvp);
 		mra.shader->bind("time", time);
+		mra.shader->bind("maxVert", (float)attr.indexCount);
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

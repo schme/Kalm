@@ -5,7 +5,11 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "include/common.h"
 #include "Timeline.h"
+#include "main.h"
+
+#include <sstream>
 
 namespace ks {
 
@@ -29,7 +33,7 @@ bool Gui::init(GLFWwindow *window)
 	return true;
 }
 
-static void showMainMenuBar(Gui &gui)
+static void showMainMenuBar(Gui &gui, EditorState &state)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -37,14 +41,24 @@ static void showMainMenuBar(Gui &gui)
         {
             ImGui::EndMenu();
         }
+		if (ImGui::BeginMenu("Windows"))
+		{
+			ImGui::Checkbox("Scene Window", &gui.optShowSceneWindow);
+			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
+			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
+            ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Rendering"))
+		{
+			ImGui::Checkbox("Wireframe", &state.renderWireframe);
+			ImGui::EndMenu();
+		}
         if (ImGui::BeginMenu("Settings"))
         {
 			ImGui::ColorEdit3("clear color", (float*)&gui.clear_color); // Edit 3 floats representing a color
             ImGui::EndMenu();
         }
 
-		ImGui::Separator();
-		ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
 		ImGui::Separator();
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -70,7 +84,81 @@ static void showTimeline(Gui &gui)
 	ImGui::End();
 }
 
-void Gui::run()
+static void drawCameraWindow(Camera &camera, bool &opt)
+{
+	if (!opt)
+		return;
+
+	if (ImGui::Begin("Camera", &opt)) {
+		ImGui::InputFloat3("position", math::value_ptr(camera.position));
+		ImGui::InputFloat3("target", math::value_ptr(camera.target));
+		ImGui::InputFloat3("up", math::value_ptr(camera.up));
+		ImGui::InputFloat3("front", math::value_ptr(camera.front));
+		ImGui::InputFloat3("right", math::value_ptr(camera.right));
+
+		ImGui::InputFloat("fov", &camera.lens.fov, 0.f, 360.f, "%.3f");
+		ImGui::InputFloat("aspect", &camera.lens.aspect, 0.f, 3.f, "%.3f");
+		ImGui::InputFloat("near", &camera.lens.near, -1000.f, 1000.f, "%.3f");
+		ImGui::InputFloat("far", &camera.lens.far, -1000.f, 1000.f, "%.3f");
+
+		ImGui::InputFloat("yaw", &camera.yaw, 0, 0, "%.3f");
+		ImGui::InputFloat("pitch", &camera.pitch, 0, 0, "%.3f");
+		ImGui::InputFloat("roll", &camera.roll, 0, 0, "%.3f");
+
+		ImGui::End();
+	}
+}
+
+void drawMesh(EditorState &state, Mesh &mesh)
+{
+	size_t stride = mesh.descriptor.stride / sizeof(float);
+	if (ImGui::TreeNode(mesh.name.c_str())) {
+		std::stringstream id(mesh.name);
+		size_t vertCount = 0;
+		for (size_t i=0; i < mesh.vertices.size(); i += stride) {
+			std::stringstream vertId;
+			vertId << id.str();
+			vertId << "pos";
+			vertId << vertCount;
+			if (ImGui::InputFloat3(vertId.str().c_str(), &mesh.vertices[i])) {
+				state.reloadMeshes.push_back(mesh.name);
+			}
+			++vertCount;
+		}
+		ImGui::TreePop();
+	}
+}
+
+void drawModel(EditorState &state, Model &model)
+{
+	if (ImGui::TreeNode(model.name.c_str())) {
+		ImGui::Text("Name:");
+		ImGui::SameLine(); ImGui::Text("%s", model.name.c_str());
+
+		ImGui::InputFloat3("position", math::value_ptr(model.position));
+		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
+
+		for (Mesh &mesh : model.meshes) {
+			drawMesh(state, mesh);
+		}
+		ImGui::TreePop();
+	}
+}
+
+void drawSceneWindow(EditorState &state, bool &opt)
+{
+	if (!opt)
+		return;
+
+	if (ImGui::Begin("Scene", &opt)) {
+		for (Model *model : state.scene.models) {
+			drawModel(state, *model);
+		}
+		ImGui::End();
+	}
+}
+
+void Gui::run(EditorState &state)
 {
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplGlfw_NewFrame();
@@ -80,13 +168,16 @@ void Gui::run()
 			ImGuiDockNodeFlags_PassthruCentralNode
 			| ImGuiDockNodeFlags_NoDockingInCentralNode);
 
-	showMainMenuBar(*this);
+	showMainMenuBar(*this, state);
 
 	if (optShowTimeline)
 		showTimeline(*this);
 
 	if (optShowDemoWindow)
 		ImGui::ShowDemoWindow(&optShowDemoWindow);
+
+	drawCameraWindow(state.camera, optShowCameraWindow);
+	drawSceneWindow(state, optShowSceneWindow);
 }
 
 void Gui::render()

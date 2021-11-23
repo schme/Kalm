@@ -1,16 +1,16 @@
+#include "main.h"
 
 #include "Camera.h"
-#include "Timeline.h"
+#include "Input.h"
 #include "gui/gui.h"
+#include "Scene.h"
+#include "Timeline.h"
 #include "include/common.h"
 #include "include/maths.h"
 #include "mesh/MeshManager.h"
 #include "render/gl_model.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
-#include "Input.h"
-#include "Scene.h"
-
 #include "imgui.h"
 
 #include <stdlib.h>
@@ -79,6 +79,8 @@ int main(int, char**)
 	glEnable(GL_DEPTH_TEST);
 	glDebugMessageCallback( render::openGlMessageCallback, 0);
 
+	EditorState state;
+
 	ShaderManager::get().createDefault();
 	MeshManager &mm = MeshManager::get();
 	mm.init("assets/");
@@ -91,15 +93,13 @@ int main(int, char**)
     Timeline &timeline = Timeline::get();
     timeline.init();
 
-	Scene mainScene;
-	mainScene.name = "Start";
+	Scene &mainScene = state.scene;
+	mainScene.name = "Main";
 
 	mainScene.addModel("ico");
 	mainScene.addModel("HappyBuddha");
 
 	mainScene.setupModels();
-
-    Camera camera;
 
 	float delta = 0.0f;
 	float frameStart = 0.0f;
@@ -115,6 +115,7 @@ int main(int, char**)
 		frameStart = glfwGetTime();
 
 		// logic
+		Camera &camera = state.camera;
 
 		float time = timeline.timestep(frameStart);
 		handleInput(window, getCurrentInputState(), getLastInputState(), camera, delta);
@@ -133,31 +134,22 @@ int main(int, char**)
 		glClearColor(clear_color.r, clear_color.g, clear_color.b, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
+		if (state.renderWireframe) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		}
+		else {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
 		math::mat4 v, p;
 
         v = math::lookAt(camera.position, camera.position + camera.front, camera.up);
 		p = math::perspective(math::radians(camera.lens.fov),
                 camera.lens.aspect, camera.lens.near, camera.lens.far);
 
-		mainScene.renderModels(v, p, time);
+		mainScene.renderModels(state, v, p, time);
 
-		Gui::get().run();
-
-        ImGui::Begin("Camera");
-        ImGui::InputFloat3("position", math::value_ptr(camera.position));
-        ImGui::InputFloat3("target", math::value_ptr(camera.target));
-        ImGui::InputFloat3("up", math::value_ptr(camera.up));
-        ImGui::InputFloat3("front", math::value_ptr(camera.front));
-        ImGui::InputFloat3("right", math::value_ptr(camera.right));
-
-        ImGui::InputFloat("fov", &camera.lens.fov, 0.f, 360.f, "%.3f");
-        ImGui::InputFloat("aspect", &camera.lens.aspect, 0.f, 3.f, "%.3f");
-        ImGui::InputFloat("near", &camera.lens.near, -1000.f, 1000.f, "%.3f");
-        ImGui::InputFloat("far", &camera.lens.far, -1000.f, 1000.f, "%.3f");
-
-
-        ImGui::End();
-
+		Gui::get().run(state);
 
 		Gui::get().render();
 

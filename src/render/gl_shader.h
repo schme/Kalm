@@ -9,34 +9,10 @@
 namespace ks {
 
 static const char* default_vert =
-	"#version 460\n"
-	"uniform mat4 MVP;\n"
-	"uniform float time;\n"
-	"in vec3 vPos;\n"
-	"in vec4 vCol;\n"
-	"in vec3 vNorm;\n"
-	"in vec2 uv;\n"
-	"out vec4 color;\n"
-	"out vec2 tex;\n"
-	"void main()\n"
-	"{\n"
-	"    color = vec4(vNorm.x, vNorm.y, 0.5 + sin(time) / 2.0, vCol.a);\n"
-	"    tex = uv;\n"
-	"    gl_Position = MVP * vec4(vPos, 1.0);\n"
-	"}\n";
+#include "shader/default.vert"
 
-static const char* default_frag =
-	"#version 460\n"
-	"uniform mat4 MVP;\n"
-	"uniform float time;\n"
-	"in vec4 color;\n"
-	"in vec2 tex;\n"
-	"out vec4 fragColor;\n"
-	"void main()\n"
-	"{\n"
-	"    fragColor = color;\n"
-	"}\n";
-
+static const char* default_frag = 
+#include "shader/default.frag"
 
 struct Shader {
 

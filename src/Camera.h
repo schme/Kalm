@@ -11,7 +11,7 @@ struct CameraLens {
 	};
     float fov = 90.f;
     float aspect = 1440.f/900.f;
-    float near = 1.f;
+    float near = 0.1f;
     float far = 100.f;
 	Type type = Type::Perspective;
 };
@@ -23,13 +23,15 @@ struct Camera {
     math::vec3 right = math::vec3(-1.f, 0.f, 0.f);
     math::vec3 up = math::vec3(0.f, 1.f, 0.f);
 
-	float yaw = 0;
-	float pitch = 0;
+	float yaw = atan2(front.x, front.z);
+	float pitch = asin(-front.y);
+	float roll = 0;
 
     CameraLens lens;
 };
 
-void updateCameraLook(Camera &camera, math::vec2 pos);
+void updateCameraLook(Camera &camera, math::vec2 offset);
+
 // vec should be a normalized directional vector in model space, opengl coordinates
 void updateCameraPos(Camera &camera, float forward, float right, float magnitude);
 

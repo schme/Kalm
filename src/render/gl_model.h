@@ -99,6 +99,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 				state.reloadMeshes.erase(meshNameIt);
 				found = true;
 			}
+			mesh = std::next(mesh);
 		}
 		if (found) break;
 	}

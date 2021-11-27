@@ -7,7 +7,7 @@
 #include "RenderAttributes.h"
 
 
-namespace ks {
+namespace ks::render {
 
 static void setupModel(const Model &model, ModelRenderAttributes &mra)
 {
@@ -94,7 +94,14 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		auto mesh = model->meshes.begin();
 		bool found = false;
 		while (mesh != model->meshes.end() && !found) {
-			if (mesh->name == *meshNameIt) {
+			if (mesh->name.compare(*meshNameIt) == 0) {
+                const MeshRenderAttributes *meshAttr;
+                for (const MeshRenderAttributes &mera : mra.attr) {
+                    if (mera.name.compare(mesh->name) == 0) {
+                        meshAttr = &mera;
+                    }
+                }
+                glBindBuffer(GL_ARRAY_BUFFER, meshAttr->vbo);
 				glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(float), mesh->vertices.data(), GL_STATIC_DRAW);
 				state.reloadMeshes.erase(meshNameIt);
 				found = true;

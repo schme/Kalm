@@ -23,13 +23,12 @@ public:
 	// true on success
 	bool readFile(const std::string &filename);
 
-	// true on success, false if already exists
-	Model * addMesh(const std::string &name, Model &&model);
-	Model * addMesh(const std::string &name, Model &model);
+	Model * addMesh(Model &&model);
+	Model * addMesh(Model &model);
 
 	Model * addPrimitive(PrimitiveType type);
 	// Add numbers after name if name conflicts
-	Model * addMeshRename(const std::string &name, Model &&model);
+	Model * addMeshRename(Model &&model);
 
 
 	Model *find(const std::string &name) {

@@ -145,12 +145,22 @@ void drawModel(EditorState &state, Model &model)
 	}
 }
 
+void addPrimitive(PrimitiveType type, Scene &scene)
+{
+    auto &mm = MeshManager::get();
+    Model *primitive = mm.addPrimitive(type);
+    scene.addModel(primitive->name);
+}
+
 void drawSceneWindow(EditorState &state, bool &opt)
 {
 	if (!opt)
 		return;
 
 	if (ImGui::Begin("Scene", &opt)) {
+        if (ImGui::Button("Add cube")) {
+            addPrimitive(PrimitiveType::Cube, state.scene);
+        }
 		for (Model *model : state.scene.models) {
 			drawModel(state, *model);
 		}

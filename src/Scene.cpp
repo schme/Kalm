@@ -12,15 +12,22 @@ bool Scene::addModel(const std::string &name) {
 		return false;
 
 	models.push_back(model);
-	attributes.emplace_back(ModelRenderAttributes());
+    ModelRenderAttributes mra;
+    setupModel(*model, mra);
+	attributes.emplace_back(mra);
 	return true;
+}
+
+void Scene::setupModel(Model &model, ModelRenderAttributes &attribute)
+{
+    render::setupModel(model, attribute);
 }
 
 void Scene::setupModels() {
 	for(size_t i=0; i < models.size(); ++i) {
-		const Model *model = models[i];
+		Model *model = models[i];
 		ModelRenderAttributes &attribute = attributes[i];
-		setupModel(*model, attribute);
+		this->setupModel(*model, attribute);
 	}
 }
 
@@ -37,7 +44,7 @@ void Scene::renderModels(EditorState &state, const math::mat4 &view, const math:
 
 		math::mat4 mvp = perspective * view * m;
 
-		renderModel(state, attribute, mvp, time);
+        render::renderModel(state, attribute, mvp, time);
 	}
 }
 }

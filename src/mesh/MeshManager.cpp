@@ -217,35 +217,36 @@ bool MeshManager::readFile(const std::string &filename)
 	return true;
 }
 
-Model * MeshManager::addMesh(const std::string &name, Model &&model)
+Model * MeshManager::addMesh(Model &&model)
 {
-	auto it = models.find(name);
+	auto it = models.find(model.name);
 	if (it == models.end()) {
-		auto val = models.insert(std::make_pair(name, std::move(model)));
+		auto val = models.insert(std::make_pair(model.name, std::move(model)));
 		return &val.first->second;
 	}
 	return nullptr;
 }
 
-Model * MeshManager::addMesh(const std::string &name, Model &model)
+Model * MeshManager::addMesh(Model &model)
 {
-	auto it = models.find(name);
+	auto it = models.find(model.name);
 	if (it == models.end()) {
-		auto val = models.insert(std::make_pair(name, std::move(model)));
+		auto val = models.insert(std::make_pair(model.name, std::move(model)));
 		return &val.first->second;
 	}
 	return nullptr;
 }
 
-Model * MeshManager::addMeshRename(const std::string &name, Model &&model)
+Model * MeshManager::addMeshRename(Model &&model)
 {
 	std::string newName;
 
-	Model *addedMesh = addMesh(name, model);
+	Model *addedMesh = addMesh(model);
 	int counter = 0;
 	while (!addedMesh) {
-		newName = name + std::to_string(counter);
-		addedMesh = addMesh(newName, model);
+		newName = model.name + std::to_string(counter);
+        model.name = newName;
+		addedMesh = addMesh(model);
 	}
 	return addedMesh;
 }
@@ -253,7 +254,7 @@ Model * MeshManager::addMeshRename(const std::string &name, Model &&model)
 Model *MeshManager::addPrimitive(PrimitiveType type)
 {
 	Model primitive = createPrimitive(type);
-	Model *model = addMeshRename(toStr(type), std::move(primitive));
+	Model *model = addMeshRename(std::move(primitive));
 	return model;
 }
 

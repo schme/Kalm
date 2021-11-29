@@ -11,12 +11,20 @@
 #include "render/gl_model.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
-#include "imgui.h"
 
 #include <stdlib.h>
 #include <stdio.h>
 
 namespace ks {
+
+static void resizeCallback(GLFWwindow* window, int width, int height)
+{
+}
+
+static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
+{
+    render::resizeViewport(width, height);
+}
 
 void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera &camera, float delta)
 {
@@ -70,6 +78,8 @@ int main(int, char**)
 	glfwSetCursorPosCallback(window, mouseCallback);
 	glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	glfwSetKeyCallback(window, keyCallback);
+    glfwSetWindowSizeCallback(window, resizeCallback);
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	glfwMakeContextCurrent(window);
 	gladLoadGL(glfwGetProcAddress);
@@ -96,8 +106,11 @@ int main(int, char**)
 	Scene &mainScene = state.scene;
 	mainScene.name = "Main";
 
-	mainScene.addModel("ico");
-	mainScene.addModel("HappyBuddha");
+	Model *model = mainScene.addModel("ico");
+    model->position = math::vec3(0.f, -3.f, -5.f);
+
+	model = mainScene.addModel("HappyBuddha");
+    model->position = math::vec3(0.f, 2.f, 5.f);
 
 	mainScene.setupModels();
 

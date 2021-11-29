@@ -13,6 +13,12 @@ set(MAIN_SOURCES
 	Input.h
 	Scene.h
 	Scene.cpp
+    ResourceBank.cpp
+    ResourceBank.h
+    Texture.cpp
+    Texture.h
+    TextureLoader.cpp
+    TextureLoader.h
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

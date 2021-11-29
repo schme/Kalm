@@ -38,6 +38,13 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw glm assimp)
 
+message( STATUS "Fetching stb library...")
+FetchContent_Declare(
+    stb
+    
+    
+)
+
 message( STATUS "Fetching imgui...")
 FetchContent_Declare(
     imgui

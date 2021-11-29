@@ -5,17 +5,17 @@
 
 namespace ks {
 
-bool Scene::addModel(const std::string &name) {
+Model *Scene::addModel(const std::string &name) {
 	MeshManager &mm = MeshManager::get();
 	Model *model = mm.find(name);
 	if (!model)
-		return false;
+		return nullptr;
 
 	models.push_back(model);
     ModelRenderAttributes mra;
     setupModel(*model, mra);
 	attributes.emplace_back(mra);
-	return true;
+	return model;
 }
 
 void Scene::setupModel(Model &model, ModelRenderAttributes &attribute)

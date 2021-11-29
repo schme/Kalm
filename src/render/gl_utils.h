@@ -36,4 +36,9 @@ static void GLAPIENTRY openGlMessageCallback(
 	}
 }
 
+void resizeViewport(int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 }

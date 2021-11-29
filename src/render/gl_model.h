@@ -20,7 +20,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	Shader &shader = *mra.shader;
 
 	GLuint vbo, vao, ebo;
-	GLint vpos_location, vcol_location, vnorm_location, uv_location;
+	GLint vpos_location, vcol_location, vnorm_location, vuv_location;
 
 	mra.name = model.name;
 
@@ -41,7 +41,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 		vpos_location = glGetAttribLocation(shader.get(), "vPos");
 		vcol_location = glGetAttribLocation(shader.get(), "vCol");
 		vnorm_location = glGetAttribLocation(shader.get(), "vNorm");
-		uv_location = glGetAttribLocation(shader.get(), "uv");
+		vuv_location = glGetAttribLocation(shader.get(), "vUv");
 
 		const MeshDescriptor &md = mesh.descriptor;
 		for (const BufferDescriptor &bd : md.buffers) {
@@ -68,8 +68,8 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 										 }
 				case BufferType::Texcoord0: {
 
-												glEnableVertexAttribArray(uv_location);
-												glVertexAttribPointer(uv_location, 2, GL_FLOAT, GL_FALSE,
+												glEnableVertexAttribArray(vuv_location);
+												glVertexAttribPointer(vuv_location, 2, GL_FLOAT, GL_FALSE,
 														md.stride, (void*)bd.offset);
 												break;
 											}
@@ -83,7 +83,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	}
 }
 
-inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::mat4 &mvp, float time)
+inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::mat4 &mvp)
 {
 
 	// TODO: yea this doesn't scale
@@ -120,7 +120,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 
 		mra.shader->use();
 		mra.shader->bind("MVP", mvp);
-		mra.shader->bind("time", time);
+		mra.shader->bind("time", state.time);
 		mra.shader->bind("maxVert", (float)attr.indexCount);
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);

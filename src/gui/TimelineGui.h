@@ -39,7 +39,8 @@ public:
 	int sequenceOptions = 0;
 	bool expanded = true;
 
-
+    float playbackRate = 0.0f;
+    float playbackStartTime = 0.0f;
 };
 
 }

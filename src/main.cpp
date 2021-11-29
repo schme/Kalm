@@ -117,7 +117,7 @@ int main(int, char**)
 		// logic
 		Camera &camera = state.camera;
 
-		float time = timeline.timestep(frameStart);
+		state.time = timeline.timestep(frameStart);
 		handleInput(window, getCurrentInputState(), getLastInputState(), camera, delta);
 
 		swapInputStates();
@@ -147,7 +147,7 @@ int main(int, char**)
 		p = math::perspective(math::radians(camera.lens.fov),
                 camera.lens.aspect, camera.lens.near, camera.lens.far);
 
-		mainScene.renderModels(state, v, p, time);
+		mainScene.renderModels(state, v, p);
 
 		Gui::get().run(state);
 

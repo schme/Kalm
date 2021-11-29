@@ -78,6 +78,11 @@ static void showTimeline(Gui &gui)
 
 	ImGui::Begin("Timeline", nullptr, windowFlags);
 	TimelineGui &timeline = Timeline::get();
+	ImGui::InputInt("Max Frames", &timeline.frameMax);
+
+	ImGui::InputFloat("Playback Rate", &timeline.playbackRate);
+	ImGui::SameLine(); ImGui::Text("Current: %d", timeline.currentFrame);
+
 	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(&timeline);
 	ImSequencer::Sequencer(sequencer, &timeline.currentFrame, &timeline.expanded, &timeline.selectedEntry, &timeline.firstFrame, timeline.sequenceOptions);
 
@@ -137,6 +142,7 @@ void drawModel(EditorState &state, Model &model)
 
 		ImGui::InputFloat3("position", math::value_ptr(model.position));
 		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
+		ImGui::InputFloat3("rotation", math::value_ptr(model.rotation));
 
 		for (Mesh &mesh : model.meshes) {
 			drawMesh(state, mesh);

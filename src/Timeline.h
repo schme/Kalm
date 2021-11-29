@@ -46,9 +46,6 @@ public:
 
         return time;
     }
-
-    float playbackRate = 0.0f;
-    float playbackStartTime = 0.0f;
 };
 
 }

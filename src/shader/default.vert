@@ -6,7 +6,7 @@ uniform float maxVert;
 in vec3 vPos;
 in vec4 vCol;
 in vec3 vNorm;
-in vec2 uv;
+in vec2 vUv;
 out vec4 color;
 out vec2 tex;
 
@@ -20,7 +20,7 @@ void main()
 {
 	vec3 color3 = hueShift( vec3(1.0, 0.0, 0.0), (gl_VertexID / maxVert) * radians(360));
     color = vec4(color3, vCol.a);
-    tex = uv;
+    tex = vUv;
     vec3 newPos = vec3(vPos + vNorm * sin(time * 0.05));
     gl_Position = MVP * vec4(newPos, 1.0);
 }

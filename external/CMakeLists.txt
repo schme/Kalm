@@ -38,12 +38,17 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(glfw glm assimp)
 
-message( STATUS "Fetching stb library...")
+message( STATUS "Fetching stb libraries...")
 FetchContent_Declare(
     stb
-    
-    
+	GIT_REPOSITORY git@github.com:nothings/stb.git
+	GIT_TAG af1a5bc352164740c1cc1354942b1c6b72eacb8a
 )
+
+FetchContent_Populate(stb)
+
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR}/)
 
 message( STATUS "Fetching imgui...")
 FetchContent_Declare(
@@ -103,5 +108,3 @@ target_include_directories(imgui
 )
 
 target_link_libraries(imgui PRIVATE glfw)
-
-install (FILES ${IMGUI_HEADERS} DESTINATION include)

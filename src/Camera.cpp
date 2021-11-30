@@ -23,7 +23,7 @@ void updateCameraLook(Camera &camera, math::vec2 offset)
 	camera.front = math::normalize(front);
 }
 
-void updateCameraPos(Camera &camera, float forward, float right, float magnitude)
+void updateCameraPos(Camera &camera, float forward, float right, float up, float magnitude)
 {
 	math::vec3 cameraVec = {};
 	if (!math::isAboutZero(forward)) {
@@ -31,6 +31,9 @@ void updateCameraPos(Camera &camera, float forward, float right, float magnitude
 	}
 	if (!math::isAboutZero(right)) {
 		cameraVec += math::normalize(math::cross(camera.front, camera.up) * right);
+	}
+	if (!math::isAboutZero(up)) {
+		cameraVec += camera.up * up;
 	}
 
 	if (!math::isAboutZero(cameraVec)) {

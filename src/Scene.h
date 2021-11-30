@@ -1,8 +1,8 @@
 #pragma once
 
-#include "mesh/Mesh.h"
-#include "mesh/MeshManager.h"
-#include "mesh/MeshGenerators.h"
+#include "Mesh.h"
+#include "MeshManager.h"
+#include "MeshGenerators.h"
 #include "render/RenderAttributes.h"
 
 #include <vector>

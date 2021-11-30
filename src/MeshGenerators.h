@@ -1,6 +1,7 @@
 #pragma once
 
-#include "mesh/Mesh.h"
+#include "Mesh.h"
+#include "Model.h"
 
 namespace ks {
 

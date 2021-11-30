@@ -24,6 +24,7 @@ struct InputState {
 
 	float forward = 0.0f;
 	float right = 0.0f;
+	float up = 0.0f;
 };
 
 static InputState inputState[2];
@@ -118,6 +119,12 @@ static void keyCallback(GLFWwindow* window, int key, int scancode, int action, i
 	}
 	if (key == GLFW_KEY_D) {
 		state.right = (action & KEY_DOWN) ? 1.0f : 0.0f;
+	}
+	if (key == GLFW_KEY_E) {
+		state.up = (action & KEY_DOWN) ? 1.0f : 0.0f;
+	}
+	if (key == GLFW_KEY_Q) {
+		state.up = (action & KEY_DOWN) ? -1.0f : 0.0f;
 	}
 
 	if (key == GLFW_KEY_LEFT_SHIFT) {

@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "log.h"
+
 namespace ks {
 
 enum LogLevel : int {

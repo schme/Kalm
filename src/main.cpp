@@ -7,7 +7,7 @@
 #include "Timeline.h"
 #include "include/common.h"
 #include "include/maths.h"
-#include "mesh/MeshManager.h"
+#include "MeshManager.h"
 #include "render/gl_model.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
@@ -46,7 +46,7 @@ void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera
 	if (input.rmb) {
 		float cameraSpeed = input.shift ? 5.f : 2.f;
 		updateCameraLook(camera, -input.mouseDelta);
-		updateCameraPos(camera, input.forward, input.right, cameraSpeed * delta);
+		updateCameraPos(camera, input.forward, input.right, input.up, cameraSpeed * delta);
 	}
 }
 

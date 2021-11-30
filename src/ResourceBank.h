@@ -1,13 +1,11 @@
 #pragma once
 
-#include <string>
 #include <unordered_map>
 
+#include "ResourceId.h"
 #include "include/common.h"
 
 namespace ks {
-
-using ResourceId = std::string;
 
 template <typename T>
 struct ResourceBank {
@@ -19,7 +17,7 @@ struct ResourceBank {
         }
         auto it = storage.emplace(ResourceId(filepath), res);
         if (!it.second) return nullptr;
-        return it.first->second;
+        return &it.first->second;
     }
 
     T* find(const ResourceId &id) {

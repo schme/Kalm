@@ -2,7 +2,7 @@
 
 
 #include "main.h"
-#include "mesh/Mesh.h"
+#include "Mesh.h"
 #include "gl_shader.h"
 #include "RenderAttributes.h"
 

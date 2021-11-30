@@ -13,6 +13,8 @@ class aiScene;
 class aiNode;
 class aiMesh;
 
+#include "Model.h"
+
 namespace ks {
 
 class MeshManager {

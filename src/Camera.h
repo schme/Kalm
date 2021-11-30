@@ -32,7 +32,6 @@ struct Camera {
 
 void updateCameraLook(Camera &camera, math::vec2 offset);
 
-// vec should be a normalized directional vector in model space, opengl coordinates
-void updateCameraPos(Camera &camera, float forward, float right, float magnitude);
+void updateCameraPos(Camera &camera, float forward, float right, float up, float magnitude);
 
 }

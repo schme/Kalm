@@ -4,6 +4,7 @@ set(RENDER_SOURCES
 	gl_shader.cpp
 	gl_utils.h
 	gl_model.h
+	gl_texture.h
 )
 
 add_library(kalm-render STATIC ${RENDER_SOURCES})

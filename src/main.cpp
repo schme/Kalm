@@ -7,7 +7,8 @@
 #include "Timeline.h"
 #include "include/common.h"
 #include "include/maths.h"
-#include "MeshManager.h"
+#include "ModelManager.h"
+#include "render/Rendering.h"
 #include "render/gl_model.h"
 #include "render/gl_shader.h"
 #include "render/gl_utils.h"
@@ -49,6 +50,32 @@ void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera
 		updateCameraPos(camera, input.forward, input.right, input.up, cameraSpeed * delta);
 	}
 }
+
+void setupRenderFrame()
+{
+
+}
+
+void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, const math::mat4 &perspective)
+{
+	for (size_t i=0; i < scene.models.size(); ++i) {
+
+		const Model *model = scene.models[i];
+		ModelRenderAttributes &attribute = scene.attributes[i];
+
+		math::quat rotation = math::quat(model->rotation);
+		math::mat4 m = math::mat4(1.0f);
+		math::mat4 t = math::translate(m, model->position);
+		math::mat4 r = math::toMat4(rotation);
+		math::mat4 s = math::scale(m, model->scale);
+
+		m = t * r * s;
+		math::mat4 mvp = perspective * view * m;
+
+        render::renderModel(state, attribute, mvp);
+	}
+}
+
 
 } // namespace ks
 
@@ -92,21 +119,21 @@ int main(int, char**)
 	EditorState state;
 
 	ShaderManager::get().createDefault();
-	MeshManager &mm = MeshManager::get();
+	auto& mm = ModelManager::get();
 	mm.init("assets/");
 	mm.readFile("ico.dae");
 	mm.readFile("HappyBuddha.obj");
 
-	Gui &gui = Gui::get();
+	Gui& gui = Gui::get();
 	gui.init(window);
 
-    Timeline &timeline = Timeline::get();
+    Timeline& timeline = Timeline::get();
     timeline.init();
 
-	Scene &mainScene = state.scene;
+	Scene& mainScene = state.scene;
 	mainScene.name = "Main";
 
-	Model *model = mainScene.addModel("ico");
+	Model* model = mainScene.addModel("ico");
     model->position = math::vec3(0.f, -3.f, -5.f);
 
 	model = mainScene.addModel("HappyBuddha");
@@ -138,21 +165,17 @@ int main(int, char**)
 		// render
 
 		int width, height;
-
 		glfwGetFramebufferSize(window, &width, &height);
 
-		glViewport(0, 0, width, height);
-
-		const math::vec3 &clear_color = Gui::get().clear_color;
-		glClearColor(clear_color.r, clear_color.g, clear_color.b, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+		render::setupFrame(width, height);
 
 		if (state.renderWireframe) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			render::setPolygonMode(render::PolygonMode::Line);
 		}
 		else {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			render::setPolygonMode(render::PolygonMode::Fill);
 		}
+
 
 		math::mat4 v, p;
 
@@ -160,10 +183,9 @@ int main(int, char**)
 		p = math::perspective(math::radians(camera.lens.fov),
                 camera.lens.aspect, camera.lens.near, camera.lens.far);
 
-		mainScene.renderModels(state, v, p);
+		renderModels(mainScene, state, v, p);
 
 		Gui::get().run(state);
-
 		Gui::get().render();
 
 		glfwSwapBuffers(window);

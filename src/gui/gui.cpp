@@ -153,7 +153,7 @@ void drawModel(EditorState &state, Model &model)
 
 void addPrimitive(PrimitiveType type, Scene &scene)
 {
-    auto &mm = MeshManager::get();
+    auto &mm = ModelManager::get();
     Model *primitive = mm.addPrimitive(type);
     scene.addModel(primitive->name);
 }

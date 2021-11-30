@@ -89,7 +89,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 	// TODO: yea this doesn't scale
 	auto meshNameIt = state.reloadMeshes.begin();
 	while (meshNameIt != state.reloadMeshes.end()) {
-		MeshManager &mm = MeshManager::get();
+		auto &mm = ModelManager::get();
 		Model *model = mm.find(mra.name);
 		auto mesh = model->meshes.begin();
 		bool found = false;

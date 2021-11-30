@@ -1,9 +1,9 @@
 #pragma once
 
-#include "include/maths.h"
 #include "Mesh.h"
 #include "MeshGenerators.h"
-
+#include "Model.h"
+#include "include/maths.h"
 
 #include <map>
 #include <vector>
@@ -13,11 +13,9 @@ class aiScene;
 class aiNode;
 class aiMesh;
 
-#include "Model.h"
-
 namespace ks {
 
-class MeshManager {
+class ModelManager {
 public:
 
 	void init(const std::string &defaultMeshPath);
@@ -43,8 +41,8 @@ public:
 
 	std::string defaultMeshPath = "";
 
-	static MeshManager &get() {
-		static MeshManager m;
+	static ModelManager &get() {
+		static ModelManager m;
 		return m;
 	}
 

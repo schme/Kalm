@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Mesh.h"
-#include "MeshManager.h"
+#include "ModelManager.h"
 #include "MeshGenerators.h"
 #include "render/RenderAttributes.h"
 
@@ -20,7 +20,6 @@ struct Scene {
 
     void setupModel(Model &model, ModelRenderAttributes &attribute);
 	void setupModels();
-	void renderModels(EditorState &state, const math::mat4 &view, const math::mat4 &perspective);
 };
 
 }

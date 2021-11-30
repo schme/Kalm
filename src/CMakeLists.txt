@@ -22,8 +22,8 @@ set(MAIN_SOURCES
 	ResourceId.h
     Mesh.h
     Mesh.cpp
-	MeshManager.h
-	MeshManager.cpp
+	ModelManager.h
+	ModelManager.cpp
 	MeshGenerators.h
 	Model.h
 	Model.cpp

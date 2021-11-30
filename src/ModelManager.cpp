@@ -1,4 +1,4 @@
-#include "MeshManager.h"
+#include "ModelManager.h"
 
 #include <assimp/mesh.h>
 #include <assimp/Importer.hpp>
@@ -6,11 +6,6 @@
 #include <assimp/postprocess.h>
 
 namespace ks {
-
-void MeshManager::init(const std::string &defaultMeshPath)
-{
-	this->defaultMeshPath = defaultMeshPath;
-}
 
 static void fillMeshDescriptors(const aiMesh &mesh, MeshDescriptor &descriptor)
 {
@@ -164,7 +159,12 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 	model.meshes.push_back(std::move(out));
 }
 
-void MeshManager::importScene(const aiScene *scene, Model &model)
+void ModelManager::init(const std::string &defaultMeshPath)
+{
+	this->defaultMeshPath = defaultMeshPath;
+}
+
+void ModelManager::importScene(const aiScene *scene, Model &model)
 {
 	if (scene->HasMeshes())	{
 		for (unsigned i=0; i < scene->mNumMeshes; ++i) {
@@ -179,7 +179,7 @@ static inline void removeExtension(std::string &filename)
 	filename = filename.substr(0, filename.find_last_of("."));
 }
 
-bool MeshManager::readFile(const std::string &filename)
+bool ModelManager::readFile(const std::string &filename)
 {
 	std::string filepath = defaultMeshPath + filename;
 	Assimp::Importer importer;
@@ -217,7 +217,7 @@ bool MeshManager::readFile(const std::string &filename)
 	return true;
 }
 
-Model * MeshManager::addMesh(Model &&model)
+Model * ModelManager::addMesh(Model &&model)
 {
 	auto it = models.find(model.name);
 	if (it == models.end()) {
@@ -227,7 +227,7 @@ Model * MeshManager::addMesh(Model &&model)
 	return nullptr;
 }
 
-Model * MeshManager::addMesh(Model &model)
+Model * ModelManager::addMesh(Model &model)
 {
 	auto it = models.find(model.name);
 	if (it == models.end()) {
@@ -237,7 +237,7 @@ Model * MeshManager::addMesh(Model &model)
 	return nullptr;
 }
 
-Model * MeshManager::addMeshRename(Model &&model)
+Model * ModelManager::addMeshRename(Model &&model)
 {
 	std::string newName;
 
@@ -251,7 +251,7 @@ Model * MeshManager::addMeshRename(Model &&model)
 	return addedMesh;
 }
 
-Model *MeshManager::addPrimitive(PrimitiveType type)
+Model *ModelManager::addPrimitive(PrimitiveType type)
 {
 	Model primitive = createPrimitive(type);
 	Model *model = addMeshRename(std::move(primitive));

@@ -1,5 +1,9 @@
 
 set(RENDER_SOURCES
+	Rendering.h
+	Rendering.cpp
+	glRendering.h
+	glRendering.cpp
 	gl_shader.h
 	gl_shader.cpp
 	gl_utils.h

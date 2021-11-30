@@ -35,4 +35,11 @@ Texture* TextureLoader::load(const std::string &filepath)
 	return res;
 }
 
+Texture* find(const ResourceId &id)
+{
+	auto bank = ResourceBank<Texture>::get();
+	Texture* res = bank.find(id);
+	return res;
+}
+
 }

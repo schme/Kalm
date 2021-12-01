@@ -1,6 +1,7 @@
 #pragma once
 
 #include "include/maths.h"
+#include "gl_utils.h"
 
 namespace ks::render
 {

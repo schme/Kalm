@@ -17,9 +17,6 @@ struct Scene {
 	std::vector<ModelRenderAttributes> attributes;
 
 	Model *addModel(const std::string &name);
-
-    void setupModel(Model &model, ModelRenderAttributes &attribute);
-	void setupModels();
 };
 
 }

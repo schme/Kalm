@@ -8,10 +8,10 @@
 #include "include/common.h"
 #include "include/maths.h"
 #include "ModelManager.h"
-#include "render/Rendering.h"
+#include "TextureLoader.h"
+
 #include "render/gl_model.h"
-#include "render/gl_shader.h"
-#include "render/gl_utils.h"
+#include "render/Rendering.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,7 +24,8 @@ static void resizeCallback(GLFWwindow* window, int width, int height)
 
 static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    render::resizeViewport(width, height);
+    ks_unused(window);
+    render::setViewport(0, 0, width, height);
 }
 
 void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera &camera, float delta)
@@ -51,9 +52,13 @@ void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera
 	}
 }
 
-void setupRenderFrame()
+void setupModels(Scene &scene)
 {
-
+	for(size_t i=0; i < scene.models.size(); ++i) {
+		Model *model = scene.models[i];
+		ModelRenderAttributes &attribute = scene.attributes[i];
+        render::setupModel(*model, attribute);
+	}
 }
 
 void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, const math::mat4 &perspective)
@@ -61,7 +66,6 @@ void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, cons
 	for (size_t i=0; i < scene.models.size(); ++i) {
 
 		const Model *model = scene.models[i];
-		ModelRenderAttributes &attribute = scene.attributes[i];
 
 		math::quat rotation = math::quat(model->rotation);
 		math::mat4 m = math::mat4(1.0f);
@@ -72,6 +76,7 @@ void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, cons
 		m = t * r * s;
 		math::mat4 mvp = perspective * view * m;
 
+		ModelRenderAttributes &attribute = scene.attributes[i];
         render::renderModel(state, attribute, mvp);
 	}
 }
@@ -109,20 +114,28 @@ int main(int, char**)
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
 	glfwMakeContextCurrent(window);
-	gladLoadGL(glfwGetProcAddress);
 	glfwSwapInterval(1);
 
-	glEnable(GL_DEBUG_OUTPUT);
-	glEnable(GL_DEPTH_TEST);
-	glDebugMessageCallback( render::openGlMessageCallback, 0);
-
 	EditorState state;
+
+    render::setupEnvironment(glfwGetProcAddress);
 
 	ShaderManager::get().createDefault();
 	auto& mm = ModelManager::get();
 	mm.init("assets/");
 	mm.readFile("ico.dae");
 	mm.readFile("HappyBuddha.obj");
+    Model* model = mm.addPrimitive(PrimitiveType::Cube);
+    model->scale = math::vec3(20.f, 20.f, 20.f);
+
+    std::string cubeId = model->name;
+
+    auto& tl = TextureLoader::get();
+    tl.init("assets/");
+    Texture *texture = tl.load("dish.png");
+
+    u32 txtr = render::generateTexture();
+    render::loadTexture(txtr, texture->width, texture->height, texture->channels, texture->data);
 
 	Gui& gui = Gui::get();
 	gui.init(window);
@@ -133,13 +146,15 @@ int main(int, char**)
 	Scene& mainScene = state.scene;
 	mainScene.name = "Main";
 
-	Model* model = mainScene.addModel("ico");
+	model = mainScene.addModel("ico");
     model->position = math::vec3(0.f, -3.f, -5.f);
 
 	model = mainScene.addModel("HappyBuddha");
     model->position = math::vec3(0.f, 2.f, 5.f);
 
-	mainScene.setupModels();
+    mainScene.addModel(cubeId);
+
+	setupModels(mainScene);
 
 	float delta = 0.0f;
 	float frameStart = 0.0f;
@@ -175,7 +190,6 @@ int main(int, char**)
 		else {
 			render::setPolygonMode(render::PolygonMode::Fill);
 		}
-
 
 		math::mat4 v, p;
 

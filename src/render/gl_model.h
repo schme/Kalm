@@ -45,41 +45,41 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 
 		const MeshDescriptor &md = mesh.descriptor;
 		for (const BufferDescriptor &bd : md.buffers) {
-			switch(bd.type) {
-				case BufferType::Vertex: {
-											 glEnableVertexAttribArray(vpos_location);
-											 glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
-													 md.stride, (void*)bd.offset);
-											 break;
-										 }
-				case BufferType::Color: {
+            switch(bd.type) {
+                case BufferType::Vertex: {
+                     glEnableVertexAttribArray(vpos_location);
+                     glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
+                             md.stride, (void*)bd.offset);
+                     break;
+                }
+                case BufferType::Color: {
 
-											glEnableVertexAttribArray(vcol_location);
-											glVertexAttribPointer(vcol_location, 4, GL_FLOAT, GL_FALSE,
-													md.stride, (void*)bd.offset);
-											break;
-										}
-				case BufferType::Normal: {
+                    glEnableVertexAttribArray(vcol_location);
+                    glVertexAttribPointer(vcol_location, 4, GL_FLOAT, GL_FALSE,
+                    md.stride, (void*)bd.offset);
+                    break;
+                }
+                case BufferType::Normal: {
 
-											 glEnableVertexAttribArray(vnorm_location);
-											 glVertexAttribPointer(vnorm_location, 3, GL_FLOAT, GL_FALSE,
-													 md.stride, (void*)bd.offset);
-											 break;
-										 }
-				case BufferType::Texcoord0: {
+                    glEnableVertexAttribArray(vnorm_location);
+                    glVertexAttribPointer(vnorm_location, 3, GL_FLOAT, GL_FALSE,
+                     md.stride, (void*)bd.offset);
+                    break;
+                }
+                case BufferType::Texcoord0: {
 
-												glEnableVertexAttribArray(vuv_location);
-												glVertexAttribPointer(vuv_location, 2, GL_FLOAT, GL_FALSE,
-														md.stride, (void*)bd.offset);
-												break;
-											}
-				default: {
-							 fprintf(stderr, "Unhandled BufferType\n");
-							 break;
-						 }
-			}
-		}
-		mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vao, vbo, ebo, shader.get(), mesh.indices.size()});
+                    glEnableVertexAttribArray(vuv_location);
+                    glVertexAttribPointer(vuv_location, 2, GL_FLOAT, GL_FALSE,
+                        md.stride, (void*)bd.offset);
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "Unhandled BufferType\n");
+                    break;
+                }
+            }
+        }
+        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vao, vbo, ebo, shader.get(), mesh.indices.size()});
 	}
 }
 

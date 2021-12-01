@@ -8,12 +8,9 @@
 
 namespace ks::render {
 
-void setupFrame(int fbWidth, int fbHeight)
+void setViewport(int x, int y, int width, int height)
 {
-	static const math::vec4 clearColor = math::vec4(0.f, 0.f, 0.f, 1.f);
-
-	clearBuffer(clearColor);
-	setupViewport(0, 0, fbWidth, fbHeight);
+    glViewport(x, y, width, height);
 }
 
 void setPolygonMode(PolygonMode mode)
@@ -29,6 +26,60 @@ void setPolygonMode(PolygonMode mode)
 		break;
 	}
 	}
+}
+
+u32 generateFrameBuffer()
+{
+    u32 id;
+    glGenFramebuffers(1, &id);
+    return id;
+}
+void bindFrameBuffer(u32 id)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, id);
+}
+
+u32 generateTexture()
+{
+    u32 id;
+    glGenTextures(1, &id);
+    return id;
+}
+void bindTexture(u32 id)
+{
+    glBindTexture(GL_TEXTURE_2D, id);
+}
+void loadTexture(u32 id, int width, int height, int channels, void *data, bool mipmap)
+{
+    u32 format = 0;
+    if (channels == 4)
+        format = GL_RGBA;
+    else
+        format = GL_RGB;
+
+    bindTexture(id);
+    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    if (mipmap)
+        glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+
+void setupFrame(int fbWidth, int fbHeight)
+{
+	static const math::vec4 clearColor = math::vec4(0.f, 0.f, 0.f, 1.f);
+
+	clearBuffer(clearColor);
+	setViewport(0, 0, fbWidth, fbHeight);
+}
+
+void setupEnvironment(GLADloadfunc loadFunc)
+{
+	gladLoadGL(loadFunc);
+
+	glEnable(GL_DEBUG_OUTPUT);
+	glEnable(GL_DEPTH_TEST);
+
+	glDebugMessageCallback( openGlMessageCallback, 0);
 }
 
 }

@@ -28,6 +28,18 @@ void setPolygonMode(PolygonMode mode)
 	}
 }
 
+u32 generateVAO()
+{
+    u32 id;
+    glGenVertexArrays(1, &id);
+    return id;
+}
+
+void bindVAO(u32 id)
+{
+    glBindVertexArray(id);
+}
+
 u32 generateFrameBuffer()
 {
     u32 id;
@@ -45,10 +57,12 @@ u32 generateTexture()
     glGenTextures(1, &id);
     return id;
 }
+
 void bindTexture(u32 id)
 {
     glBindTexture(GL_TEXTURE_2D, id);
 }
+
 void loadTexture(u32 id, int width, int height, int channels, void *data, bool mipmap)
 {
     u32 format = 0;

@@ -5,6 +5,8 @@
 #include "Mesh.h"
 #include "gl_shader.h"
 #include "RenderAttributes.h"
+#include "Rendering.h"
+#include "Texture.h"
 
 
 namespace ks::render {
@@ -15,16 +17,18 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 		mra.shader = ShaderManager::get().find("default");
 	}
 
-	assert(mra.shader && "No shader was found for model");
-
 	Shader &shader = *mra.shader;
 
 	GLuint vbo, vao, ebo;
-	GLint vpos_location, vcol_location, vnorm_location, vuv_location;
+	GLint vpos_location, vcol_location, vnorm_location;
+    GLint tex0_location, tex1_location, tex2_location;
+
+    mra.texture0 = model.texture0;
 
 	mra.name = model.name;
 
 	glGenVertexArrays(1, &vao);
+    mra.vao = vao;
 
 	for (const Mesh &mesh : model.meshes) {
 		glGenBuffers(1, &vbo);
@@ -38,10 +42,12 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(float), mesh.indices.data(), GL_STATIC_DRAW);
 
-		vpos_location = glGetAttribLocation(shader.get(), "vPos");
-		vcol_location = glGetAttribLocation(shader.get(), "vCol");
-		vnorm_location = glGetAttribLocation(shader.get(), "vNorm");
-		vuv_location = glGetAttribLocation(shader.get(), "vUv");
+		vpos_location = render::VertexAttribLocation::Position;
+		vnorm_location = render::VertexAttribLocation::Normal;
+		vcol_location = render::VertexAttribLocation::Color;
+		tex0_location = render::VertexAttribLocation::Texcoord0;
+		tex1_location = render::VertexAttribLocation::Texcoord1;
+		tex2_location = render::VertexAttribLocation::Texcoord2;
 
 		const MeshDescriptor &md = mesh.descriptor;
 		for (const BufferDescriptor &bd : md.buffers) {
@@ -49,28 +55,28 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
                 case BufferType::Vertex: {
                      glEnableVertexAttribArray(vpos_location);
                      glVertexAttribPointer(vpos_location, 3, GL_FLOAT, GL_FALSE,
-                             md.stride, (void*)bd.offset);
+                             md.stride, reinterpret_cast<void*>(bd.offset));
                      break;
                 }
                 case BufferType::Color: {
 
                     glEnableVertexAttribArray(vcol_location);
                     glVertexAttribPointer(vcol_location, 4, GL_FLOAT, GL_FALSE,
-                    md.stride, (void*)bd.offset);
+                    md.stride, reinterpret_cast<void*>(bd.offset));
                     break;
                 }
                 case BufferType::Normal: {
 
                     glEnableVertexAttribArray(vnorm_location);
                     glVertexAttribPointer(vnorm_location, 3, GL_FLOAT, GL_FALSE,
-                     md.stride, (void*)bd.offset);
+                     md.stride, reinterpret_cast<void*>(bd.offset));
                     break;
                 }
                 case BufferType::Texcoord0: {
 
-                    glEnableVertexAttribArray(vuv_location);
-                    glVertexAttribPointer(vuv_location, 2, GL_FLOAT, GL_FALSE,
-                        md.stride, (void*)bd.offset);
+                    glEnableVertexAttribArray(tex0_location);
+                    glVertexAttribPointer(tex0_location, 2, GL_FLOAT, GL_FALSE,
+                        md.stride, reinterpret_cast<void*>(bd.offset));
                     break;
                 }
                 default: {
@@ -79,7 +85,8 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
                 }
             }
         }
-        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vao, vbo, ebo, shader.get(), mesh.indices.size()});
+        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo, shader.get(),
+                static_cast<u32>(mesh.indices.size())});
 	}
 }
 
@@ -111,9 +118,16 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		if (found) break;
 	}
 
-	for (const auto &attr: mra.attr) {
+    glBindVertexArray(mra.vao);
 
-		glBindVertexArray(attr.vao);
+    if (mra.texture0) {
+        render::bindTexture(mra.texture0->id);
+    }
+    else {
+        render::bindTexture(0);
+    }
+
+	for (const auto &attr: mra.attr) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, attr.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
@@ -121,7 +135,6 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		mra.shader->use();
 		mra.shader->bind("MVP", mvp);
 		mra.shader->bind("time", state.time);
-		mra.shader->bind("maxVert", (float)attr.indexCount);
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

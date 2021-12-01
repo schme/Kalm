@@ -2,8 +2,9 @@
 #include <glad/gl.h>
 
 #include <string>
-#include <map>
+#include <unordered_map>
 
+#include "ResourceId.h"
 #include "include/maths.h"
 
 namespace ks {
@@ -75,7 +76,7 @@ struct ShaderManager {
 	Shader *create(const std::string &name) {
 		auto it = shaders.find(name);
 		if (it == shaders.end()) {
-			auto val = shaders.insert(std::make_pair(name, new Shader));
+			auto val = shaders.emplace(std::make_pair(name, new Shader));
 			if (!val.second)
 				return nullptr;
 			return val.first->second;
@@ -95,6 +96,6 @@ struct ShaderManager {
 		return m;
 	}
 
-	std::map<std::string, Shader*> shaders;
+	std::unordered_map<ResourceId, Shader*> shaders;
 };
 }

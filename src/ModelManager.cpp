@@ -99,7 +99,9 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 	const aiMesh &mesh = *scene->mMeshes[index];
 	out.name = mesh.mName.C_Str();
 
-	assert(mesh.mPrimitiveTypes == aiPrimitiveType_TRIANGLE);
+    if (mesh.mPrimitiveTypes != aiPrimitiveType_TRIANGLE) {
+        log_warning("%s", "Ignoring non-triangle type on mesh import\n");
+    }
 
 	fillMeshDescriptors(mesh, descriptor);
 	out.descriptor = descriptor;
@@ -137,6 +139,7 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 				fillTexcoords(desc, elemStride, 2, mesh, out.vertices);
 				break;
 			}
+            default: break;
 		}
 	}
 
@@ -158,6 +161,7 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 		{mesh.mAABB.mMin.x, mesh.mAABB.mMin.y, mesh.mAABB.mMin.z},
 		{mesh.mAABB.mMax.x, mesh.mAABB.mMax.y, mesh.mAABB.mMax.z}};
 
+    log_trace("Loaded mesh { %s }\n", toStr(out).c_str());
 	model.meshes.push_back(std::move(out));
 }
 

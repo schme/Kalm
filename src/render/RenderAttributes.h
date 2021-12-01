@@ -8,17 +8,22 @@
 namespace ks {
 
 class Shader;
+class Texture;
 
 struct MeshRenderAttributes {
 	std::string name;
-	u32 vao, vbo, ebo, shader;
-	size_t indexCount;
+	u32 vbo, ebo, shader, indexCount;
 };
 
 struct ModelRenderAttributes {
 	std::string name;
-	std::vector<MeshRenderAttributes> attr;
+    u32 vao;
 	Shader *shader = nullptr;
+    Texture *texture0 = nullptr;
+    Texture *texture1 = nullptr;
+    Texture *texture2 = nullptr;
+    Texture *texture3 = nullptr;
+	std::vector<MeshRenderAttributes> attr;
 };
 
 }

@@ -121,19 +121,25 @@ int main(int, char**)
     render::setupEnvironment(glfwGetProcAddress);
 
 	ShaderManager::get().createDefault();
+
 	auto& mm = ModelManager::get();
 	mm.init("assets/");
 	mm.readFile("ico.dae");
 	mm.readFile("HappyBuddha.obj");
+    mm.readFile("grenade.fbx");
+
     Model* model = mm.addPrimitive(PrimitiveType::Cube);
     model->scale = math::vec3(20.f, 20.f, 20.f);
-
     std::string cubeId = model->name;
 
     auto& tl = TextureLoader::get();
 
     tl.init("assets/");
     Texture *texture = tl.load("dish.png");
+    texture->id = render::generateTexture();
+    render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
+
+    texture = tl.load("grenade_Base_color.png");
     texture->id = render::generateTexture();
     render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
 
@@ -153,6 +159,10 @@ int main(int, char**)
     model->position = math::vec3(0.f, 2.f, 5.f);
 
     mainScene.addModel(cubeId);
+
+    model = mainScene.addModel("grenade");
+    model->position = math::vec3(0.f, 0.f, -1.f);
+    model->texture0 = texture;
 
 	setupModels(mainScene);
 

@@ -6,13 +6,14 @@
 
 namespace ks {
 
-enum class BufferType {
-	Vertex,
+enum class BufferType : int{
+	Vertex = 0,
 	Color,
 	Normal,
 	Texcoord0,
 	Texcoord1,
 	Texcoord2,
+    Last,
 };
 
 struct BufferDescriptor {
@@ -36,5 +37,8 @@ struct Mesh {
 	std::vector<float> vertices;
 	std::vector<unsigned> indices;
 };
+
+std::string toStr(const Mesh &mesh);
+
 
 }

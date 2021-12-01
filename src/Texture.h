@@ -11,7 +11,7 @@ using TextureId = u32;
 
 struct Texture {
 
-    static Texture* load(const std::string filepath);
+    static Texture* load(const std::string filepath, bool absolutePath = false);
 
 	TextureId id = 0;
     void* data = nullptr;

@@ -6,19 +6,20 @@
 
 namespace ks {
 
-Texture* TextureLoader::load(const std::string &filepath)
+
+Texture* TextureLoader::load(const std::string &filepath, bool absolutePath)
 {
 	auto& bank = ResourceBank<Texture>::get();
 	Texture *res = bank.find({filepath});
 	if (res)
 		return res;
 
-	std::string fullpath = projectRoot + filepath;
+	std::string fullpath = absolutePath ? filepath : projectRoot + filepath;
 	int x,y,n,ok;
 	ok = stbi_info(fullpath.c_str(), &x, &y, &n);
 
 	if (!ok) {
-		log_error("Failed to load texture: %s", filepath.c_str());
+		log_error("Failed to load texture: %s\n", filepath.c_str());
 		return nullptr;
 	}
 
@@ -31,7 +32,10 @@ Texture* TextureLoader::load(const std::string &filepath)
 	txtr.width = x;
 	txtr.height = y;
 
-	res = bank.add(filepath, std::move(txtr));
+	std::string name = filepath;
+	removePath(name);
+
+	res = bank.add(name, std::move(txtr));
 	return res;
 }
 

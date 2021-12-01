@@ -5,6 +5,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include "include/common.h"
+
 namespace ks {
 
 static void fillMeshDescriptors(const aiMesh &mesh, MeshDescriptor &descriptor)
@@ -171,12 +173,6 @@ void ModelManager::importScene(const aiScene *scene, Model &model)
 			importMesh(scene, i, model);
 		}
 	}
-}
-
-// true if string was edited
-static inline void removeExtension(std::string &filename)
-{
-	filename = filename.substr(0, filename.find_last_of("."));
 }
 
 bool ModelManager::readFile(const std::string &filename)

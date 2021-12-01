@@ -1,16 +1,19 @@
 #include "gui.h"
 
-#include "ResourceBank.h"
-#include "Texture.h"
-#include "gui/FileBrowser.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "include/common.h"
+
+#include "ResourceBank.h"
+#include "Texture.h"
 #include "Timeline.h"
+#include "gui/FileBrowser.h"
+#include "include/common.h"
 #include "main.h"
+#include "render/Rendering.h"
+
 
 #include <sstream>
 
@@ -223,11 +226,14 @@ void drawTextureWindow(EditorState &state, bool &opt)
 
 	bool selectionMade = false;
 	if (showingFileBrowser) {
-		selectionMade = showFileBrowser(state.projectRoot, selectedFile, &showingFileBrowser);
+		selectionMade = showFileBrowser(selectedFile, &showingFileBrowser);
 	}
 
 	if (selectionMade) {
 		selectionMade = false;
+		Texture *txtr = Texture::load(selectedFile, true);
+		txtr->id = render::generateTexture();
+		render::loadTexture(txtr->id, txtr->width, txtr->height, txtr->channels, txtr->data);
 	}
 }
 

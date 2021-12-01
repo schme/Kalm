@@ -4,8 +4,8 @@
 
 namespace ks {
 
-Texture* Texture::load(const std::string filepath) {
-    return TextureLoader::get().load(filepath);
+Texture* Texture::load(const std::string filepath, bool absolutePath) {
+    return TextureLoader::get().load(filepath, absolutePath);
 }
 
 }

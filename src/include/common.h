@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 #include "log.h"
 
@@ -34,3 +35,18 @@ using f32 = float;
 using f64 = double;
 
 }
+
+static inline void removePath(std::string &filename)
+{
+	size_t pos = filename.find_last_of("/");
+	if (pos == std::string::npos)
+		return;
+
+	filename = filename.substr(pos + 1);
+}
+
+static inline void removeExtension(std::string &filename)
+{
+	filename = filename.substr(0, filename.find_last_of("."));
+}
+

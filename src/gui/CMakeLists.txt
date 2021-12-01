@@ -14,5 +14,5 @@ set(GUI_SOURCES
 
 add_library(kalm-gui STATIC ${GUI_SOURCES})
 
-target_link_libraries(kalm-gui PRIVATE glfw glad
+target_link_libraries(kalm-gui PRIVATE glfw glad kalm-render
 	PUBLIC imgui) 

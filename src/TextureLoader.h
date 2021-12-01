@@ -12,7 +12,7 @@ struct TextureLoader {
     }
 
 	/// Checks if the texture exists first and returns the already loaded one if so
-    Texture* load(const std::string &filepath);
+    Texture* load(const std::string &filepath, bool absolutePath = false);
 
 	Texture* find(const ResourceId &id);
 

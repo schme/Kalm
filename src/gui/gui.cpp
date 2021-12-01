@@ -182,7 +182,7 @@ void drawSceneWindow(EditorState &state, bool &opt)
 	ImGui::End();
 }
 
-void drawTexturePreview(Texture &txtr, bool &opt)
+void drawTexturePreview(const Texture &txtr, bool &opt)
 {
 	ImGui::Begin("Texture Preview", &opt, ImGuiWindowFlags_HorizontalScrollbar);
 	ImGui::Image((void*)txtr.id,
@@ -198,7 +198,7 @@ void drawTextureWindow(EditorState &state, bool &opt)
 {
 	static bool texturePreview = false;
 	static bool showingFileBrowser = false;
-	static Texture *inPreview = nullptr;
+	static const Texture* inPreview = nullptr;
 
 	std::string selectedFile;
 
@@ -210,12 +210,12 @@ void drawTextureWindow(EditorState &state, bool &opt)
 			showingFileBrowser = true;
 		}
 		auto &tb = ResourceBank<Texture>::get();
-		for (auto it : tb.storage) {
-			ImGui::Text("Name: %s", it.first.c_str());
-			Texture &txtr = it.second;
+		for (const auto &[id, txtr] : tb.storage) {
+			ImGui::Text("Id: %s", id.c_str());
 			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
 				texturePreview = true;
 				inPreview = &txtr;
+                log_info("inPreview set to: %s at %p\n", id.c_str(), &txtr);
 			}
 		}
 	}
@@ -224,13 +224,14 @@ void drawTextureWindow(EditorState &state, bool &opt)
 	if (texturePreview && inPreview)
 		drawTexturePreview(*inPreview, texturePreview);
 
-	bool selectionMade = false;
+	bool browserSelectionMade = false;
 	if (showingFileBrowser) {
-		selectionMade = showFileBrowser(selectedFile, &showingFileBrowser);
+		browserSelectionMade = showFileBrowser(selectedFile, &showingFileBrowser);
 	}
 
-	if (selectionMade) {
-		selectionMade = false;
+	if (browserSelectionMade) {
+		browserSelectionMade = false;
+
 		Texture *txtr = Texture::load(selectedFile, true);
 		txtr->id = render::generateTexture();
 		render::loadTexture(txtr->id, txtr->width, txtr->height, txtr->channels, txtr->data);

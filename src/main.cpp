@@ -131,11 +131,11 @@ int main(int, char**)
     std::string cubeId = model->name;
 
     auto& tl = TextureLoader::get();
+
     tl.init("assets/");
     Texture *texture = tl.load("dish.png");
-
-    u32 txtr = render::generateTexture();
-    render::loadTexture(txtr, texture->width, texture->height, texture->channels, texture->data);
+    texture->id = render::generateTexture();
+    render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
 
 	Gui& gui = Gui::get();
 	gui.init(window);

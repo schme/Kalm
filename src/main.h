@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Camera.h"
+#include "ResourceId.h"
 #include "Scene.h"
 
 namespace ks {
@@ -16,7 +17,8 @@ struct EditorState {
 
 	bool renderWireframe = false;
 
-	std::vector<std::string> reloadMeshes;
+	std::string projectRoot = "";
+	std::vector<ResourceId> reloadMeshes;
 };
 
 }

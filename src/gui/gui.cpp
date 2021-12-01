@@ -1,5 +1,8 @@
 #include "gui.h"
 
+#include "ResourceBank.h"
+#include "Texture.h"
+#include "gui/FileBrowser.h"
 #include "imgui.h"
 #include "ImGuizmo.h"
 #include "imgui_impl_glfw.h"
@@ -45,6 +48,8 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		{
 			ImGui::Checkbox("Scene Window", &gui.optShowSceneWindow);
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
+			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
+
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
             ImGui::EndMenu();
 		}
@@ -170,7 +175,59 @@ void drawSceneWindow(EditorState &state, bool &opt)
 		for (Model *model : state.scene.models) {
 			drawModel(state, *model);
 		}
-		ImGui::End();
+	}
+	ImGui::End();
+}
+
+void drawTexturePreview(Texture &txtr, bool &opt)
+{
+	ImGui::Begin("Texture Preview", &opt, ImGuiWindowFlags_HorizontalScrollbar);
+	ImGui::Image((void*)txtr.id,
+			ImVec2(txtr.width, txtr.height),
+			ImVec2(0.0f, 0.0f),
+			ImVec2(1.0f, 1.0f),
+			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
+			ImColor(0.0f, 1.0f, 0.0f, 1.0f));
+	ImGui::End();
+}
+
+void drawTextureWindow(EditorState &state, bool &opt)
+{
+	static bool texturePreview = false;
+	static bool showingFileBrowser = false;
+	static Texture *inPreview = nullptr;
+
+	std::string selectedFile;
+
+	if (!opt)
+		return;
+
+	if (ImGui::Begin("Textures", &opt)) {
+		if (ImGui::Button("Add texture")) {
+			showingFileBrowser = true;
+		}
+		auto &tb = ResourceBank<Texture>::get();
+		for (auto it : tb.storage) {
+			ImGui::Text("Name: %s", it.first.c_str());
+			Texture &txtr = it.second;
+			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
+				texturePreview = true;
+				inPreview = &txtr;
+			}
+		}
+	}
+	ImGui::End();
+
+	if (texturePreview && inPreview)
+		drawTexturePreview(*inPreview, texturePreview);
+
+	bool selectionMade = false;
+	if (showingFileBrowser) {
+		selectionMade = showFileBrowser(state.projectRoot, selectedFile, &showingFileBrowser);
+	}
+
+	if (selectionMade) {
+		selectionMade = false;
 	}
 }
 
@@ -194,6 +251,7 @@ void Gui::run(EditorState &state)
 
 	drawCameraWindow(state.camera, optShowCameraWindow);
 	drawSceneWindow(state, optShowSceneWindow);
+	drawTextureWindow(state, optShowTextureWindow);
 }
 
 void Gui::render()

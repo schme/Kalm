@@ -23,6 +23,7 @@ struct Gui {
 	bool optShowTimeline = true;
 	bool optShowCameraWindow = false;
 	bool optShowSceneWindow = true;
+	bool optShowTextureWindow = true;
 
 	static Gui &get() {
 		static Gui gui;

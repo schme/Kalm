@@ -4,10 +4,12 @@ project(
 	LANGUAGES CXX)
 
 set(GUI_SOURCES
-	gui.cpp
 	gui.h
-	TimelineGui.cpp
+	gui.cpp
 	TimelineGui.h
+	TimelineGui.cpp
+	FileBrowser.h
+	FileBrowser.cpp
 )
 
 add_library(kalm-gui STATIC ${GUI_SOURCES})

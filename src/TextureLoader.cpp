@@ -8,7 +8,7 @@ namespace ks {
 
 Texture* TextureLoader::load(const std::string &filepath)
 {
-	auto bank = ResourceBank<Texture>::get();
+	auto& bank = ResourceBank<Texture>::get();
 	Texture *res = bank.find({filepath});
 	if (res)
 		return res;
@@ -22,7 +22,7 @@ Texture* TextureLoader::load(const std::string &filepath)
 		return nullptr;
 	}
 
-	stbi_set_flip_vertically_on_load(1);
+	stbi_set_flip_vertically_on_load(false);
 	u8* data = stbi_load(fullpath.c_str(), &x, &y, &n, 0);
 
 	Texture txtr;

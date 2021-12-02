@@ -16,7 +16,6 @@ struct Gui {
 	void render();
 	void terminate();
 
-	math::vec3 clear_color = math::vec3(0.05f, 0.05f, 0.05f);
 	GLFWwindow *window = nullptr;
 
 	bool optShowDemoWindow = false;
@@ -24,6 +23,7 @@ struct Gui {
 	bool optShowCameraWindow = false;
 	bool optShowSceneWindow = true;
 	bool optShowTextureWindow = true;
+	bool optShowShadersWindow = true;
 
 	static Gui &get() {
 		static Gui gui;

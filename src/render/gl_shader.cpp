@@ -19,20 +19,23 @@ namespace ks {
 		glUniformMatrix4fv(location, 1, GL_FALSE, math::value_ptr(matrix));
 	}
 
-	Shader & Shader::attach(const std::string &shaderText, Type type)
-	{
-		GLuint shader = create(type);
-		const GLchar *shdr = shaderText.c_str();
-		glShaderSource(shader, 1, &shdr, nullptr);
-		glCompileShader(shader);
-		glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-
-		if (status == false) {
-			glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
-			std::unique_ptr<char[]> buffer(new char[length]);
-			glGetShaderInfoLog(shader, length, nullptr, buffer.get());
-			fprintf(stderr, "Compile error: %s", buffer.get());
-		}
+    Shader & Shader::attach(const std::string &shaderText, Type type, bool &success)
+    {
+        GLuint shader = create(type);
+        const GLchar *shdr = shaderText.c_str();
+        glShaderSource(shader, 1, &shdr, nullptr);
+        glCompileShader(shader);
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
+        if (status == false) {
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
+            std::unique_ptr<char[]> buffer(new char[length]);
+            glGetShaderInfoLog(shader, length, nullptr, buffer.get());
+            fprintf(stderr, "Compile error: %s", buffer.get());
+            success = false;
+        }
+        else {
+            success = true;
+        }
 
 		glAttachShader(program, shader);
 		glDeleteShader(shader);

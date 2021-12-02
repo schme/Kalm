@@ -13,6 +13,7 @@
 #include "include/common.h"
 #include "main.h"
 #include "render/Rendering.h"
+#include "render/gl_shader.h"
 
 
 #include <sstream>
@@ -52,6 +53,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 			ImGui::Checkbox("Scene Window", &gui.optShowSceneWindow);
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
+			ImGui::Checkbox("Shaders Window", &gui.optShowShadersWindow);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
             ImGui::EndMenu();
@@ -63,7 +65,6 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		}
         if (ImGui::BeginMenu("Settings"))
         {
-			ImGui::ColorEdit3("clear color", (float*)&gui.clear_color); // Edit 3 floats representing a color
             ImGui::EndMenu();
         }
 
@@ -238,6 +239,21 @@ void drawTextureWindow(EditorState &state, bool &opt)
 	}
 }
 
+void drawShadersWindow(EditorState &state, bool &opt)
+{
+	if (!opt)
+		return;
+
+    if (ImGui::Begin("Shaders Window", &opt)) {
+        auto &mm = ShaderManager::get();
+        for (auto& [id, shader] : mm.storage) {
+            ImGui::Text("shader: %s", id.c_str());
+        }
+    }
+    ImGui::End();
+
+}
+
 void Gui::run(EditorState &state)
 {
 	ImGui_ImplOpenGL3_NewFrame();
@@ -259,6 +275,7 @@ void Gui::run(EditorState &state)
 	drawCameraWindow(state.camera, optShowCameraWindow);
 	drawSceneWindow(state, optShowSceneWindow);
 	drawTextureWindow(state, optShowTextureWindow);
+    drawShadersWindow(state, optShowShadersWindow);
 }
 
 void Gui::render()

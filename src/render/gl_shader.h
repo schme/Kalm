@@ -18,10 +18,10 @@ static const char* default_frag =
 struct Shader {
 
 	enum Type : unsigned {
-		Comp = GL_COMPUTE_SHADER,
-		Frag = GL_FRAGMENT_SHADER,
-		Geom = GL_GEOMETRY_SHADER,
 		Vert = GL_VERTEX_SHADER,
+		Geom = GL_GEOMETRY_SHADER,
+		Frag = GL_FRAGMENT_SHADER,
+		Comp = GL_COMPUTE_SHADER,
 	};
 
 	Shader() { program = glCreateProgram(); }
@@ -32,7 +32,7 @@ struct Shader {
 	}
 
 	Shader & use();
-	Shader & attach(const std::string &shader, Type type);
+	Shader & attach(const std::string &shader, Type type, bool &success);
 	Shader & link();
 	GLuint get() { return program; }
 
@@ -65,18 +65,19 @@ struct ShaderManager {
 
 	Shader *createDefault() {
 		Shader &shader = *create("default");
+        bool res = false;
 		shader
-			.attach(default_vert, Shader::Type::Vert)
-			.attach(default_frag, Shader::Type::Frag)
+			.attach(default_vert, Shader::Type::Vert, res)
+			.attach(default_frag, Shader::Type::Frag, res)
 			.link();
 
 		return &shader;
 	}
 
 	Shader *create(const std::string &name) {
-		auto it = shaders.find(name);
-		if (it == shaders.end()) {
-			auto val = shaders.emplace(std::make_pair(name, new Shader));
+		auto it = storage.find(name);
+		if (it == storage.end()) {
+			auto val = storage.emplace(std::make_pair(name, new Shader));
 			if (!val.second)
 				return nullptr;
 			return val.first->second;
@@ -85,8 +86,8 @@ struct ShaderManager {
 	}
 
 	Shader *find(const std::string &name) {
-		auto it = shaders.find(name);
-		if (it == shaders.end())
+		auto it = storage.find(name);
+		if (it == storage.end())
 			return nullptr;
 		return it->second;
 	}
@@ -96,6 +97,6 @@ struct ShaderManager {
 		return m;
 	}
 
-	std::unordered_map<ResourceId, Shader*> shaders;
+	std::unordered_map<ResourceId, Shader*> storage;
 };
 }

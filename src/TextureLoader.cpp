@@ -23,7 +23,7 @@ Texture* TextureLoader::load(const std::string &filepath, bool absolutePath)
 		return nullptr;
 	}
 
-	stbi_set_flip_vertically_on_load(false);
+	stbi_set_flip_vertically_on_load(true);
 	u8* data = stbi_load(fullpath.c_str(), &x, &y, &n, 0);
 
 	Texture txtr;

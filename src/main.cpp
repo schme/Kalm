@@ -67,7 +67,7 @@ void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, cons
 
 		const Model *model = scene.models[i];
 
-		math::quat rotation = math::quat(model->rotation);
+		math::quat rotation = math::quat(math::radians(model->rotation));
 		math::mat4 m = math::mat4(1.0f);
 		math::mat4 t = math::translate(m, model->position);
 		math::mat4 r = math::toMat4(rotation);
@@ -163,6 +163,7 @@ int main(int, char**)
     model = mainScene.addModel("grenade");
     model->position = math::vec3(0.f, 0.f, -1.f);
     model->texture0 = texture;
+    model->rotation = math::vec3(-90.f, 0.f, 0.f);
 
 	setupModels(mainScene);
 

@@ -66,10 +66,23 @@ void bindTexture(u32 id)
 void loadTexture(u32 id, int width, int height, int channels, void *data, bool mipmap)
 {
     u32 format = 0;
-    if (channels == 4)
-        format = GL_RGBA;
-    else
-        format = GL_RGB;
+    switch (channels) {
+        case 4:
+            format = GL_RGBA;
+            break;
+        case 3:
+            format = GL_RGB;
+            break;
+        case 2:
+            format = GL_RG;
+            break;
+        case 1:
+            format = GL_RED;
+            break;
+        default:
+            format = GL_RGBA;
+            break;
+    }
 
     bindTexture(id);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);

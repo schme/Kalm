@@ -187,8 +187,8 @@ void drawTexturePreview(const Texture &txtr, bool &opt)
 	ImGui::Begin("Texture Preview", &opt, ImGuiWindowFlags_HorizontalScrollbar);
 	ImGui::Image((void*)txtr.id,
 			ImVec2(txtr.width, txtr.height),
-			ImVec2(0.0f, 0.0f),
-			ImVec2(1.0f, 1.0f),
+			ImVec2(0.0f, 1.0f),
+			ImVec2(1.0f, 0.0f),
 			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
 			ImColor(0.0f, 1.0f, 0.0f, 1.0f));
 	ImGui::End();
@@ -212,7 +212,7 @@ void drawTextureWindow(EditorState &state, bool &opt)
 		auto &tb = ResourceBank<Texture>::get();
 		for (const auto &[id, txtr] : tb.storage) {
 			ImGui::Text("Id: %s", id.c_str());
-			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 0.0f), ImVec2(1.0f, 1.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
+			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
 				texturePreview = true;
 				inPreview = &txtr;
                 log_info("inPreview set to: %s at %p\n", id.c_str(), &txtr);

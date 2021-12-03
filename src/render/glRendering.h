@@ -6,7 +6,8 @@
 namespace ks::render
 {
 
-void clearBuffer(math::vec4 clearColor);
+void clearColorBuffer(math::vec4 clearColor);
+void clearColorAndDepthBuffer(math::vec4 clearColor);
 void setupViewport(int x, int y, int width, int height);
 
 

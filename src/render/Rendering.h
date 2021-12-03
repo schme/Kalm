@@ -33,6 +33,8 @@ void bindVAO(u32 id);
 
 u32 generateFrameBuffer();
 void bindFrameBuffer(u32 id);
+void setFramebufferAttachment(u32 texture);
+bool checkFramebufferStatus();
 
 u32 generateTexture();
 void bindTexture(u32 id);

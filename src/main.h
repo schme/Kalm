@@ -13,8 +13,8 @@ struct EditorState {
 	Scene scene;
 	Camera camera;
 
+	u32 sceneTextureId = 0;
 	float time = 0.0f;
-
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";

@@ -86,8 +86,27 @@ void loadTexture(u32 id, int width, int height, int channels, void *data, bool m
 
     bindTexture(id);
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     if (mipmap)
         glGenerateMipmap(GL_TEXTURE_2D);
+
+	bindTexture(0);
+}
+
+void setFramebufferAttachment(u32 texture)
+{
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+}
+
+bool checkFramebufferStatus()
+{
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		log_error("%s", "Framebuffer not complete!");
+		return false;
+	}
+	return true;
 }
 
 
@@ -95,7 +114,7 @@ void setupFrame(int fbWidth, int fbHeight)
 {
 	static const math::vec4 clearColor = math::vec4(0.f, 0.f, 0.f, 1.f);
 
-	clearBuffer(clearColor);
+	clearColorAndDepthBuffer(clearColor);
 	setViewport(0, 0, fbWidth, fbHeight);
 }
 

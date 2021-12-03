@@ -20,6 +20,9 @@
 
 namespace ks {
 
+static ImGuiDockNodeFlags windowFlags = ImGuiDockNodeFlags_PassthruCentralNode;
+
+
 bool Gui::init(GLFWwindow *window)
 {
 	const char *glsl_version = "#version 460";
@@ -50,10 +53,12 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
         }
 		if (ImGui::BeginMenu("Windows"))
 		{
+			ImGui::Checkbox("Timeline Preview Window", &gui.optShowTimelinePreview);
 			ImGui::Checkbox("Scene Window", &gui.optShowSceneWindow);
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
 			ImGui::Checkbox("Shaders Window", &gui.optShowShadersWindow);
+			ImGui::Checkbox("Timeline Window", &gui.optShowTimeline);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
             ImGui::EndMenu();
@@ -75,17 +80,12 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 	}
 }
 
-static void showTimeline(Gui &gui)
+static void showTimelineWindow(Gui &gui, bool &opt)
 {
-	ImGuiWindowFlags windowFlags =
-		ImGuiWindowFlags_NoTitleBar
-		| ImGuiWindowFlags_NoBackground
-		| ImGuiWindowFlags_NoDecoration
-		| ImGuiWindowFlags_NoCollapse
-        | ImGuiDockNodeFlags_PassthruCentralNode
-	;
+	if (!opt)
+		return;
 
-	ImGui::Begin("Timeline", nullptr, windowFlags);
+	ImGui::Begin("Timeline", &opt, windowFlags);
 	TimelineGui &timeline = Timeline::get();
 	ImGui::InputInt("Max Frames", &timeline.frameMax);
 
@@ -254,6 +254,22 @@ void drawShadersWindow(EditorState &state, bool &opt)
 
 }
 
+void drawTimelinePreview(EditorState &state, bool &opt)
+{
+	if (!opt)
+		return;
+
+	if (ImGui::Begin("Timeline Preview", &opt))	{
+		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
+			ImGui::GetWindowSize(),
+			ImVec2(0.0f, 1.0f),
+			ImVec2(1.0f, 0.0f),
+			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
+			ImColor(1.0f, 1.0f, 1.0f, 1.0f));
+	}
+	ImGui::End();
+}
+
 void Gui::run(EditorState &state)
 {
 	ImGui_ImplOpenGL3_NewFrame();
@@ -265,17 +281,16 @@ void Gui::run(EditorState &state)
 			| ImGuiDockNodeFlags_NoDockingInCentralNode);
 
 	showMainMenuBar(*this, state);
-
-	if (optShowTimeline)
-		showTimeline(*this);
-
-	if (optShowDemoWindow)
-		ImGui::ShowDemoWindow(&optShowDemoWindow);
-
+	showTimelineWindow(*this, optShowTimeline);
 	drawCameraWindow(state.camera, optShowCameraWindow);
 	drawSceneWindow(state, optShowSceneWindow);
 	drawTextureWindow(state, optShowTextureWindow);
     drawShadersWindow(state, optShowShadersWindow);
+	drawTimelinePreview(state, optShowTimelinePreview);
+
+
+	if (optShowDemoWindow)
+		ImGui::ShowDemoWindow(&optShowDemoWindow);
 }
 
 void Gui::render()

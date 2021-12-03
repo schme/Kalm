@@ -15,6 +15,12 @@ static const char* default_vert =
 static const char* default_frag = 
 #include "shader/default.frag"
 
+static const char* pass_vert =
+#include "shader/pass.vert"
+
+static const char* pass_frag =
+#include "shader/pass.frag"
+
 struct Shader {
 
 	enum Type : unsigned {
@@ -69,6 +75,17 @@ struct ShaderManager {
 		shader
 			.attach(default_vert, Shader::Type::Vert, res)
 			.attach(default_frag, Shader::Type::Frag, res)
+			.link();
+
+		return &shader;
+	}
+
+	Shader *createPass() {
+		Shader &shader = *create("pass");
+		bool res = false;
+		shader
+			.attach(pass_vert, Shader::Type::Vert, res)
+			.attach(pass_frag, Shader::Type::Frag, res)
 			.link();
 
 		return &shader;

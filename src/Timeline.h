@@ -16,7 +16,7 @@ public:
         return timeline;
     }
 
-    constexpr static const float oneFrameTime = 1.0f/60.0f;
+    constexpr static const float oneFrameTime = 1.0f/120.0f;
 
     constexpr float getPlaybackTime(float now) {
         return now - playbackStartTime;

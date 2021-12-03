@@ -9,7 +9,7 @@ struct CameraLens {
 		Perspective,
 		Ortho,
 	};
-    float fov = 90.f;
+    float fov = 45.f;
     float aspect = 1440.f/900.f;
     float near = 0.1f;
     float far = 100.f;

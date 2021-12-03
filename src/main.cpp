@@ -10,6 +10,7 @@
 #include "ModelManager.h"
 #include "TextureLoader.h"
 
+#include "render/glRendering.h"
 #include "render/gl_model.h"
 #include "render/Rendering.h"
 
@@ -63,6 +64,8 @@ namespace ks {
 
 	void renderModels(Scene &scene, EditorState &state, const math::mat4 &view, const math::mat4 &perspective)
 	{
+		render::setupFrameRenderModels();
+
 		for (size_t i=0; i < scene.models.size(); ++i) {
 
 			const Model *model = scene.models[i];
@@ -81,7 +84,6 @@ namespace ks {
 		}
 	}
 
-
 } // namespace ks
 
 
@@ -98,9 +100,12 @@ int main(int, char**)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window;
+	int width = 1440;
+	int height = 900;
 
-	window = glfwCreateWindow(1440, 900, "Kalm", nullptr, nullptr);
+	GLFWwindow* window = nullptr;
+
+	window = glfwCreateWindow(width, height, "Kalm", nullptr, nullptr);
 	if (!window)
 	{
 		glfwTerminate();
@@ -121,6 +126,7 @@ int main(int, char**)
 	render::setupEnvironment(glfwGetProcAddress);
 
 	ShaderManager::get().createDefault();
+	ShaderManager::get().createPass();
 
 	auto& mm = ModelManager::get();
 	mm.init("assets/");
@@ -165,6 +171,13 @@ int main(int, char**)
 	model->texture0 = texture;
 	model->rotation = math::vec3(-90.f, 0.f, 0.f);
 
+	u32 quadVao, quadVbo;
+
+	render::SceneFboInfo sceneFboInfo = render::setupSceneFbo(width, height);
+	render::setupQuadBuffers(quadVao, quadVbo);
+
+	state.sceneTextureId = sceneFboInfo.colorTextureId;
+
 	setupModels(mainScene);
 
 	float delta = 0.0f;
@@ -189,9 +202,7 @@ int main(int, char**)
 		swapInputStates();
 
 		// render
-
-		int width, height;
-		glfwGetFramebufferSize(window, &width, &height);
+		render::bindFrameBuffer(sceneFboInfo.fboId);
 
 		render::setupFrame(width, height);
 
@@ -209,6 +220,12 @@ int main(int, char**)
 				camera.lens.aspect, camera.lens.near, camera.lens.far);
 
 		renderModels(mainScene, state, v, p);
+
+		render::bindFrameBuffer(0);
+
+		render::setupViewport(0, 0, 1280, 720);
+
+		// renderSceneFboToScreen(sceneFboInfo, quadVao);
 
 		Gui::get().run(state);
 		Gui::get().render();

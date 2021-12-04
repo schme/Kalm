@@ -27,13 +27,13 @@ constexpr static bool isWidthBound(float outerAspect, float innerAspect)
 	return outerAspect <= innerAspect;
 }
 
-static math::vec2 fitRectInRectKeepAspect(math::vec2 outerSize, float innerAspect)
+static ImVec2 fitRectInRectKeepAspect(ImVec2 outerSize, float innerAspect)
 {
 	float outerAspect = outerSize.x / outerSize.y;
 	if (isWidthBound(outerAspect, innerAspect))
-		return math::vec2(outerSize.x, outerSize.x / innerAspect);
+		return ImVec2(outerSize.x, outerSize.x / innerAspect);
 
-	return math::vec2(innerAspect * outerSize.y, outerSize.y);
+	return ImVec2(innerAspect * outerSize.y, outerSize.y);
 }
 
 bool Gui::init(GLFWwindow *window)
@@ -66,7 +66,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
         }
 		if (ImGui::BeginMenu("Windows"))
 		{
-			ImGui::Checkbox("Timeline Preview Window", &gui.optShowTimelinePreview);
+			ImGui::Checkbox("Output Preview", &gui.optShowTimelinePreview);
 			ImGui::Checkbox("Scene Window", &gui.optShowSceneWindow);
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
@@ -273,24 +273,17 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 		return;
 
 	if (ImGui::Begin("Timeline Preview", &opt))	{
-		math::vec2 windowSize{ImGui::GetWindowSize().x, ImGui::GetWindowSize().y};
-		math::vec2 imageSize = fitRectInRectKeepAspect(windowSize, state.outputSize.x / state.outputSize.y);
-		ImVec2 previewAreaSize;
-		if (isWidthBound(windowSize.x / windowSize.y, imageSize.x / imageSize.y))
-			previewAreaSize = ImVec2(0, imageSize.y);
-		else
-			previewAreaSize = ImVec2(imageSize.x, 0);
+		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
+		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), state.outputSize.x / state.outputSize.y);
+		const ImGuiStyle &style = ImGui::GetStyle();
 
-		if (ImGui::BeginChild("TimelinePreviewImage", previewAreaSize, false, 0)) {
-			ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
-				ImVec2(imageSize.x, imageSize.y),
-				ImVec2(0.0f, 1.0f),
-				ImVec2(1.0f, 0.0f),
-				ImColor(1.0f, 1.0f, 1.0f, 1.0f),
-				ImColor(0.0f, 0.0f, 0.0f, 1.0f));
-		}
-		ImGui::EndChild();
-	}
+		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
+			imageSize,
+			ImVec2(0.0f, 1.0f),
+			ImVec2(1.0f, 0.0f),
+			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
+			ImColor(1.0f, 1.0f, 1.0f, 1.0f));
+}
 	ImGui::End();
 }
 

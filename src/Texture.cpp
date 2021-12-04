@@ -1,11 +1,11 @@
 #include "Texture.h"
 
-#include "TextureLoader.h"
+#include "TextureBank.h"
 
 namespace ks {
 
 Texture* Texture::load(const std::string filepath, bool absolutePath) {
-    return TextureLoader::get().load(filepath, absolutePath);
+    return TextureBank::get().load(filepath, absolutePath);
 }
 
 }

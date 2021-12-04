@@ -13,12 +13,14 @@ set(MAIN_SOURCES
 	Input.h
 	Scene.h
 	Scene.cpp
+	SceneBank.h
+	SceneBank.cpp
     ResourceBank.cpp
     ResourceBank.h
     Texture.cpp
     Texture.h
-    TextureLoader.cpp
-    TextureLoader.h
+    TextureBank.cpp
+    TextureBank.h
 	ResourceId.h
     Mesh.h
     Mesh.cpp
@@ -37,7 +39,7 @@ add_executable(Kalm ${MAIN_SOURCES})
 target_link_libraries(Kalm PRIVATE kalm-gui kalm-render)
 target_link_libraries(Kalm PRIVATE glfw glad)
 target_link_libraries(Kalm PRIVATE assimp)
-target_link_libraries(Kalm PRIVATE stb) # stb_image: TextureLoader
+target_link_libraries(Kalm PRIVATE stb) # stb_image: TextureBank
 
 configure_file(include/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
 

@@ -8,7 +8,7 @@
 #include "include/common.h"
 #include "include/maths.h"
 #include "ModelManager.h"
-#include "TextureLoader.h"
+#include "TextureBank.h"
 
 #include "render/glRendering.h"
 #include "render/gl_model.h"
@@ -139,7 +139,7 @@ int main(int, char**)
 	model->scale = math::vec3(20.f, 20.f, 20.f);
 	std::string cubeId = model->name;
 
-	auto& tl = TextureLoader::get();
+	auto& tl = TextureBank::get();
 
 	tl.init("assets/");
 	Texture *texture = tl.load("dish.png");

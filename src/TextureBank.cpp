@@ -1,4 +1,4 @@
-#include "TextureLoader.h"
+#include "TextureBank.h"
 #include "ResourceBank.h"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -6,8 +6,11 @@
 
 namespace ks {
 
+void TextureBank::init(const std::string& projectRoot) {
+	this->projectRoot = projectRoot;
+}
 
-Texture* TextureLoader::load(const std::string &filepath, bool absolutePath)
+Texture* TextureBank::load(const std::string &filepath, bool absolutePath)
 {
 	auto& bank = ResourceBank<Texture>::get();
 	Texture *res = bank.find({filepath});

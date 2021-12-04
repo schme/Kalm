@@ -123,6 +123,7 @@ int main(int, char**)
 
 	EditorState state;
 
+	state.outputSize = math::vec2(width, height);
 	render::setupEnvironment(glfwGetProcAddress);
 
 	ShaderManager::get().createDefault();

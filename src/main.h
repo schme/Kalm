@@ -14,6 +14,7 @@ struct EditorState {
 	Camera camera;
 
 	u32 sceneTextureId = 0;
+	math::vec2 outputSize = math::vec2(1.f, 1.f);
 	float time = 0.0f;
 	bool renderWireframe = false;
 

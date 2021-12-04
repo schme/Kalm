@@ -22,6 +22,19 @@ namespace ks {
 
 static ImGuiDockNodeFlags windowFlags = ImGuiDockNodeFlags_PassthruCentralNode;
 
+constexpr static bool isWidthBound(float outerAspect, float innerAspect)
+{
+	return outerAspect <= innerAspect;
+}
+
+static math::vec2 fitRectInRectKeepAspect(math::vec2 outerSize, float innerAspect)
+{
+	float outerAspect = outerSize.x / outerSize.y;
+	if (isWidthBound(outerAspect, innerAspect))
+		return math::vec2(outerSize.x, outerSize.x / innerAspect);
+
+	return math::vec2(innerAspect * outerSize.y, outerSize.y);
+}
 
 bool Gui::init(GLFWwindow *window)
 {
@@ -260,12 +273,23 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 		return;
 
 	if (ImGui::Begin("Timeline Preview", &opt))	{
-		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
-			ImGui::GetWindowSize(),
-			ImVec2(0.0f, 1.0f),
-			ImVec2(1.0f, 0.0f),
-			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
-			ImColor(1.0f, 1.0f, 1.0f, 1.0f));
+		math::vec2 windowSize{ImGui::GetWindowSize().x, ImGui::GetWindowSize().y};
+		math::vec2 imageSize = fitRectInRectKeepAspect(windowSize, state.outputSize.x / state.outputSize.y);
+		ImVec2 previewAreaSize;
+		if (isWidthBound(windowSize.x / windowSize.y, imageSize.x / imageSize.y))
+			previewAreaSize = ImVec2(0, imageSize.y);
+		else
+			previewAreaSize = ImVec2(imageSize.x, 0);
+
+		if (ImGui::BeginChild("TimelinePreviewImage", previewAreaSize, false, 0)) {
+			ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
+				ImVec2(imageSize.x, imageSize.y),
+				ImVec2(0.0f, 1.0f),
+				ImVec2(1.0f, 0.0f),
+				ImColor(1.0f, 1.0f, 1.0f, 1.0f),
+				ImColor(0.0f, 0.0f, 0.0f, 1.0f));
+		}
+		ImGui::EndChild();
 	}
 	ImGui::End();
 }
@@ -276,9 +300,7 @@ void Gui::run(EditorState &state)
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(),
-			ImGuiDockNodeFlags_PassthruCentralNode
-			| ImGuiDockNodeFlags_NoDockingInCentralNode);
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
 	showMainMenuBar(*this, state);
 	showTimelineWindow(*this, optShowTimeline);

@@ -49,4 +49,3 @@ static inline void removeExtension(std::string &filename)
 {
 	filename = filename.substr(0, filename.find_last_of("."));
 }
-

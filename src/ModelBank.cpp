@@ -216,6 +216,7 @@ bool ModelBank::readFile(const std::string &filename)
 	}
 
 	std::string sceneName = scene->mName.length == 0 ? filename : scene->mName.C_Str();
+	removePath(sceneName);
 	removeExtension(sceneName);
 	model.name = sceneName;
 	ResourceStorage<Model>::get().add(sceneName, std::move(model));

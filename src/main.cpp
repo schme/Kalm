@@ -131,9 +131,9 @@ int main(int, char**)
 
 	auto& mm = ModelBank::get();
 	mm.init();
-	mm.readFile("ico.dae");
-	mm.readFile("HappyBuddha.obj");
-	mm.readFile("grenade.fbx");
+	mm.readFile(getEditorState().modelPrefix + "ico.dae");
+	mm.readFile(getEditorState().modelPrefix + "HappyBuddha.obj");
+	mm.readFile(getEditorState(). modelPrefix + "grenade.fbx");
 
 	Model* model = mm.addPrimitive(PrimitiveType::Cube);
 	model->scale = math::vec3(20.f, 20.f, 20.f);
@@ -142,11 +142,11 @@ int main(int, char**)
 	auto& tl = TextureBank::get();
 
 	tl.init();
-	Texture *texture = tl.load("dish.png");
+	Texture *texture = tl.load(getEditorState().texturePrefix + "dish.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
 
-	texture = tl.load("grenade_Base_color.png");
+	texture = tl.load(getEditorState().texturePrefix + "grenade_Base_color.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
 

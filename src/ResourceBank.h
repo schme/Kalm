@@ -1,39 +1,26 @@
 #pragma once
 
-#include <unordered_map>
-
+#include "ResourceStorage.h"
+#include "StaticSingleton.h"
 #include "ResourceId.h"
-#include "include/common.h"
 
 namespace ks {
 
-template <typename T>
-struct ResourceBank {
+template <typename T, typename U>
+struct ResourceBank : StaticSingleton<U>{
+    void init() {}
 
-    T* add(const std::string &filepath, T&& res) {
-        T* foundRes = find(ResourceId(filepath));
-        if (foundRes) {
-            return foundRes;
-        }
-        auto it = storage.emplace(ResourceId(filepath), res);
-        if (!it.second) return nullptr;
-        return &it.first->second;
-    }
+	/// Should check if the resource exists first and return the already loaded one if so
+    virtual T* load(const std::string &filepath, bool absolutePath = false) {
+		ks_unused(filepath);
+		ks_unused(absolutePath);
+		return nullptr;
+	}
 
-    T* find(const ResourceId &id) {
-        auto it = storage.find(id);
-        if (it != storage.end()) {
-            return &it->second;
-        }
-        return nullptr;
-    }
-
-    static ResourceBank<T>& get() {
-        static ResourceBank<T> bank;
-        return bank;
-    }
-
-    std::unordered_map<ResourceId, T> storage;
+	/// Prefer this whenever possible
+	constexpr T* find(const ResourceId &id) {
+		return ResourceStorage<T>::get().find(id);
+	}
 };
 
 }

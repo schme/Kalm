@@ -1,4 +1,4 @@
-#include "ModelManager.h"
+#include "ModelBank.h"
 
 #include <assimp/mesh.h>
 #include <assimp/Importer.hpp>
@@ -6,6 +6,7 @@
 #include <assimp/postprocess.h>
 
 #include "include/common.h"
+#include "main.h"
 
 namespace ks {
 
@@ -165,12 +166,7 @@ static void importMesh(const aiScene *scene, unsigned index, Model &model)
 	model.meshes.push_back(std::move(out));
 }
 
-void ModelManager::init(const std::string &defaultMeshPath)
-{
-	this->defaultMeshPath = defaultMeshPath;
-}
-
-void ModelManager::importScene(const aiScene *scene, Model &model)
+void ModelBank::importScene(const aiScene *scene, Model &model)
 {
 	if (scene->HasMeshes())	{
 		for (unsigned i=0; i < scene->mNumMeshes; ++i) {
@@ -179,11 +175,21 @@ void ModelManager::importScene(const aiScene *scene, Model &model)
 	}
 }
 
-bool ModelManager::readFile(const std::string &filename)
+Model* ModelBank::load(const std::string &filepath, bool absolutePath)
 {
-	std::string filepath = defaultMeshPath + filename;
+	std::string fp = absolutePath ? filepath : getEditorState().modelPrefix + filepath;
+	if (readFile(fp))
+	{
+		removeExtension(fp);
+		return ResourceStorage<Model>::get().find(fp);
+	}
+	return nullptr;
+}
+
+bool ModelBank::readFile(const std::string &filename)
+{
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(filepath,
+	const aiScene *scene = importer.ReadFile(filename,
 			aiProcess_Triangulate
 			| aiProcess_JoinIdenticalVertices
 			| aiProcess_SortByPType);
@@ -212,49 +218,51 @@ bool ModelManager::readFile(const std::string &filename)
 	std::string sceneName = scene->mName.length == 0 ? filename : scene->mName.C_Str();
 	removeExtension(sceneName);
 	model.name = sceneName;
-	models.insert(std::make_pair(sceneName, std::move(model)));
+	ResourceStorage<Model>::get().add(sceneName, std::move(model));
 
 	return true;
 }
 
-Model * ModelManager::addMesh(Model &&model)
+Model * ModelBank::addModel(Model &&model)
 {
-	auto it = models.find(model.name);
-	if (it == models.end()) {
-		auto val = models.insert(std::make_pair(model.name, std::move(model)));
-		return &val.first->second;
+	auto& storage = ResourceStorage<Model>::get();
+	Model *m = storage.find(model.name);
+
+	if (!m) {
+		m = storage.add(model.name, std::move(model));
 	}
-	return nullptr;
+	return m;
 }
 
-Model * ModelManager::addMesh(Model &model)
+Model * ModelBank::addModel(Model &model)
 {
-	auto it = models.find(model.name);
-	if (it == models.end()) {
-		auto val = models.insert(std::make_pair(model.name, std::move(model)));
-		return &val.first->second;
+	auto& storage = ResourceStorage<Model>::get();
+	Model *m = storage.find(model.name);
+
+	if (!m) {
+		m = storage.add(model.name, std::move(model));
 	}
-	return nullptr;
+	return m;
 }
 
-Model * ModelManager::addMeshRename(Model &&model)
+Model * ModelBank::addModelRename(Model &&model)
 {
 	std::string newName;
 
-	Model *addedMesh = addMesh(model);
+	Model *addedMesh = addModel(model);
 	int counter = 0;
 	while (!addedMesh) {
 		newName = model.name + std::to_string(counter);
         model.name = newName;
-		addedMesh = addMesh(model);
+		addedMesh = addModel(model);
 	}
 	return addedMesh;
 }
 
-Model *ModelManager::addPrimitive(PrimitiveType type)
+Model *ModelBank::addPrimitive(PrimitiveType type)
 {
 	Model primitive = createPrimitive(type);
-	Model *model = addMeshRename(std::move(primitive));
+	Model *model = addModelRename(std::move(primitive));
 	return model;
 }
 

@@ -11,12 +11,12 @@ set(MAIN_SOURCES
     Camera.h
     Camera.cpp
 	Input.h
+	ResourceStorage.h
+	ResourceBank.h
 	Scene.h
 	Scene.cpp
 	SceneBank.h
 	SceneBank.cpp
-    ResourceBank.cpp
-    ResourceBank.h
     Texture.cpp
     Texture.h
     TextureBank.cpp
@@ -24,11 +24,11 @@ set(MAIN_SOURCES
 	ResourceId.h
     Mesh.h
     Mesh.cpp
-	ModelManager.h
-	ModelManager.cpp
 	MeshGenerators.h
 	Model.h
 	Model.cpp
+	ModelBank.h
+	ModelBank.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

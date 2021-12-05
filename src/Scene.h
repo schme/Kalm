@@ -1,14 +1,11 @@
 #pragma once
 
-#include "Mesh.h"
-#include "ModelManager.h"
-#include "MeshGenerators.h"
+#include "Model.h"
 #include "render/RenderAttributes.h"
 
 #include <vector>
 
 namespace ks {
-struct EditorState;
 
 struct Scene {
 

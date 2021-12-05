@@ -6,7 +6,7 @@
 namespace ks {
 
 Model *Scene::addModel(const std::string &name) {
-	ModelManager &mm = ModelManager::get();
+	ModelBank &mm = ModelBank::get();
 	Model *model = mm.find(name);
 	if (!model)
 		return nullptr;

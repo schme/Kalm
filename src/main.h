@@ -19,7 +19,17 @@ struct EditorState {
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";
+	std::string assetPrefix = "assets/";
+	std::string modelPrefix = "assets/";
+	std::string texturePrefix = "assets/";
+
 	std::vector<ResourceId> reloadMeshes;
 };
+
+static EditorState& getEditorState()
+{
+	static EditorState editorState;
+	return editorState;
+}
 
 }

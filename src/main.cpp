@@ -7,7 +7,7 @@
 #include "Timeline.h"
 #include "include/common.h"
 #include "include/maths.h"
-#include "ModelManager.h"
+#include "ModelBank.h"
 #include "TextureBank.h"
 
 #include "render/glRendering.h"
@@ -129,8 +129,8 @@ int main(int, char**)
 	ShaderManager::get().createDefault();
 	ShaderManager::get().createPass();
 
-	auto& mm = ModelManager::get();
-	mm.init("assets/");
+	auto& mm = ModelBank::get();
+	mm.init();
 	mm.readFile("ico.dae");
 	mm.readFile("HappyBuddha.obj");
 	mm.readFile("grenade.fbx");
@@ -141,7 +141,7 @@ int main(int, char**)
 
 	auto& tl = TextureBank::get();
 
-	tl.init("assets/");
+	tl.init();
 	Texture *texture = tl.load("dish.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);

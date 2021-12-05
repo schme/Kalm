@@ -5,8 +5,8 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-
-#include "ResourceBank.h"
+#include "ModelBank.h"
+#include "ResourceStorage.h"
 #include "Texture.h"
 #include "Timeline.h"
 #include "gui/FileBrowser.h"
@@ -175,7 +175,7 @@ void drawModel(EditorState &state, Model &model)
 
 void addPrimitive(PrimitiveType type, Scene &scene)
 {
-    auto &mm = ModelManager::get();
+    auto &mm = ModelBank::get();
     Model *primitive = mm.addPrimitive(type);
     scene.addModel(primitive->name);
 }
@@ -223,7 +223,7 @@ void drawTextureWindow(EditorState &state, bool &opt)
 		if (ImGui::Button("Add texture")) {
 			showingFileBrowser = true;
 		}
-		auto &tb = ResourceBank<Texture>::get();
+		auto &tb = ResourceStorage<Texture>::get();
 		for (const auto &[id, txtr] : tb.storage) {
 			ImGui::Text("Id: %s", id.c_str());
 			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {

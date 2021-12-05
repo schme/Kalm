@@ -1,23 +1,20 @@
 #include "TextureBank.h"
-#include "ResourceBank.h"
+
+#include "main.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 namespace ks {
 
-void TextureBank::init(const std::string& projectRoot) {
-	this->projectRoot = projectRoot;
-}
-
 Texture* TextureBank::load(const std::string &filepath, bool absolutePath)
 {
-	auto& bank = ResourceBank<Texture>::get();
+	auto& bank = ResourceStorage<Texture>::get();
 	Texture *res = bank.find({filepath});
 	if (res)
 		return res;
 
-	std::string fullpath = absolutePath ? filepath : projectRoot + filepath;
+	std::string fullpath = absolutePath ? filepath : getEditorState().projectRoot + filepath;
 	int x,y,n,ok;
 	ok = stbi_info(fullpath.c_str(), &x, &y, &n);
 
@@ -39,13 +36,6 @@ Texture* TextureBank::load(const std::string &filepath, bool absolutePath)
 	removePath(name);
 
 	res = bank.add(name, std::move(txtr));
-	return res;
-}
-
-Texture* find(const ResourceId &id)
-{
-	auto bank = ResourceBank<Texture>::get();
-	Texture* res = bank.find(id);
 	return res;
 }
 

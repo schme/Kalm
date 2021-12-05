@@ -1,17 +1,16 @@
 #pragma once
 
 #include "ResourceId.h"
+#include "Scene.h"
+#include "ResourceBank.h"
 
 #include <string>
 
 namespace ks {
 
-class SceneBank {
+class SceneBank : ResourceBank<Scene, SceneBank> {
 	
-    void init(const std::string& projectRoot) {
-        this->projectRoot = projectRoot;
-    }
-    std::string projectRoot = "";
+    Scene* load(const std::string &filepath, bool absolutePath = false) override;
 };
 
 }

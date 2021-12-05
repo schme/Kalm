@@ -1,6 +1,7 @@
 #pragma once
 
 
+#include "ModelBank.h"
 #include "main.h"
 #include "Mesh.h"
 #include "gl_shader.h"
@@ -181,7 +182,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 	// TODO: yea this doesn't scale
 	auto meshNameIt = state.reloadMeshes.begin();
 	while (meshNameIt != state.reloadMeshes.end()) {
-		auto &mm = ModelManager::get();
+		auto &mm = ModelBank::get();
 		Model *model = mm.find(mra.name);
 		auto mesh = model->meshes.begin();
 		bool found = false;

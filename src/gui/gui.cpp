@@ -123,14 +123,14 @@ static void drawCameraWindow(Camera &camera, bool &opt)
 		ImGui::InputFloat3("front", math::value_ptr(camera.front));
 		ImGui::InputFloat3("right", math::value_ptr(camera.right));
 
-		ImGui::InputFloat("fov", &camera.lens.fov, 0.f, 360.f, "%.3f");
+		ImGui::SliderFloat("fov", &camera.lens.fov, 1.f, 180.f, "%.3f");
 		ImGui::InputFloat("aspect", &camera.lens.aspect, 0.f, 3.f, "%.3f");
 		ImGui::InputFloat("near", &camera.lens.near, -1000.f, 1000.f, "%.3f");
 		ImGui::InputFloat("far", &camera.lens.far, -1000.f, 1000.f, "%.3f");
 
-		ImGui::InputFloat("yaw", &camera.yaw, 0, 0, "%.3f");
-		ImGui::InputFloat("pitch", &camera.pitch, 0, 0, "%.3f");
-		ImGui::InputFloat("roll", &camera.roll, 0, 0, "%.3f");
+		ImGui::SliderFloat("camera.yaw", &camera.yaw, -179.9f, 179.9f);
+		ImGui::SliderFloat("camera.pitch", &camera.pitch, -89.f, 89.f);
+		ImGui::SliderFloat("camera.roll", &camera.roll, -179.9f, 179.9f);
 
 		ImGui::End();
 	}

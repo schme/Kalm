@@ -48,7 +48,7 @@ namespace ks {
 
 		if (input.rmb) {
 			float cameraSpeed = input.shift ? 5.f : 2.f;
-			updateCameraLook(camera, -input.mouseDelta);
+			updateFreeCameraLook(camera, -input.mouseDelta);
 			updateCameraPos(camera, input.forward, input.right, input.up, cameraSpeed * delta);
 		}
 	}
@@ -201,6 +201,8 @@ int main(int, char**)
 		handleInput(window, getCurrentInputState(), getLastInputState(), camera, delta);
 
 		swapInputStates();
+
+		updateCameraFront(camera);
 
 		// render
 		render::bindFrameBuffer(sceneFboInfo.fboId);

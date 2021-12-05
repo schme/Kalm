@@ -23,14 +23,15 @@ struct Camera {
     math::vec3 right = math::vec3(-1.f, 0.f, 0.f);
     math::vec3 up = math::vec3(0.f, 1.f, 0.f);
 
-	float yaw = atan2(front.x, front.z);
-	float pitch = asin(-front.y);
+	float yaw = 0;
+	float pitch = 0;
 	float roll = 0;
 
     CameraLens lens;
 };
 
-void updateCameraLook(Camera &camera, math::vec2 offset);
+void updateFreeCameraLook(Camera &camera, math::vec2 offset);
+void updateCameraFront(Camera &camera);
 
 void updateCameraPos(Camera &camera, float forward, float right, float up, float magnitude);
 

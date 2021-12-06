@@ -9,6 +9,7 @@
 #include "Rendering.h"
 #include "Texture.h"
 #include "render/glRendering.h"
+#include "render/ShaderBank.h"
 
 
 namespace ks::render {
@@ -82,7 +83,7 @@ static void renderSceneFboToScreen(const SceneFboInfo &info, u32 quadVao)
 {
 	clearColorBuffer(math::vec4(1.0f, 0.50f, 0.10f, 1.f));
 
-	ShaderManager::get().find("pass")->use();
+	ShaderBank::get().find("pass")->use();
 
 	glBindVertexArray(quadVao);
 	glDisable(GL_DEPTH_TEST);
@@ -92,11 +93,12 @@ static void renderSceneFboToScreen(const SceneFboInfo &info, u32 quadVao)
 
 static void setupModel(const Model &model, ModelRenderAttributes &mra)
 {
-	if (!mra.shader) {
-		mra.shader = ShaderManager::get().find("default");
+	if (mra.shader.empty()) {
+		mra.shader = ResourceId("default");
 	}
 
-	Shader &shader = *mra.shader;
+	Shader *shader = ShaderBank::get().find(mra.shader);
+	assert(shader);
 
 	GLuint vbo, vao, ebo;
 	GLint vPosLocation, vColLocation, vNormLocation;
@@ -164,7 +166,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
                 }
             }
         }
-        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo, shader.get(),
+        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo, shader->get(),
                 static_cast<u32>(mesh.indices.size())});
 	}
 }
@@ -219,9 +221,11 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		glBindBuffer(GL_ARRAY_BUFFER, attr.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
 
-		mra.shader->use();
-		mra.shader->bind("MVP", mvp);
-		mra.shader->bind("time", state.time);
+		Shader *shader = ShaderBank::get().find(mra.shader);
+		assert(shader);
+		shader->use();
+		shader->bind("MVP", mvp);
+		shader->bind("time", state.time);
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

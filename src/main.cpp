@@ -126,8 +126,8 @@ int main(int, char**)
 	state.outputSize = math::vec2(width, height);
 	render::setupEnvironment(glfwGetProcAddress);
 
-	ShaderManager::get().createDefault();
-	ShaderManager::get().createPass();
+	ShaderBank::get().createDefault();
+	ShaderBank::get().createPass();
 
 	auto& mm = ModelBank::get();
 	mm.init();

@@ -3,10 +3,10 @@
 #include <memory>
 
 namespace ks {
-	Shader & Shader::use()
+	Shader * Shader::use()
 	{
 		glUseProgram(program);
-		return *this;
+		return this;
 	}
 
     void Shader::bind(unsigned int location, float value)
@@ -19,14 +19,14 @@ namespace ks {
 		glUniformMatrix4fv(location, 1, GL_FALSE, math::value_ptr(matrix));
 	}
 
-    Shader & Shader::attach(const std::string &shaderText, Type type, bool &success)
+    Shader* Shader::attach(const std::string &shaderText, Type type, bool &success)
     {
         GLuint shader = create(type);
         const GLchar *shdr = shaderText.c_str();
         glShaderSource(shader, 1, &shdr, nullptr);
         glCompileShader(shader);
         glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-        if (status == false) {
+        if (status != true) {
             glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length);
             std::unique_ptr<char[]> buffer(new char[length]);
             glGetShaderInfoLog(shader, length, nullptr, buffer.get());
@@ -40,7 +40,20 @@ namespace ks {
 		glAttachShader(program, shader);
 		glDeleteShader(shader);
 
-		return *this;
+		return this;
+	}
+
+	Shader* Shader::create()
+	{
+		program = glCreateProgram();
+		return this;
+	}
+
+	Shader* Shader::remove()
+	{
+		glDeleteProgram(program);
+		program = 0;
+		return this;
 	}
 
 	GLuint Shader::create(Type type)
@@ -48,19 +61,18 @@ namespace ks {
 		return glCreateShader(type);
 	}
 
-	Shader &Shader::link()
+	Shader* Shader::link()
 	{
 		glLinkProgram(program);
 		glGetProgramiv(program, GL_LINK_STATUS, &status);
-        if(status == false)
+        if(status != GL_TRUE)
         {
             glGetProgramiv(program, GL_INFO_LOG_LENGTH, & length);
             std::unique_ptr<char[]> buffer(new char[length]);
             glGetProgramInfoLog(program, length, nullptr, buffer.get());
             fprintf(stderr, "Link error: %s", buffer.get());
         }
-        assert(status == true);
-        return *this;
+        assert(status == GL_TRUE);
+        return this;
 	}
-
 }

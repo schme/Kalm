@@ -4,6 +4,8 @@ set(RENDER_SOURCES
 	Rendering.cpp
 	glRendering.h
 	glRendering.cpp
+	ShaderBank.h
+	ShaderBank.cpp
 	gl_shader.h
 	gl_shader.cpp
 	gl_utils.h

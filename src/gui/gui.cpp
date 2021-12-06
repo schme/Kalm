@@ -258,7 +258,7 @@ void drawShadersWindow(EditorState &state, bool &opt)
 		return;
 
     if (ImGui::Begin("Shaders Window", &opt)) {
-        auto &mm = ShaderManager::get();
+        auto &mm = ResourceStorage<Shader>::get();
         for (auto& [id, shader] : mm.storage) {
             ImGui::Text("shader: %s", id.c_str());
         }
@@ -275,7 +275,6 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 	if (ImGui::Begin("Timeline Preview", &opt))	{
 		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
 		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), state.outputSize.x / state.outputSize.y);
-		const ImGuiStyle &style = ImGui::GetStyle();
 
 		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
 			imageSize,

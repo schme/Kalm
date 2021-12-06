@@ -6,7 +6,7 @@ namespace ks {
 struct Config
 {
 
-	LogLevel logLevel = LogLevel::Trace;
+	LogLevel logLevel = LogLevel::Debug;
 
 
 	static Config &get() {

@@ -93,13 +93,6 @@ static void renderSceneFboToScreen(const SceneFboInfo &info, u32 quadVao)
 
 static void setupModel(const Model &model, ModelRenderAttributes &mra)
 {
-	if (mra.shader.empty()) {
-		mra.shader = ResourceId("default");
-	}
-
-	Shader *shader = ShaderBank::get().find(mra.shader);
-	assert(shader);
-
 	GLuint vbo, vao, ebo;
 	GLint vPosLocation, vColLocation, vNormLocation;
     GLint vTex0Location, vTex1Location, vTex2Location;
@@ -161,11 +154,19 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
                     break;
                 }
                 default: {
-                    fprintf(stderr, "Unhandled BufferType\n");
+                    log_error("%s\n", "Unhandled buffer type");
                     break;
                 }
             }
         }
+
+		if (mra.shader.empty()) {
+			mra.shader = ResourceId("default");
+		}
+
+		Shader *shader = ShaderBank::get().find(mra.shader);
+		assert(shader);
+
         mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo, shader->get(),
                 static_cast<u32>(mesh.indices.size())});
 	}

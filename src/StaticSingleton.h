@@ -5,8 +5,8 @@ namespace ks {
 template <typename T>
 struct StaticSingleton {
 	static T& get() {
-		static T instance;
-		return instance;
+		static T* instance = new T;;
+		return *instance;
 	}
 };
 

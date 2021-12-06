@@ -10,7 +10,6 @@ struct SimulationState {
 };
 
 struct EditorState {
-	Scene scene;
 	Camera camera;
 
 	u32 sceneTextureId = 0;

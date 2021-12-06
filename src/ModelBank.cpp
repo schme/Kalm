@@ -248,16 +248,15 @@ Model * ModelBank::addModel(Model &model)
 
 Model * ModelBank::addModelRename(Model &&model)
 {
-	std::string newName;
+	std::string originalName = model.name;
 
-	Model *addedMesh = addModel(model);
+	Model *alreadyHasOne = find(model.name);
 	int counter = 0;
-	while (!addedMesh) {
-		newName = model.name + std::to_string(counter);
-        model.name = newName;
-		addedMesh = addModel(model);
+	while (alreadyHasOne) {
+		model.name = originalName + std::to_string(counter++);
+		alreadyHasOne = find(model.name);
 	}
-	return addedMesh;
+	return addModel(model);
 }
 
 Model *ModelBank::addPrimitive(PrimitiveType type)

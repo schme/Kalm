@@ -9,6 +9,7 @@
 #include "include/maths.h"
 #include "ModelBank.h"
 #include "TextureBank.h"
+#include "SceneBank.h"
 
 #include "render/glRendering.h"
 #include "render/gl_model.h"
@@ -156,8 +157,8 @@ int main(int, char**)
 	Timeline& timeline = Timeline::get();
 	timeline.init();
 
-	Scene& mainScene = state.scene;
-	mainScene.name = "Main";
+	SceneBank::get().load("Scene0");
+	Scene& mainScene = *SceneBank::get().load("Main");
 
 	model = mainScene.addModel("ico");
 	model->position = math::vec3(0.f, -3.f, -5.f);

@@ -14,6 +14,7 @@
 #include "main.h"
 #include "render/Rendering.h"
 #include "render/gl_shader.h"
+#include "SceneBank.h"
 
 
 #include <sstream>
@@ -186,10 +187,43 @@ void drawSceneWindow(EditorState &state, bool &opt)
 		return;
 
 	if (ImGui::Begin("Scene", &opt)) {
+		auto &storage = ResourceStorage<Scene>::get().storage;
+
+		static int currentIndx = 0;
+		static std::vector<ResourceId> keys;
+		static std::vector<Scene*> scenes;
+		keys.clear();
+		keys.reserve(storage.size());
+		scenes.clear();
+		scenes.reserve(storage.size());
+
+		for (auto& [key, scene] : storage) {
+			keys.emplace_back(key);
+			scenes.emplace_back(&scene);
+		}
+
+		const char* comboPreview = keys[currentIndx].c_str();
+
+		if (ImGui::BeginCombo("Scene List", comboPreview, 0)) {
+
+			for (int i=0; i < keys.size(); ++i) {
+				bool isSelected = currentIndx == i;
+				if (ImGui::Selectable(keys[i].c_str(), isSelected))
+					currentIndx = i;
+
+				if (isSelected)
+					ImGui::SetItemDefaultFocus();
+			}
+
+			ImGui::EndCombo();
+		}
+
+		Scene *scene = scenes[currentIndx];
+
         if (ImGui::Button("Add cube")) {
-            addPrimitive(PrimitiveType::Cube, state.scene);
+            addPrimitive(PrimitiveType::Cube, *scene);
         }
-		for (Model *model : state.scene.models) {
+		for (Model *model : scene->models) {
 			drawModel(state, *model);
 		}
 	}

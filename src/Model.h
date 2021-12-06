@@ -17,6 +17,7 @@ struct Model {
 	math::vec3 position = math::vec3(0.f, 0.f, 0.f);
 	math::vec3 scale = math::vec3(1.f, 1.f, 1.f);
 	math::vec3 rotation = math::vec3(0.0f, 0.0f, 0.0f);
+	// Todo: replace with material
 	Texture *texture0 = nullptr;
 	std::vector<Mesh> meshes = {};
 };

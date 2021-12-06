@@ -8,7 +8,7 @@
 
 namespace ks {
 
-class SceneBank : ResourceBank<Scene, SceneBank> {
+struct SceneBank : public ResourceBank<Scene, SceneBank> {
 	
     Scene* load(const std::string &filepath, bool absolutePath = false) override;
 };

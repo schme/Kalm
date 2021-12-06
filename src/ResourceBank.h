@@ -7,7 +7,7 @@
 namespace ks {
 
 template <typename T, typename U>
-struct ResourceBank : StaticSingleton<U>{
+struct ResourceBank : public StaticSingleton<U>{
     void init() {}
 
 	/// Should check if the resource exists first and return the already loaded one if so

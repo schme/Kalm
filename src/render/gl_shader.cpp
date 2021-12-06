@@ -3,6 +3,28 @@
 #include <memory>
 
 namespace ks {
+
+	static GLuint getShaderGLType(Shader::Type type)
+	{
+		switch (type) {
+		case Shader::Type::Vert:
+			return GL_VERTEX_SHADER;
+		case Shader::Type::TessCtrl:
+			return GL_TESS_CONTROL_SHADER;
+		case Shader::Type::TessEval:
+			return GL_TESS_EVALUATION_SHADER;
+		case Shader::Type::Geom:
+			return GL_GEOMETRY_SHADER;
+		case Shader::Type::Frag:
+			return GL_FRAGMENT_SHADER;
+		case Shader::Type::Comp:
+			return GL_COMPUTE_SHADER;
+		default:
+			return 0;
+		}
+
+	}
+
 	Shader * Shader::use()
 	{
 		glUseProgram(program);
@@ -40,6 +62,8 @@ namespace ks {
 		glAttachShader(program, shader);
 		glDeleteShader(shader);
 
+		shaderIds[type] = shader;
+
 		return this;
 	}
 
@@ -58,7 +82,7 @@ namespace ks {
 
 	GLuint Shader::create(Type type)
 	{
-		return glCreateShader(type);
+		return glCreateShader(getShaderGLType(type));
 	}
 
 	Shader* Shader::link()
@@ -73,6 +97,13 @@ namespace ks {
             fprintf(stderr, "Link error: %s", buffer.get());
         }
         assert(status == GL_TRUE);
+
+		for (u32& shaderId : shaderIds) {
+			if (shaderId != 0) {
+				glDetachShader(program, shaderId);
+				shaderId = 0;
+			}
+		}
         return this;
 	}
 }

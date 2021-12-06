@@ -198,7 +198,7 @@ int main(int, char**)
 		// logic
 		Camera &camera = state.camera;
 
-		state.time = timeline.timestep(frameStart);
+		state.time = timeline.advanceTimestep(frameStart);
 		handleInput(window, getCurrentInputState(), getLastInputState(), camera, delta);
 
 		swapInputStates();

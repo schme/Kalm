@@ -6,6 +6,7 @@
 
 #include "ResourceId.h"
 #include "include/maths.h"
+#include "include/common.h"
 
 namespace ks {
 
@@ -24,10 +25,13 @@ static const char* pass_frag =
 struct Shader {
 
 	enum Type : unsigned {
-		Vert = GL_VERTEX_SHADER,
-		Geom = GL_GEOMETRY_SHADER,
-		Frag = GL_FRAGMENT_SHADER,
-		Comp = GL_COMPUTE_SHADER,
+		Vert = 1,
+		TessCtrl,
+		TessEval,
+		Geom,
+		Frag,
+		Comp,
+		Count,
 	};
 
 	static inline void unuse() {
@@ -55,11 +59,12 @@ struct Shader {
 	}
 
 private:
-	GLuint create(Type type);
+	u32 create(Type type);
 
-	GLuint program = 0;
-	GLint status = -1;
-	GLint length = -1;
+	u32 program = 0;
+	u32 shaderIds[Type::Count] = {0};
+	i32 status = -1;
+	i32 length = -1;
 };
 
 }

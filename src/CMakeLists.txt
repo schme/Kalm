@@ -29,6 +29,10 @@ set(MAIN_SOURCES
 	Model.cpp
 	ModelBank.h
 	ModelBank.cpp
+	Material.h
+	Material.cpp
+	MaterialBank.h
+	MaterialBank.cpp
 )
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})

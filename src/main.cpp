@@ -208,8 +208,8 @@ int main(int, char**)
 
 #if 1
 		// hardcoded camera movement
-		camera.position.x = sin(state.time) * 5.0f;
-		camera.position.z = cos(state.time) * 5.0f;
+		camera.position.x = sin(state.time) * 7.0f;
+		camera.position.z = cos(state.time) * 7.0f;
 
 		cameraLookAt(camera, math::vec3(0.f));
 #endif

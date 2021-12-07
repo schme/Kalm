@@ -17,7 +17,14 @@ public:
 	int GetFrameMax() const override;
 	int GetItemCount() const override;
 
+	int GetItemTypeCount() const override;
+
+	const char* GetItemTypeName(int /*typeIndex*/) const override;
+	const char* GetItemLabel(int /*index*/) const override;
+
 	void Get(int index, int** start, int** end, int* type, unsigned int* color) override;
+	void Add(int /*type*/) override;
+	void Del(int /*index*/) override;
 
 #if 0
 	void CustomDraw(int /*index*/, ImDrawList* /*draw_list*/, const ImRect& /*rc*/, const ImRect& /*legendRect*/, const ImRect& /*clippingRect*/, const ImRect& /*legendClippingRect*/) override;

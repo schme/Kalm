@@ -1,4 +1,6 @@
 #include "TimelineGui.h"
+#include "ResourceStorage.h"
+#include "Scene.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -34,6 +36,62 @@ int TimelineGui::GetFrameMax() const
 int TimelineGui::GetItemCount() const
 {
 	return items.size();
+}
+
+int TimelineGui::GetItemTypeCount() const 
+{
+	return static_cast<int>(TimelineItem::Type::Count);
+}
+
+const char* TimelineGui::GetItemTypeName(int typeIndex) const
+{
+	using Type = TimelineItem::Type;
+	Type type = Type(typeIndex);
+
+	switch(type) {
+		case Type::Scene:
+			return "Scene";
+		case Type::Post:
+			return "Post";
+		default:
+			return "";
+	}
+
+	return "";
+}
+
+const char* TimelineGui::GetItemLabel(int index) const 
+{
+	return items[index].id.c_str();
+}
+
+void TimelineGui::Add(int typeIndex)
+{
+	TimelineItem::Type type = TimelineItem::Type(typeIndex);
+	if (type == TimelineItem::Type::Scene) {
+		// TODO: proper handling
+		auto& storage = ResourceStorage<Scene>::get().storage;
+		for (const auto& [key, scene] : storage) {
+			bool sceneInTimeline = false;
+			for (const auto& item : items) {
+				if (item.type == type && item.id == key) {
+					sceneInTimeline = true;
+					break;
+				}
+			}
+
+			if (!sceneInTimeline) {
+				items.emplace_back(TimelineItem{ResourceId(key), 0, 120, type});
+			}
+		}
+	}
+	else {
+	}
+}
+
+void TimelineGui::Del(int index)
+{
+	items.erase(items.begin() + index);
 }
 
 void TimelineGui::Get(int index, int** start, int** end, int* type, unsigned int* color)

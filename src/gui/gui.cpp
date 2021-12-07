@@ -7,6 +7,7 @@
 
 #include "ModelBank.h"
 #include "ResourceStorage.h"
+#include "SceneBank.h"
 #include "Texture.h"
 #include "Timeline.h"
 #include "gui/FileBrowser.h"
@@ -14,12 +15,13 @@
 #include "main.h"
 #include "render/Rendering.h"
 #include "render/gl_shader.h"
-#include "SceneBank.h"
 
 
 #include <sstream>
 
 namespace ks {
+
+static char guiInputBuffer[256];
 
 static ImGuiDockNodeFlags windowFlags = ImGuiDockNodeFlags_PassthruCentralNode;
 
@@ -102,9 +104,7 @@ static void showTimelineWindow(Gui &gui, bool &opt)
 	ImGui::Begin("Timeline", &opt, windowFlags);
 	TimelineGui &timeline = Timeline::get();
 	ImGui::InputInt("Max Frames", &timeline.frameMax);
-
-	ImGui::InputFloat("Playback Rate", &timeline.playbackRate);
-	ImGui::SameLine(); ImGui::Text("Current: %d", timeline.currentFrame);
+	ImGui::SameLine(); ImGui::Text("Frame: %d", timeline.currentFrame);
 
 	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(&timeline);
 	ImSequencer::Sequencer(sequencer, &timeline.currentFrame, &timeline.expanded, &timeline.selectedEntry, &timeline.firstFrame, timeline.sequenceOptions);
@@ -181,15 +181,50 @@ void addPrimitive(PrimitiveType type, Scene &scene)
     scene.addModel(primitive->name);
 }
 
+static void  Strtrim(char* s) {
+	char* str_end = s + strlen(s);
+	while (str_end > s && str_end[-1] == ' ') str_end--;
+	*str_end = 0;
+}
+
+void addNewEmptyScenePrompt()
+{
+	if (ImGui::BeginPopupModal("Add new empty scene", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		if (ImGui::InputText("Scene name", guiInputBuffer, IM_ARRAYSIZE(guiInputBuffer),
+					ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			ImGui::SetItemDefaultFocus();
+			char *s = guiInputBuffer;
+			Strtrim(s);
+			if (s[0]) {
+				SceneBank::get().load(std::string(s));
+				std::strcpy(s, "");
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		if (ImGui::Button("Cancel")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void drawSceneWindow(EditorState &state, bool &opt)
 {
 	if (!opt)
 		return;
 
 	if (ImGui::Begin("Scene", &opt)) {
+
+		addNewEmptyScenePrompt();
+
+		if (ImGui::Button("Add scene")) {
+			ImGui::OpenPopup("Add new empty scene");
+		}
+
 		auto &storage = ResourceStorage<Scene>::get().storage;
 
-		static int currentIndx = 0;
+		static size_t currentIndx = 0;
 		static std::vector<ResourceId> keys;
 		static std::vector<Scene*> scenes;
 		keys.clear();
@@ -206,7 +241,7 @@ void drawSceneWindow(EditorState &state, bool &opt)
 
 		if (ImGui::BeginCombo("Scene List", comboPreview, 0)) {
 
-			for (int i=0; i < keys.size(); ++i) {
+			for (size_t i=0; i < keys.size(); ++i) {
 				bool isSelected = currentIndx == i;
 				if (ImGui::Selectable(keys[i].c_str(), isSelected))
 					currentIndx = i;

@@ -32,6 +32,7 @@ struct Camera {
 
 void updateFreeCameraLook(Camera &camera, math::vec2 offset);
 void updateCameraFront(Camera &camera);
+void cameraLookAt(Camera &camera, math::vec3 position);
 
 void updateCameraPos(Camera &camera, float forward, float right, float up, float magnitude);
 

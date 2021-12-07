@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ImSequencer.h"
+#include "TimelineItem.h"
 
 #include <vector>
 
@@ -9,12 +10,6 @@ namespace ks {
 class TimelineGui : public ImSequencer::SequenceInterface
 {
 public:
-	struct TimelineItem {
-		int frameStart = 0;
-		int frameEnd = 10;
-		int type = 0;
-	};
-
 	explicit TimelineGui() {};
 	explicit TimelineGui(TimelineGui *) {};
 
@@ -31,7 +26,7 @@ public:
 
 	std::vector<TimelineItem> items;
 	int frameMin = 0;
-	int frameMax = 60;
+	int frameMax = 120;
 
 	int selectedEntry = -1;
 	int firstFrame = 0;

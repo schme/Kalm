@@ -4,6 +4,25 @@
 
 namespace ks {
 
+namespace style {
+const ImColor sceneItemColor = 0xFFFF00FF;
+const ImColor postItemColor = 0xFFFFFF00;
+const ImColor unknownColor = 0x0F0F0FFF;
+}
+
+static ImColor getItemColorByType(TimelineItem::Type type) {
+	using Type = TimelineItem::Type;
+
+	switch(type) {
+		case Type::Scene:
+			return style::sceneItemColor;
+		case Type::Post:
+			return style::postItemColor;
+		default:
+			return style::unknownColor;
+	}
+}
+
 int TimelineGui::GetFrameMin() const
 {
 	return frameMin;
@@ -21,13 +40,13 @@ void TimelineGui::Get(int index, int** start, int** end, int* type, unsigned int
 {
 	TimelineItem &item = items[index];
 	if (color)
-		*color = 0xFFAA8080;
+		*color = getItemColorByType(item.type);
 	if (start)
 		*start = &item.frameStart;
 	if (end)
 		*end = &item.frameEnd;
 	if (type)
-		*type = item.type;
+		*type = static_cast<int>(item.type);
 }
 
 #if 0

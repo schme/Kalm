@@ -205,6 +205,15 @@ int main(int, char**)
 
 		updateCameraFront(camera);
 
+
+#if 1
+		// hardcoded camera movement
+		camera.position.x = sin(state.time) * 5.0f;
+		camera.position.z = cos(state.time) * 5.0f;
+
+		cameraLookAt(camera, math::vec3(0.f));
+#endif
+
 		// render
 		render::bindFrameBuffer(sceneFboInfo.fboId);
 
@@ -223,13 +232,17 @@ int main(int, char**)
 		p = math::perspective(math::radians(camera.lens.fov),
 				camera.lens.aspect, camera.lens.near, camera.lens.far);
 
-		renderModels(mainScene, state, v, p);
+		for (const TimelineItem& item : timeline.items) {
+			if (item.type == TimelineItem::Type::Scene) {
+				if (item.frameStart <= timeline.currentFrame
+						&& item.frameEnd >= timeline.currentFrame) {
+					Scene *scene = SceneBank::get().find(item.id);
+					renderModels(*scene, state, v, p);
+				}
+			}
+		}
 
 		render::bindFrameBuffer(0);
-
-		render::setupViewport(0, 0, 1280, 720);
-
-		// renderSceneFboToScreen(sceneFboInfo, quadVao);
 
 		Gui::get().run(state);
 		Gui::get().render();

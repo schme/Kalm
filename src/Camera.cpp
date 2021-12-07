@@ -56,4 +56,8 @@ void updateCameraPos(Camera &camera, float forward, float right, float up, float
 	camera.position += cameraVec * magnitude;
 }
 
+void cameraLookAt(Camera &camera, math::vec3 target) {
+	camera.front = math::normalize(target - camera.position);
+}
+
 }

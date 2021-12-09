@@ -330,6 +330,10 @@ void drawShadersWindow(EditorState &state, bool &opt)
         auto &mm = ResourceStorage<Shader>::get();
         for (auto& [id, shader] : mm.storage) {
             ImGui::Text("shader: %s", id.c_str());
+			ImGui::SameLine();
+			if (ImGui::Button("Recompile")) {
+				shader.recompileAndLink();
+			}
         }
     }
     ImGui::End();

@@ -171,7 +171,7 @@ inline void setupFrameRenderModels()
 	glEnable(GL_DEPTH_TEST);
 }
 
-inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::mat4 &mvp)
+inline void renderModel(EditorState &state, ModelRenderAttributes &mra, const math::mat4 &model, const math::mat4 &view, const math::mat4 &perspective)
 {
 
     glBindVertexArray(mra.vao);
@@ -208,6 +208,10 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 	shader->use();
 	Texture *texture0 = TextureBank::get().find(material->texture0);
 
+	math::mat4 modelView = view * model;
+	math::mat4 modelViewPerspective = perspective * modelView;
+	math::mat4 normalMatrix = math::transpose(math::inverse(modelView));
+
 	if (texture0)
 		render::bindTexture(texture0->id);
 
@@ -217,11 +221,13 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
 
 		assert(shader);
-		shader->bind("MVP", mvp);
-		shader->bind("time", state.time);
-		if (material->shader.compare("matcap") == 0) {
-			shader->bind("eye", state.camera.position);
-		}
+		shader
+			->bind("time", state.time)
+			->bind("MVP", modelViewPerspective)
+			->bind("P", perspective)
+			->bind("MV", modelView)
+			->bind("mNormal", normalMatrix)
+		;
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

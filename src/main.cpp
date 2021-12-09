@@ -79,10 +79,8 @@ namespace ks {
 			math::mat4 s = math::scale(m, model->scale);
 
 			m = t * r * s;
-			math::mat4 mvp = perspective * view * m;
-
 			ModelRenderAttributes &attribute = scene.attributes[i];
-			render::renderModel(state, attribute, mvp);
+			render::renderModel(state, attribute, m, view, perspective);
 		}
 	}
 
@@ -217,15 +215,6 @@ int main(int, char**)
 		swapInputStates();
 
 		updateCameraFront(camera);
-
-
-#if 1
-		// hardcoded camera movement
-		camera.position.x = sin(state.time) * 7.0f;
-		camera.position.z = cos(state.time) * 7.0f;
-
-		cameraLookAt(camera, math::vec3(0.f));
-#endif
 
 		// render
 		render::bindFrameBuffer(sceneFboInfo.fboId);

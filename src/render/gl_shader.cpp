@@ -46,10 +46,10 @@ namespace ks {
 		glUniform3f(location, vec.x, vec.y, vec.z);
 	}
 
-    Shader* Shader::attach(const std::string &shaderText, Type type, bool &success)
+    Shader* Shader::attach(const char* shaderText, Type type, bool &success)
     {
         GLuint shader = create(type);
-        const GLchar *shdr = shaderText.c_str();
+        const GLchar *shdr = shaderText;
         glShaderSource(shader, 1, &shdr, nullptr);
         glCompileShader(shader);
         glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
@@ -68,8 +68,20 @@ namespace ks {
 		glDeleteShader(shader);
 
 		shaderIds[type] = shader;
+		sources[type] = shdr;
 
 		return this;
+	}
+
+	Shader* Shader::recompileAndLink()
+	{
+		for (u32 i=0; i < Type::Count; ++i) {
+			if (sources[i] != 0) {
+				bool res = false;
+				attach(sources[i], Type(i), res);
+			}
+		}
+		return link();
 	}
 
 	Shader* Shader::create()

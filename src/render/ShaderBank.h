@@ -29,6 +29,16 @@ struct ShaderBank : public ResourceBank<Shader, ShaderBank>
 		return shader;
 	}
 
+	Shader* createMatcap() {
+		Shader* shader = create("matcap");
+		bool res = false;
+		shader
+			->attach(matcap_vert, Shader::Type::Vert, res)
+			->attach(matcap_frag, Shader::Type::Frag, res)
+			->link();
+		return shader;
+	}
+
 	Shader* create(const std::string &name) {
 		Shader* shader = find(name);
 		if (!shader) {

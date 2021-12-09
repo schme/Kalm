@@ -10,6 +10,8 @@
 #include "Texture.h"
 #include "render/glRendering.h"
 #include "render/ShaderBank.h"
+#include "TextureBank.h"
+#include "MaterialBank.h"
 
 
 namespace ks::render {
@@ -97,8 +99,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	GLint vPosLocation, vColLocation, vNormLocation;
     GLint vTex0Location, vTex1Location, vTex2Location;
 
-    mra.texture0 = model.texture0;
-
+	mra.material = model.material;
 	mra.name = model.name;
 
 	glGenVertexArrays(1, &vao);
@@ -160,14 +161,7 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
             }
         }
 
-		if (mra.shader.empty()) {
-			mra.shader = ResourceId("default");
-		}
-
-		Shader *shader = ShaderBank::get().find(mra.shader);
-		assert(shader);
-
-        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo, shader->get(),
+        mra.attr.emplace_back(MeshRenderAttributes{mesh.name, vbo, ebo,
                 static_cast<u32>(mesh.indices.size())});
 	}
 }
@@ -182,6 +176,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 
     glBindVertexArray(mra.vao);
 
+#if 0
 	// TODO: yea this doesn't scale
 	auto meshNameIt = state.reloadMeshes.begin();
 	while (meshNameIt != state.reloadMeshes.end()) {
@@ -206,27 +201,27 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, math::ma
 		}
 		if (found) break;
 	}
+#endif
 
-	static u32 ___txtr_id= 0;
-    if (mra.texture0) {
-        render::bindTexture(mra.texture0->id);
-		___txtr_id = mra.texture0->id;
-    }
-    else {
-        render::bindTexture(___txtr_id);
-        //render::bindTexture(0);
-    }
+	Material *material = MaterialBank::get().find(mra.material);
+	Shader *shader = ShaderBank::get().find(material->shader);
+	shader->use();
+	Texture *texture0 = TextureBank::get().find(material->texture0);
+
+	if (texture0)
+		render::bindTexture(texture0->id);
 
 	for (const auto &attr: mra.attr) {
 
 		glBindBuffer(GL_ARRAY_BUFFER, attr.vbo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
 
-		Shader *shader = ShaderBank::get().find(mra.shader);
 		assert(shader);
-		shader->use();
 		shader->bind("MVP", mvp);
 		shader->bind("time", state.time);
+		if (material->shader.compare("matcap") == 0) {
+			shader->bind("eye", state.camera.position);
+		}
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);
 	}

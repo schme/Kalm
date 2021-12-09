@@ -10,6 +10,7 @@
 #include "ModelBank.h"
 #include "TextureBank.h"
 #include "SceneBank.h"
+#include "MaterialBank.h"
 
 #include "render/glRendering.h"
 #include "render/gl_model.h"
@@ -129,6 +130,7 @@ int main(int, char**)
 
 	ShaderBank::get().createDefault();
 	ShaderBank::get().createPass();
+	ShaderBank::get().createMatcap();
 
 	auto& mm = ModelBank::get();
 	mm.init();
@@ -136,14 +138,14 @@ int main(int, char**)
 	mm.readFile(getEditorState().modelPrefix + "HappyBuddha.obj");
 	mm.readFile(getEditorState(). modelPrefix + "grenade.fbx");
 
-	Model* model = mm.addPrimitive(PrimitiveType::Cube);
-	model->scale = math::vec3(20.f, 20.f, 20.f);
-	std::string cubeId = model->name;
+	Model* prim = mm.addPrimitive(PrimitiveType::Cube);
+	prim->scale = math::vec3(20.f, 20.f, 20.f);
+	std::string cubeId = prim->name;
 
 	auto& tl = TextureBank::get();
 
 	tl.init();
-	Texture *texture = tl.load(getEditorState().texturePrefix + "dish.png");
+	Texture *texture = tl.load(getEditorState().texturePrefix + "matcap.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
 
@@ -160,7 +162,7 @@ int main(int, char**)
 	SceneBank::get().load("Scene0");
 	Scene& mainScene = *SceneBank::get().load("Main");
 
-	model = mainScene.addModel("ico");
+	Model* model = mainScene.addModel("ico");
 	model->position = math::vec3(0.f, -3.f, -5.f);
 
 	model = mainScene.addModel("HappyBuddha");
@@ -170,13 +172,24 @@ int main(int, char**)
 
 	model = mainScene.addModel("grenade");
 	model->position = math::vec3(0.f, 0.f, -1.f);
-	model->texture0 = texture;
 	model->rotation = math::vec3(-90.f, 0.f, 0.f);
+	model->material = ResourceId("grenade");
+
 
 	u32 quadVao, quadVbo;
 
 	render::SceneFboInfo sceneFboInfo = render::setupSceneFbo(width, height);
 	render::setupQuadBuffers(quadVao, quadVbo);
+
+	Material *matcap = MaterialBank::get().load("matcap");
+	matcap->shader = ResourceId("matcap");
+	matcap->texture0 = ResourceId("matcap.png");
+
+	Material *grenade = MaterialBank::get().load("grenade");
+	grenade->shader = ResourceId("default");
+	grenade->texture0 = ResourceId("grenade_Base_color.png");
+
+	ModelBank::get().find("grenade")->material = ResourceId("grenade");
 
 	state.sceneTextureId = sceneFboInfo.colorTextureId;
 

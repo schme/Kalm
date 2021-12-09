@@ -31,14 +31,19 @@ namespace ks {
 		return this;
 	}
 
-    void Shader::bind(unsigned int location, float value)
+    void Shader::bind(u32 location, float value)
 	{
 		glUniform1f(location, value);
 	}
 
-    void Shader::bind(unsigned int location, glm::mat4 const & matrix)
+    void Shader::bind(u32 location, math::mat4 const & matrix)
     {
 		glUniformMatrix4fv(location, 1, GL_FALSE, math::value_ptr(matrix));
+	}
+
+	void Shader::bind(u32 location, math::vec3 vec)
+	{
+		glUniform3f(location, vec.x, vec.y, vec.z);
 	}
 
     Shader* Shader::attach(const std::string &shaderText, Type type, bool &success)

@@ -22,6 +22,12 @@ static const char* pass_vert =
 static const char* pass_frag =
 #include "shader/pass.frag"
 
+static const char* matcap_vert =
+#include "shader/matcap.vert"
+
+static const char* matcap_frag =
+#include "shader/matcap.frag"
+
 struct Shader {
 
 	enum Type : unsigned {
@@ -46,6 +52,7 @@ struct Shader {
 	GLuint get() { return program; }
 
 	void bind(unsigned int location, float value);
+	void bind(unsigned int location, math::vec3 value);
 	void bind(unsigned int location, math::mat4 const &matrix);
 
 	template<typename T> Shader & bind(std::string const &name, T&& value)

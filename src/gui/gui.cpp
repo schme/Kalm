@@ -5,6 +5,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "MaterialBank.h"
 #include "ModelBank.h"
 #include "ResourceStorage.h"
 #include "SceneBank.h"
@@ -15,7 +16,6 @@
 #include "main.h"
 #include "render/Rendering.h"
 #include "render/gl_shader.h"
-
 
 #include <sstream>
 
@@ -158,7 +158,7 @@ void drawMesh(EditorState &state, Mesh &mesh)
 	}
 }
 
-void MaterialPicker(ResourceId& selectedId)
+void drawMaterialPicker(ResourceId& selectedId)
 {
 	const char* currentLabel = selectedId.c_str();
 	if (ImGui::BeginCombo("Material", currentLabel)) {
@@ -183,7 +183,7 @@ void drawModel(EditorState &state, Model &model)
 		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
 		ImGui::InputFloat3("rotation", math::value_ptr(model.rotation));
 
-		MaterialPicker(model.material);
+		drawMaterialPicker(model.material);
 
 		for (Mesh &mesh : model.meshes) {
 			drawMesh(state, mesh);
@@ -334,8 +334,10 @@ void drawTextureWindow(EditorState &state, bool &opt)
 		browserSelectionMade = false;
 
 		Texture *txtr = Texture::load(selectedFile, true);
-		txtr->id = render::generateTexture();
-		render::loadTexture(txtr->id, txtr->width, txtr->height, txtr->channels, txtr->data);
+		if (txtr) {
+			txtr->id = render::generateTexture();
+			render::loadTexture(txtr->id, txtr->width, txtr->height, txtr->channels, txtr->data);
+		}
 	}
 }
 
@@ -377,6 +379,28 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 	ImGui::End();
 }
 
+void addNewMaterialPrompt()
+{
+	if (ImGui::BeginPopupModal("Add new material", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+		if (ImGui::InputText("Material name", guiInputBuffer, IM_ARRAYSIZE(guiInputBuffer),
+					ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			ImGui::SetItemDefaultFocus();
+			char *s = guiInputBuffer;
+			Strtrim(s);
+			if (s[0]) {
+				MaterialBank::get().load(std::string(s));
+				std::strcpy(s, "");
+				ImGui::CloseCurrentPopup();
+			}
+		}
+		if (ImGui::Button("Cancel")) {
+			ImGui::CloseCurrentPopup();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void drawMaterialWindow(EditorState &state, bool &opt)
 {
 	if (!opt)
@@ -384,10 +408,22 @@ void drawMaterialWindow(EditorState &state, bool &opt)
 
 	if (ImGui::Begin("Material Window", &opt)) {
 
-		auto& storage = ResourceStorage<Material>::get();
-		for (const auto& [id, material] : storage.storage) {
-			ImGui::Text("%s", id.c_str());
+		addNewMaterialPrompt();
+
+		if (ImGui::Button("Add material")) {
+			ImGui::OpenPopup("Add new material");
 		}
+
+		auto& ms = ResourceStorage<Material>::get();
+		static ResourceId current = ms.storage.begin()->first;
+
+		drawMaterialPicker(current);
+		Material *material = ms.find(current);
+
+		ImGui::Separator();
+
+		ImGui::Text("Shader: %s", material->shader.c_str());
+		ImGui::Text("Texture0: %s", material->texture0.c_str());
 
 	}
 	ImGui::End();

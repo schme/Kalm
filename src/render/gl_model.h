@@ -175,17 +175,25 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 
     glBindVertexArray(mra.vao);
 
+	// TODO: We maybe should do something sensible without material
 	Material *material = MaterialBank::get().find(matId);
+	if (!material)
+		return;
+
 	Shader *shader = ShaderBank::get().find(material->shader);
+	if (!shader)
+		return;
+
 	shader->use();
+
 	Texture *texture0 = TextureBank::get().find(material->texture0);
+	if (texture0)
+		render::bindTexture(texture0->id);
+
 
 	math::mat4 modelView = viewMat * modelMat;
 	math::mat4 modelViewPerspective = perspectiveMat * modelView;
 	math::mat4 normalMatrix = math::transpose(math::inverse(modelView));
-
-	if (texture0)
-		render::bindTexture(texture0->id);
 
 	for (const auto &attr: mra.attr) {
 

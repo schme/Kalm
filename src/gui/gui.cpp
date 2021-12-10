@@ -75,6 +75,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
 			ImGui::Checkbox("Shaders Window", &gui.optShowShadersWindow);
 			ImGui::Checkbox("Timeline Window", &gui.optShowTimeline);
+			ImGui::Checkbox("Material Window", &gui.optShowMaterialWindow);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
             ImGui::EndMenu();
@@ -359,6 +360,23 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 	ImGui::End();
 }
 
+void drawMaterialWindow(EditorState &state, bool &opt)
+{
+	if (!opt)
+		return;
+
+	if (ImGui::Begin("Material Window", &opt)) {
+
+		auto& storage = ResourceStorage<Material>::get();
+		for (const auto& [id, material] : storage.storage) {
+			ImGui::Text("%s", id.c_str());
+		}
+
+	}
+	ImGui::End();
+}
+
+
 void Gui::run(EditorState &state)
 {
 	ImGui_ImplOpenGL3_NewFrame();
@@ -374,6 +392,7 @@ void Gui::run(EditorState &state)
 	drawTextureWindow(state, optShowTextureWindow);
     drawShadersWindow(state, optShowShadersWindow);
 	drawTimelinePreview(state, optShowTimelinePreview);
+	drawMaterialWindow(state, optShowMaterialWindow);
 
 
 	if (optShowDemoWindow)

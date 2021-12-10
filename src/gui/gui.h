@@ -25,6 +25,7 @@ struct Gui {
 	bool optShowTextureWindow = true;
 	bool optShowShadersWindow = true;
 	bool optShowTimelinePreview = true;
+	bool optShowMaterialWindow = true;
 
 	static Gui &get() {
 		static Gui gui;

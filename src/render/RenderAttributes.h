@@ -17,7 +17,6 @@ struct MeshRenderAttributes {
 struct ModelRenderAttributes {
 	std::string name;
     u32 vao;
-	ResourceId material;
 	std::vector<MeshRenderAttributes> attr;
 };
 

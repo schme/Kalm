@@ -80,7 +80,7 @@ namespace ks {
 
 			m = t * r * s;
 			ModelRenderAttributes &attribute = scene.attributes[i];
-			render::renderModel(state, attribute, m, view, perspective);
+			render::renderModel(state, model->material, attribute, m, view, perspective);
 		}
 	}
 

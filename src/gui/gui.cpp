@@ -158,6 +158,21 @@ void drawMesh(EditorState &state, Mesh &mesh)
 	}
 }
 
+void MaterialPicker(ResourceId& selectedId)
+{
+	const char* currentLabel = selectedId.c_str();
+	if (ImGui::BeginCombo("Material", currentLabel)) {
+		auto& ms = ResourceStorage<Material>::get();
+		for (const auto& [id, material] : ms.storage) {
+			ImGui::PushID((void*)&material);
+			if (ImGui::Selectable(id.c_str(), selectedId == id))
+				selectedId = id;
+			ImGui::PopID();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void drawModel(EditorState &state, Model &model)
 {
 	if (ImGui::TreeNode(model.name.c_str())) {
@@ -167,6 +182,8 @@ void drawModel(EditorState &state, Model &model)
 		ImGui::InputFloat3("position", math::value_ptr(model.position));
 		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
 		ImGui::InputFloat3("rotation", math::value_ptr(model.rotation));
+
+		MaterialPicker(model.material);
 
 		for (Mesh &mesh : model.meshes) {
 			drawMesh(state, mesh);

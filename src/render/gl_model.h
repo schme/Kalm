@@ -99,7 +99,6 @@ static void setupModel(const Model &model, ModelRenderAttributes &mra)
 	GLint vPosLocation, vColLocation, vNormLocation;
     GLint vTex0Location, vTex1Location, vTex2Location;
 
-	mra.material = model.material;
 	mra.name = model.name;
 
 	glGenVertexArrays(1, &vao);
@@ -171,45 +170,18 @@ inline void setupFrameRenderModels()
 	glEnable(GL_DEPTH_TEST);
 }
 
-inline void renderModel(EditorState &state, ModelRenderAttributes &mra, const math::mat4 &model, const math::mat4 &view, const math::mat4 &perspective)
+inline void renderModel(EditorState &state, const ResourceId &matId, ModelRenderAttributes &mra, const math::mat4 &modelMat, const math::mat4 &viewMat, const math::mat4 &perspectiveMat)
 {
 
     glBindVertexArray(mra.vao);
 
-#if 0
-	// TODO: yea this doesn't scale
-	auto meshNameIt = state.reloadMeshes.begin();
-	while (meshNameIt != state.reloadMeshes.end()) {
-		auto &mm = ModelBank::get();
-		Model *model = mm.find(mra.name);
-		auto mesh = model->meshes.begin();
-		bool found = false;
-		while (mesh != model->meshes.end() && !found) {
-			if (mesh->name.compare(*meshNameIt) == 0) {
-                const MeshRenderAttributes *meshAttr;
-                for (const MeshRenderAttributes &mera : mra.attr) {
-                    if (mera.name.compare(mesh->name) == 0) {
-                        meshAttr = &mera;
-                    }
-                }
-                glBindBuffer(GL_ARRAY_BUFFER, meshAttr->vbo);
-				glBufferData(GL_ARRAY_BUFFER, mesh->vertices.size() * sizeof(float), mesh->vertices.data(), GL_STATIC_DRAW);
-				state.reloadMeshes.erase(meshNameIt);
-				found = true;
-			}
-			mesh = std::next(mesh);
-		}
-		if (found) break;
-	}
-#endif
-
-	Material *material = MaterialBank::get().find(mra.material);
+	Material *material = MaterialBank::get().find(matId);
 	Shader *shader = ShaderBank::get().find(material->shader);
 	shader->use();
 	Texture *texture0 = TextureBank::get().find(material->texture0);
 
-	math::mat4 modelView = view * model;
-	math::mat4 modelViewPerspective = perspective * modelView;
+	math::mat4 modelView = viewMat * modelMat;
+	math::mat4 modelViewPerspective = perspectiveMat * modelView;
 	math::mat4 normalMatrix = math::transpose(math::inverse(modelView));
 
 	if (texture0)
@@ -224,7 +196,7 @@ inline void renderModel(EditorState &state, ModelRenderAttributes &mra, const ma
 		shader
 			->bind("time", state.time)
 			->bind("MVP", modelViewPerspective)
-			->bind("P", perspective)
+			->bind("P", perspectiveMat)
 			->bind("MV", modelView)
 			->bind("mNormal", normalMatrix)
 		;

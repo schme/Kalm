@@ -20,6 +20,7 @@ struct Model {
 	math::vec3 rotation = math::vec3(0.0f, 0.0f, 0.0f);
 	ResourceId material = ResourceId("matcap");
 	std::vector<Mesh> meshes = {};
+	bool is2D = false;
 };
 
 }

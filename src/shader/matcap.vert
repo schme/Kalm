@@ -20,7 +20,6 @@ void main()
 	eye = normalize( vec3(MV * vec4( vPos, 1.0)));
 	norm = normalize( mNormal * vec4(vNorm, 1.0)).xyz;
 
-    vec3 newPos = vec3(vPos + vNorm * sin(time * 0.05));
-    gl_Position = P * MV * vec4(newPos, 1.0);
+    gl_Position = P * MV * vec4(vPos, 1.0);
 }
 )";

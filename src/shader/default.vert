@@ -17,7 +17,6 @@ void main()
 {
     color = vCol;
     tex = vTex0;
-    vec3 newPos = vec3(vPos + vNorm * sin(time * 0.05));
-    gl_Position = MVP * vec4(newPos, 1.0);
+    gl_Position = MVP * vec4(vPos, 1.0);
 }
 )";

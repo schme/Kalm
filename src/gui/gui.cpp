@@ -61,12 +61,12 @@ bool Gui::init(GLFWwindow *window)
 
 static void showMainMenuBar(Gui &gui, EditorState &state)
 {
-    if (ImGui::BeginMainMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            ImGui::EndMenu();
-        }
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			ImGui::EndMenu();
+		}
 		if (ImGui::BeginMenu("Windows"))
 		{
 			ImGui::Checkbox("Output Preview", &gui.optShowTimelinePreview);
@@ -78,27 +78,28 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 			ImGui::Checkbox("Material Window", &gui.optShowMaterialWindow);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
-            ImGui::EndMenu();
+			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Rendering"))
 		{
 			ImGui::Checkbox("Wireframe", &state.renderWireframe);
 			ImGui::EndMenu();
 		}
-        if (ImGui::BeginMenu("Settings"))
-        {
-            ImGui::EndMenu();
-        }
+		if (ImGui::BeginMenu("Settings"))
+		{
+			ImGui::EndMenu();
+		}
 
 		ImGui::Separator();
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-        ImGui::EndMainMenuBar();
+		ImGui::EndMainMenuBar();
 	}
 }
 
 static void showTimelineWindow(Gui &gui, bool &opt)
 {
+	ks_unused(gui);
 	if (!opt)
 		return;
 
@@ -194,9 +195,9 @@ void drawModel(EditorState &state, Model &model)
 
 void addPrimitive(PrimitiveType type, Scene &scene)
 {
-    auto &mm = ModelBank::get();
-    Model *primitive = mm.addPrimitive(type);
-    scene.addModel(primitive->name);
+	auto &mm = ModelBank::get();
+	Model *primitive = mm.addPrimitive(type);
+	scene.addModel(primitive->name);
 }
 
 static void  Strtrim(char* s) {
@@ -227,6 +228,21 @@ void addNewEmptyScenePrompt()
 	}
 }
 
+void drawScenePicker(ResourceId& selectedId)
+{
+	const char* currentLabel = selectedId.c_str();
+	if (ImGui::BeginCombo("Scene List", currentLabel)) {
+		auto& ss = ResourceStorage<Scene>::get();
+		for (const auto& [id, scene] : ss.storage) {
+			ImGui::PushID((void*)&scene);
+			if (ImGui::Selectable(id.c_str(), selectedId == id))
+				selectedId = id;
+			ImGui::PopID();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void drawSceneWindow(EditorState &state, bool &opt)
 {
 	if (!opt)
@@ -240,44 +256,28 @@ void drawSceneWindow(EditorState &state, bool &opt)
 			ImGui::OpenPopup("Add new empty scene");
 		}
 
-		auto &storage = ResourceStorage<Scene>::get().storage;
+		auto &ss = ResourceStorage<Scene>::get();
 
-		static size_t currentIndx = 0;
-		static std::vector<ResourceId> keys;
-		static std::vector<Scene*> scenes;
-		keys.clear();
-		keys.reserve(storage.size());
-		scenes.clear();
-		scenes.reserve(storage.size());
+		if (!ss.storage.empty()) {
+			static ResourceId current = ss.storage.begin()->first;
 
-		for (auto& [key, scene] : storage) {
-			keys.emplace_back(key);
-			scenes.emplace_back(&scene);
-		}
+			drawScenePicker(current);
+			Scene *scene = ss.find(current);
 
-		const char* comboPreview = keys[currentIndx].c_str();
+			ImGui::Separator();
 
-		if (ImGui::BeginCombo("Scene List", comboPreview, 0)) {
-
-			for (size_t i=0; i < keys.size(); ++i) {
-				bool isSelected = currentIndx == i;
-				if (ImGui::Selectable(keys[i].c_str(), isSelected))
-					currentIndx = i;
-
-				if (isSelected)
-					ImGui::SetItemDefaultFocus();
+			if (ImGui::Button("Add Cube")) {
+				addPrimitive(PrimitiveType::Cube, *scene);
 			}
-
-			ImGui::EndCombo();
-		}
-
-		Scene *scene = scenes[currentIndx];
-
-        if (ImGui::Button("Add cube")) {
-            addPrimitive(PrimitiveType::Cube, *scene);
-        }
-		for (Model *model : scene->models) {
-			drawModel(state, *model);
+			if (ImGui::Button("Add Quad")) {
+				addPrimitive(PrimitiveType::Quad, *scene);
+			}
+			if (ImGui::Button("Add ScreenQuad")) {
+				addPrimitive(PrimitiveType::ScreenQuad, *scene);
+			}
+			for (Model *model : scene->models) {
+				drawModel(state, *model);
+			}
 		}
 	}
 	ImGui::End();
@@ -297,6 +297,7 @@ void drawTexturePreview(const Texture &txtr, bool &opt)
 
 void drawTextureWindow(EditorState &state, bool &opt)
 {
+	ks_unused(state);
 	static bool texturePreview = false;
 	static bool showingFileBrowser = false;
 	static const Texture* inPreview = nullptr;
@@ -316,7 +317,7 @@ void drawTextureWindow(EditorState &state, bool &opt)
 			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
 				texturePreview = true;
 				inPreview = &txtr;
-                log_info("inPreview set to: %s at %p\n", id.c_str(), &txtr);
+				log_info("inPreview set to: %s at %p\n", id.c_str(), &txtr);
 			}
 		}
 	}
@@ -343,20 +344,21 @@ void drawTextureWindow(EditorState &state, bool &opt)
 
 void drawShadersWindow(EditorState &state, bool &opt)
 {
+	ks_unused(state);
 	if (!opt)
 		return;
 
-    if (ImGui::Begin("Shaders Window", &opt)) {
-        auto &mm = ResourceStorage<Shader>::get();
-        for (auto& [id, shader] : mm.storage) {
-            ImGui::Text("shader: %s", id.c_str());
+	if (ImGui::Begin("Shaders Window", &opt)) {
+		auto &mm = ResourceStorage<Shader>::get();
+		for (auto& [id, shader] : mm.storage) {
+			ImGui::Text("shader: %s", id.c_str());
 			ImGui::SameLine();
 			if (ImGui::Button("Recompile")) {
 				shader.recompileAndLink();
 			}
-        }
-    }
-    ImGui::End();
+		}
+	}
+	ImGui::End();
 
 }
 
@@ -370,12 +372,12 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), state.outputSize.x / state.outputSize.y);
 
 		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
-			imageSize,
-			ImVec2(0.0f, 1.0f),
-			ImVec2(1.0f, 0.0f),
-			ImColor(1.0f, 1.0f, 1.0f, 1.0f),
-			ImColor(1.0f, 1.0f, 1.0f, 1.0f));
-}
+				imageSize,
+				ImVec2(0.0f, 1.0f),
+				ImVec2(1.0f, 0.0f),
+				ImColor(1.0f, 1.0f, 1.0f, 1.0f),
+				ImColor(1.0f, 1.0f, 1.0f, 1.0f));
+	}
 	ImGui::End();
 }
 
@@ -403,6 +405,7 @@ void addNewMaterialPrompt()
 
 void drawMaterialWindow(EditorState &state, bool &opt)
 {
+	ks_unused(state);
 	if (!opt)
 		return;
 
@@ -415,15 +418,18 @@ void drawMaterialWindow(EditorState &state, bool &opt)
 		}
 
 		auto& ms = ResourceStorage<Material>::get();
-		static ResourceId current = ms.storage.begin()->first;
 
-		drawMaterialPicker(current);
-		Material *material = ms.find(current);
+		if (!ms.storage.empty()) {
+			static ResourceId current = ms.storage.begin()->first;
 
-		ImGui::Separator();
+			drawMaterialPicker(current);
+			Material *material = ms.find(current);
 
-		ImGui::Text("Shader: %s", material->shader.c_str());
-		ImGui::Text("Texture0: %s", material->texture0.c_str());
+			ImGui::Separator();
+
+			ImGui::Text("Shader: %s", material->shader.c_str());
+			ImGui::Text("Texture0: %s", material->texture0.c_str());
+		}
 
 	}
 	ImGui::End();
@@ -443,7 +449,7 @@ void Gui::run(EditorState &state)
 	drawCameraWindow(state.camera, optShowCameraWindow);
 	drawSceneWindow(state, optShowSceneWindow);
 	drawTextureWindow(state, optShowTextureWindow);
-    drawShadersWindow(state, optShowShadersWindow);
+	drawShadersWindow(state, optShowShadersWindow);
 	drawTimelinePreview(state, optShowTimelinePreview);
 	drawMaterialWindow(state, optShowMaterialWindow);
 
@@ -460,9 +466,10 @@ void Gui::render()
 
 void Gui::terminate()
 {
-    // Cleanup
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 }
+
 }

@@ -7,6 +7,8 @@ namespace ks {
 
 enum class PrimitiveType {
 	Cube,
+	Quad,
+	ScreenQuad,
 };
 
 static constexpr const char *toStr(PrimitiveType type)
@@ -83,10 +85,54 @@ static inline Model defaultCube()
 	return model;
 }
 
+static inline Model defaultQuad()
+{
+	Model model;
+	model.name = "Quad";
+
+	Mesh quad;
+	quad.bounds = {{-1, -1, 0}, {1, 1, 0}};
+	quad.name = "Quad-Mesh";
+
+	quad.vertices =
+	{
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+
+	quad.indices =
+	{
+		0, 1, 2,
+		0, 2, 3,
+	};
+
+	quad.descriptor.stride = (3 + 2) * sizeof(float);
+	quad.descriptor.buffers = {
+		{BufferType::Vertex, 0},
+		{BufferType::Texcoord0, 3 * sizeof(float)},
+	};
+
+	model.meshes.emplace_back(std::move(quad));
+
+	return model;
+}
+
 static Model createPrimitive(PrimitiveType type)
 {
 	if (type == PrimitiveType::Cube)
 		return defaultCube();
+
+	if (type == PrimitiveType::Quad)
+		return defaultQuad();
+
+	if (type == PrimitiveType::ScreenQuad) {
+		Model quad = defaultQuad();
+		quad.is2D = true;
+		return quad;
+	}
 
 	return defaultCube();
 }

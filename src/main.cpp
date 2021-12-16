@@ -132,17 +132,20 @@ int main(int, char**)
 
 	auto& mm = ModelBank::get();
 	mm.init();
+#if 0
 	mm.readFile(getEditorState().modelPrefix + "ico.dae");
 	mm.readFile(getEditorState().modelPrefix + "HappyBuddha.obj");
 	mm.readFile(getEditorState(). modelPrefix + "grenade.fbx");
+#endif
 
 	Model* prim = mm.addPrimitive(PrimitiveType::Cube);
 	prim->scale = math::vec3(20.f, 20.f, 20.f);
 	std::string cubeId = prim->name;
 
 	auto& tl = TextureBank::get();
-
 	tl.init();
+
+#if 0
 	Texture *texture = tl.load(getEditorState().texturePrefix + "matcap.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
@@ -150,6 +153,7 @@ int main(int, char**)
 	texture = tl.load(getEditorState().texturePrefix + "grenade_Base_color.png");
 	texture->id = render::generateTexture();
 	render::loadTexture(texture->id, texture->width, texture->height, texture->channels, texture->data);
+#endif
 
 	Gui& gui = Gui::get();
 	gui.init(window);
@@ -157,6 +161,7 @@ int main(int, char**)
 	Timeline& timeline = Timeline::get();
 	timeline.init();
 
+#if 0
 	SceneBank::get().load("Scene0");
 	Scene& mainScene = *SceneBank::get().load("Main");
 
@@ -173,25 +178,33 @@ int main(int, char**)
 	model->rotation = math::vec3(-90.f, 0.f, 0.f);
 	model->material = ResourceId("grenade");
 
+#endif
 
 	u32 quadVao, quadVbo;
 
 	render::SceneFboInfo sceneFboInfo = render::setupSceneFbo(width, height);
 	render::setupQuadBuffers(quadVao, quadVbo);
 
-	Material *matcap = MaterialBank::get().load("matcap");
+	Material *matcap = MaterialBank::get().load("Matcap");
 	matcap->shader = ResourceId("matcap");
 	matcap->texture0 = ResourceId("matcap.png");
 
+	Material *fractalFlame = MaterialBank::get().load("Fractal Flame");
+	fractalFlame->shader = ResourceId("matcap");
+
+#if 0
 	Material *grenade = MaterialBank::get().load("grenade");
 	grenade->shader = ResourceId("default");
 	grenade->texture0 = ResourceId("grenade_Base_color.png");
 
 	ModelBank::get().find("grenade")->material = ResourceId("grenade");
+#endif
 
 	state.sceneTextureId = sceneFboInfo.colorTextureId;
 
+#if 0
 	setupModels(mainScene);
+#endif
 
 	float delta = 0.0f;
 	float frameStart = 0.0f;
@@ -239,7 +252,8 @@ int main(int, char**)
 				if (item.frameStart <= timeline.currentFrame
 						&& item.frameEnd >= timeline.currentFrame) {
 					Scene *scene = SceneBank::get().find(item.id);
-					renderModels(*scene, state, v, p);
+					if (scene)
+						renderModels(*scene, state, v, p);
 				}
 			}
 		}

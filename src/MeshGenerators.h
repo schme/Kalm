@@ -97,10 +97,10 @@ static inline Model defaultQuad()
 	quad.vertices =
 	{
 		// positions   // texCoords
-		-1.0f,  1.0f,  0.0f, 1.0f,
-		-1.0f, -1.0f,  0.0f, 0.0f,
-		 1.0f, -1.0f,  1.0f, 0.0f,
-		 1.0f,  1.0f,  1.0f, 1.0f
+		-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		 1.0f,  1.0f, 0.0f, 1.0f, 1.0f
 	};
 
 	quad.indices =
@@ -109,10 +109,10 @@ static inline Model defaultQuad()
 		0, 2, 3,
 	};
 
-	quad.descriptor.stride = (2 + 2) * sizeof(float);
+	quad.descriptor.stride = (3 + 2) * sizeof(float);
 	quad.descriptor.buffers = {
 		{BufferType::Vertex, 0},
-		{BufferType::Texcoord0, 2 * sizeof(float)},
+		{BufferType::Texcoord0, 3 * sizeof(float)},
 	};
 
 	model.meshes.emplace_back(std::move(quad));

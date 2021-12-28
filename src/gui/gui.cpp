@@ -107,6 +107,10 @@ static void showTimelineWindow(Gui &gui, bool &opt)
 	TimelineGui &timeline = Timeline::get();
 	ImGui::InputInt("Max Frames", &timeline.frameMax);
 	ImGui::SameLine(); ImGui::Text("Frame: %d", timeline.currentFrame);
+	ImGui::SameLine();
+	if (ImGui::Button("Add Scenes")) {
+		timeline.Add(static_cast<int>(TimelineItem::Type::Scene));
+	}
 
 	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(&timeline);
 	ImSequencer::Sequencer(sequencer, &timeline.currentFrame, &timeline.expanded, &timeline.selectedEntry, &timeline.firstFrame, timeline.sequenceOptions);

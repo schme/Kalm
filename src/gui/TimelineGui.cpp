@@ -7,7 +7,7 @@
 namespace ks {
 
 namespace style {
-const ImColor sceneItemColor = 0xFFFF00FF;
+const ImColor sceneItemColor = 0xFFAA00AA;
 const ImColor postItemColor = 0xFFFFFF00;
 const ImColor unknownColor = 0x0F0F0FFF;
 }

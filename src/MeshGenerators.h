@@ -109,10 +109,10 @@ static inline Model defaultQuad()
 		0, 2, 3,
 	};
 
-	quad.descriptor.stride = (3 + 2) * sizeof(float);
+	quad.descriptor.stride = (2 + 2) * sizeof(float);
 	quad.descriptor.buffers = {
 		{BufferType::Vertex, 0},
-		{BufferType::Texcoord0, 3 * sizeof(float)},
+		{BufferType::Texcoord0, 2 * sizeof(float)},
 	};
 
 	model.meshes.emplace_back(std::move(quad));

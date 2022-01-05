@@ -7,7 +7,8 @@ struct Config
 {
 
 	LogLevel logLevel = LogLevel::Debug;
-
+	std::string assetPath = "assets";
+	std::string projectRoot = "";
 
 	static Config &get() {
 		static Config config;

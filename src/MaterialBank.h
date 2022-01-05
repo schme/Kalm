@@ -9,6 +9,7 @@ struct MaterialBank : public ResourceBank<Material, MaterialBank> {
 
     Material* load(const std::string &filepath, bool absolutePath = false) override;
 
+	void loadResourcesIfNeeded(const ResourceId &material);
 };
 
 }

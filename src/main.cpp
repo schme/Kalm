@@ -145,6 +145,8 @@ int main(int, char**)
 		Material *matcap = MaterialBank::get().load("Matcap");
 		matcap->shader = ResourceId("matcap");
 		matcap->texture0 = ResourceId("matcap.png");
+
+		MaterialBank::get().loadResourcesIfNeeded(ResourceId("Matcap"));
 	}
 
 	u32 quadVao, quadVbo;

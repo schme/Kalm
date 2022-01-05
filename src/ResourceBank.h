@@ -21,6 +21,10 @@ struct ResourceBank : public StaticSingleton<U>{
 	constexpr T* find(const ResourceId &id) {
 		return ResourceStorage<T>::get().find(id);
 	}
+
+	bool isLoaded(const ResourceId &id) {
+		return find(id) != nullptr;
+	}
 };
 
 }

@@ -19,8 +19,6 @@ struct EditorState {
 
 	std::string projectRoot = "";
 	std::string assetPrefix = "assets/";
-	std::string modelPrefix = "assets/";
-	std::string texturePrefix = "assets/";
 
 	std::vector<ResourceId> reloadMeshes;
 };

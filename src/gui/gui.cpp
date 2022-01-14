@@ -338,10 +338,6 @@ void drawTextureWindow(EditorState &state, bool &opt)
 		browserSelectionMade = false;
 
 		Texture *txtr = Texture::load(selectedFile, true);
-		if (txtr) {
-			txtr->id = render::generateTexture();
-			render::loadTexture(txtr->id, txtr->width, txtr->height, txtr->channels, txtr->data);
-		}
 	}
 }
 

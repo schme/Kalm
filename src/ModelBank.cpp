@@ -177,7 +177,7 @@ void ModelBank::importScene(const aiScene *scene, Model &model)
 
 Model* ModelBank::load(const std::string &filepath, bool absolutePath)
 {
-	std::string fp = absolutePath ? filepath : getEditorState().modelPrefix + filepath;
+	std::string fp = absolutePath ? filepath : getEditorState().assetPrefix + filepath;
 	if (readFile(fp))
 	{
 		removeExtension(fp);

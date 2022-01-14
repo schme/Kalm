@@ -36,7 +36,7 @@ using f64 = double;
 
 }
 
-static inline void removePath(std::string &filename)
+static inline void removePath(std::string& filename)
 {
 	size_t pos = filename.find_last_of("/");
 	if (pos == std::string::npos)

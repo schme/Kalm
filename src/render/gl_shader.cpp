@@ -46,10 +46,14 @@ void Shader::bind(u32 location, math::vec3 vec)
 	glUniform3f(location, vec.x, vec.y, vec.z);
 }
 
-void Shader::setSource(Type type, char *source)
+void Shader::setSourceFile(Type type, const std::string &sourceFile)
 {
-	delete sources[type];
-	sources[type] = source;
+	sourceFiles[type] = sourceFile;
+}
+
+void Shader::getSourceFile(Type type, std::string &sourceFile)
+{
+	sourceFile = sourceFiles[type];
 }
 
 Shader* Shader::attach(const char* shaderText, Type type, bool &success)
@@ -74,20 +78,8 @@ Shader* Shader::attach(const char* shaderText, Type type, bool &success)
 	glDeleteShader(shader);
 
 	shaderIds[type] = shader;
-	sources[type] = shdr;
 
 	return this;
-}
-
-Shader* Shader::recompileAndLink()
-{
-	for (u32 i=0; i < Type::Count; ++i) {
-		if (sources[i] != 0) {
-			bool res = false;
-			attach(sources[i], Type(i), res);
-		}
-	}
-	return link();
 }
 
 Shader* Shader::create()

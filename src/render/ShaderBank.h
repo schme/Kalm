@@ -10,6 +10,8 @@ struct ShaderBank : public ResourceBank<Shader, ShaderBank>
 
 	void init() override;
 
+	void recompileAndLink(const ResourceId &id);
+
 	Shader* create(const std::string &name) {
 		Shader* shader = find(name);
 		if (!shader) {

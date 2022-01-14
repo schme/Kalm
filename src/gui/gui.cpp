@@ -16,6 +16,7 @@
 #include "main.h"
 #include "render/Rendering.h"
 #include "render/gl_shader.h"
+#include "render/ShaderBank.h"
 
 #include <sstream>
 
@@ -386,8 +387,8 @@ void drawShadersWindow(EditorState &state, bool &opt)
 		for (auto& [id, shader] : mm.storage) {
 			ImGui::Text("shader: %s", id.c_str());
 			ImGui::SameLine();
-			if (ImGui::Button("Recompile")) {
-				shader.recompileAndLink();
+			if (ImGui::Button(std::string("Recompile " + id).c_str())) {
+				ShaderBank::get().recompileAndLink(id);
 			}
 		}
 	}

@@ -45,7 +45,6 @@ struct Shader {
 	Shader* use();
 	Shader* attach(const char *shader, Type type, bool &success);
 	Shader* link();
-	Shader* recompileAndLink();
 	GLuint get() { return program; }
 
 	void bind(unsigned int location, float value);
@@ -67,14 +66,15 @@ struct Shader {
 		return this;
 	}
 
-	void setSource(Type type, char* source);
+	void setSourceFile(Type type, const std::string &sourceFile);
+	void getSourceFile(Type type, std::string &sourceFile);
 
 private:
 	u32 create(Type type);
 
 	u32 program = 0;
 	u32 shaderIds[Type::Count] = {0};
-	const char* sources[Type::Count] = {0};
+	std::string sourceFiles[Type::Count] = {};
 
 	i32 status = -1;
 	i32 length = -1;

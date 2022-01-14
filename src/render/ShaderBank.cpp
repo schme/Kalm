@@ -31,7 +31,7 @@ Shader::Type shaderExtensionToType(std::filesystem::path ext)
 	return Shader::Type::Count;
 }
 
-void attachShaderIfFound(const std::filesystem::path &shaderPath, Shader *shader, Shader::Type type)
+void attachShaderFromFile(const std::filesystem::path &shaderPath, Shader *shader, Shader::Type type)
 {
 	std::ifstream shaderFile(shaderPath);
 	std::string shaderString((std::istreambuf_iterator<char>(shaderFile)),
@@ -39,6 +39,7 @@ void attachShaderIfFound(const std::filesystem::path &shaderPath, Shader *shader
 
 	bool success = false;
 	shader->attach(shaderString.c_str(), type, success);
+	shader->setSourceFile(type, shaderPath);
 }
 
 void attachShadersWhenFound(const std::filesystem::path &shaderPath, Shader *shader, const std::filesystem::path &name)
@@ -46,9 +47,30 @@ void attachShadersWhenFound(const std::filesystem::path &shaderPath, Shader *sha
 	auto it = std::filesystem::directory_iterator(shaderPath);
 	for (auto file : it) {
 		if (file.path().stem().compare(name) == 0) {
-			attachShaderIfFound(file, shader, shaderExtensionToType(file.path().extension()));
+			attachShaderFromFile(file, shader, shaderExtensionToType(file.path().extension()));
 		}
 	}
+}
+
+void ShaderBank::recompileAndLink(const ResourceId &id)
+{
+	Shader *shader = find(id);
+	if (!shader) {
+		log_error("Shader not found: %s\n", id.c_str());
+		return;
+	}
+
+	log_info("Compiling shader: %s\n", id.c_str());
+	std::string sourceFile;
+
+	for (int i=Shader::Type::Vert; i < (int)Shader::Type::Count; ++i) {
+		shader->getSourceFile(static_cast<Shader::Type>(i), sourceFile);
+		if (!sourceFile.empty()) {
+			attachShaderFromFile(sourceFile, shader, static_cast<Shader::Type>(i));
+		}
+	}
+
+	shader->link();
 }
 
 void ShaderBank::init()

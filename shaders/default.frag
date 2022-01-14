@@ -1,4 +1,3 @@
-R"(
 #version 460
 uniform mat4 MVP;
 uniform float time;
@@ -16,4 +15,3 @@ void main()
 {
     fragColor = texture(texture0, tex);
 }
-)";

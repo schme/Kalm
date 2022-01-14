@@ -8,7 +8,7 @@ namespace ks {
 
 template <typename T, typename U>
 struct ResourceBank : public StaticSingleton<U>{
-    void init() {}
+    virtual void init() {}
 
 	/// Should check if the resource exists first and return the already loaded one if so
     virtual T* load(const std::string &filepath, bool absolutePath = false) {

@@ -1,4 +1,3 @@
-R"(
 #version 460
 uniform sampler2D texture0;
 
@@ -9,5 +8,3 @@ void main()
 {
     fragColor = texture(texture0, tex0);
 }
-
-)";

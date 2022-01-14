@@ -1,6 +1,8 @@
 #pragma once
+
 #include <glad/gl.h>
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 
@@ -10,28 +12,14 @@
 
 namespace ks {
 
-static const char* default_vert =
-#include "shader/default.vert"
-
-static const char* default_frag = 
-#include "shader/default.frag"
-
-static const char* pass_vert =
-#include "shader/pass.vert"
-
-static const char* pass_frag =
-#include "shader/pass.frag"
-
-static const char* matcap_vert =
-#include "shader/matcap.vert"
-
-static const char* matcap_frag =
-#include "shader/matcap.frag"
-
 struct Shader {
 
+	/*
+	 * Extensions supported by Khronos reference compiler:
+	 * .vert, .tesc, .tese, .geom, .frag, and .comp
+	 */
 	enum Type : unsigned {
-		Vert = 1,
+		Vert = 0,
 		TessCtrl,
 		TessEval,
 		Geom,
@@ -78,6 +66,8 @@ struct Shader {
 		bind(location, std::forward<T>(value));
 		return this;
 	}
+
+	void setSource(Type type, char* source);
 
 private:
 	u32 create(Type type);

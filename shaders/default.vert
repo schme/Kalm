@@ -1,4 +1,3 @@
-R"(
 #version 460
 uniform mat4 MVP;
 uniform float time;
@@ -19,4 +18,3 @@ void main()
     tex = vTex0;
     gl_Position = MVP * vec4(vPos, 1.0);
 }
-)";

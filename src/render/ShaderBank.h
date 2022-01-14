@@ -7,37 +7,8 @@ namespace ks {
 
 struct ShaderBank : public ResourceBank<Shader, ShaderBank>
 {
-	Shader* createDefault() {
-		Shader* shader = create("default");
-        bool res = false;
-		shader
-			->attach(default_vert, Shader::Type::Vert, res)
-			->attach(default_frag, Shader::Type::Frag, res)
-			->link();
 
-		return shader;
-	}
-
-	Shader* createPass() {
-		Shader* shader = create("pass");
-		bool res = false;
-		shader
-			->attach(pass_vert, Shader::Type::Vert, res)
-			->attach(pass_frag, Shader::Type::Frag, res)
-			->link();
-
-		return shader;
-	}
-
-	Shader* createMatcap() {
-		Shader* shader = create("matcap");
-		bool res = false;
-		shader
-			->attach(matcap_vert, Shader::Type::Vert, res)
-			->attach(matcap_frag, Shader::Type::Frag, res)
-			->link();
-		return shader;
-	}
+	void init() override;
 
 	Shader* create(const std::string &name) {
 		Shader* shader = find(name);

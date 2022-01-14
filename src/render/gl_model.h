@@ -175,7 +175,6 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 
     glBindVertexArray(mra.vao);
 
-	// TODO: We maybe should do something sensible without material
 	Material *material = MaterialBank::get().find(matId);
 	if (!material)
 		return;

@@ -1,4 +1,3 @@
-R"(
 #version 460
 uniform mat4 MVP;
 uniform float time;
@@ -23,5 +22,3 @@ void main()
 	vec2 uv = matcap(eye, norm).xy;
 	fragColor = vec4(texture(texture0, uv).rgb, 1.0);
 }
-
-)";

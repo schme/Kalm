@@ -130,15 +130,12 @@ int main(int, char**)
 
 	ModelBank::get().init();
 	TextureBank::get().init();
+	ShaderBank::get().init();
 	Timeline::get().init();
 	Gui::get().init(window);
 
 	{
 		// Create defaults
-
-		ShaderBank::get().createDefault();
-		ShaderBank::get().createPass();
-		ShaderBank::get().createMatcap();
 
 		TextureBank::get().load("matcap.png");
 

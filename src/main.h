@@ -18,6 +18,7 @@ struct EditorState {
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";
+	std::string shaderPrefix = "shaders/";
 	std::string assetPrefix = "assets/";
 
 	std::vector<ResourceId> reloadMeshes;

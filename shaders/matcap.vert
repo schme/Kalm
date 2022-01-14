@@ -1,4 +1,3 @@
-R"(
 #version 460
 uniform mat4 MV;
 uniform mat4 P;
@@ -22,4 +21,3 @@ void main()
 
     gl_Position = P * MV * vec4(vPos, 1.0);
 }
-)";

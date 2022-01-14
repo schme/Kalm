@@ -163,6 +163,40 @@ void drawMesh(EditorState &state, Mesh &mesh)
 	}
 }
 
+void drawTexturePicker(ResourceId& selectedId, const char* name)
+{
+	const char* currentLabel = selectedId.c_str();
+	if (ImGui::BeginCombo(name, currentLabel)) {
+		auto& rs = ResourceStorage<Texture>::get();
+		ImGui::PushID((void*)0);
+		if (ImGui::Selectable("", selectedId == ""))
+			selectedId = "";
+		ImGui::PopID();
+		for (const auto& [id, texture] : rs.storage) {
+			ImGui::PushID((void*)&texture);
+			if (ImGui::Selectable(id.c_str(), selectedId == id))
+				selectedId = id;
+			ImGui::PopID();
+		}
+		ImGui::EndPopup();
+	}
+}
+
+void drawShaderPicker(ResourceId& selectedId)
+{
+	const char* currentLabel = selectedId.c_str();
+	if (ImGui::BeginCombo("Shader", currentLabel)) {
+		auto& rs = ResourceStorage<Shader>::get();
+		for (const auto& [id, shader] : rs.storage) {
+			ImGui::PushID((void*)&shader);
+			if (ImGui::Selectable(id.c_str(), selectedId == id))
+				selectedId = id;
+			ImGui::PopID();
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void drawMaterialPicker(ResourceId& selectedId)
 {
 	const char* currentLabel = selectedId.c_str();
@@ -426,8 +460,10 @@ void drawMaterialWindow(EditorState &state, bool &opt)
 
 			ImGui::Separator();
 
-			ImGui::Text("Shader: %s", material->shader.c_str());
-			ImGui::Text("Texture0: %s", material->texture0.c_str());
+			drawShaderPicker(material->shader);
+			drawTexturePicker(material->texture0, "texture0");
+			drawTexturePicker(material->texture1, "texture1");
+			drawTexturePicker(material->texture2, "texture2");
 		}
 
 	}

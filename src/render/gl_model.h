@@ -189,6 +189,8 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 	Texture *texture0 = TextureBank::get().find(material->texture0);
 	if (texture0)
 		render::bindTexture(texture0->id);
+	else
+		render::bindTexture(0);
 
 
 	math::mat4 modelView = viewMat * modelMat;

@@ -75,6 +75,8 @@ void ShaderBank::recompileAndLink(const ResourceId &id)
 
 void ShaderBank::init()
 {
+	ResourceStorage<Shader>::get().storage.clear();
+
 	auto dir = std::filesystem::directory_iterator(getEditorState().projectRoot + getEditorState().shaderPrefix);
 
 	std::vector<std::filesystem::path> added;

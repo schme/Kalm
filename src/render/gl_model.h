@@ -202,6 +202,7 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, attr.ebo);
 
 		assert(shader);
+
 		shader
 			->bind("time", state.time)
 			->bind("MVP", modelViewPerspective)

@@ -383,6 +383,9 @@ void drawShadersWindow(EditorState &state, bool &opt)
 		return;
 
 	if (ImGui::Begin("Shaders Window", &opt)) {
+		if (ImGui::Button("Refresh Shaders")) {
+			ShaderBank::get().init();
+		}
 		auto &mm = ResourceStorage<Shader>::get();
 		for (auto& [id, shader] : mm.storage) {
 			ImGui::Text("shader: %s", id.c_str());

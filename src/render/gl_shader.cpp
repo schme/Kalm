@@ -111,7 +111,6 @@ Shader* Shader::link()
 		glGetProgramInfoLog(program, length, nullptr, buffer.get());
 		fprintf(stderr, "Link error: %s", buffer.get());
 	}
-	assert(status == GL_TRUE);
 
 	for (u32& shaderId : shaderIds) {
 		if (shaderId != 0) {

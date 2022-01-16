@@ -209,6 +209,7 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 			->bind("P", perspectiveMat)
 			->bind("MV", modelView)
 			->bind("mNormal", normalMatrix)
+			->bind("resolution", math::vec2(state.width, state.height))
 		;
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);

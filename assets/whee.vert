@@ -18,5 +18,5 @@ void main()
     pos = vPos;
 	tex0 = vTex0;
     norm = vNorm;
-	gl_Position = MVP * vec4(vPos, 1.0);
+	gl_Position = vec4(vPos, 1.0);
 }

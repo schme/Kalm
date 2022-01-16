@@ -41,6 +41,11 @@ void Shader::bind(u32 location, math::mat4 const & matrix)
 	glUniformMatrix4fv(location, 1, GL_FALSE, math::value_ptr(matrix));
 }
 
+void Shader::bind(u32 location, math::vec2 vec)
+{
+	glUniform2f(location, vec.x, vec.y);
+}
+
 void Shader::bind(u32 location, math::vec3 vec)
 {
 	glUniform3f(location, vec.x, vec.y, vec.z);

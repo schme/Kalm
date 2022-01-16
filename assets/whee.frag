@@ -2,15 +2,25 @@
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform float time;
+uniform vec2 resolution;
 
 in vec2 tex0;
 in vec3 pos;
 in vec3 norm;
 out vec4 fragColor;
 
+float plot(vec2 st) {
+	return smoothstep(0.02 + sin(time), 0.0, abs(st.y - st.x));
+}
+
 void main()
 {
-    vec3 mask = texture(texture1, vec2(tex0.x + sin(time), tex0.y)).rgb;
-    float masked = dot(mask, mask);
-    fragColor = vec4(pos.x * masked, pos.y * masked, pos.z * masked, 1.0);
+	vec2 st = gl_FragCoord.xy / resolution;
+	float y = st.x;
+	vec3 color = vec3(y);
+
+	float pct = plot(st);
+	color = (1.0 - pct) * color + pct * vec3(0.0, 1.0, 1.0);
+
+    fragColor = vec4(color, 1.0);
 }

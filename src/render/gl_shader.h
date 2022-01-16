@@ -48,6 +48,7 @@ struct Shader {
 	GLuint get() { return program; }
 
 	void bind(unsigned int location, float value);
+	void bind(unsigned int location, math::vec2 value);
 	void bind(unsigned int location, math::vec3 value);
 	void bind(unsigned int location, const math::mat4 &matrix);
 

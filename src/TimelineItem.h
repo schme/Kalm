@@ -9,6 +9,7 @@ struct TimelineItem {
 	enum class Type : int {
 		Scene = 0,
 		Post,
+		Framebuffer,
 		Count
 	};
 

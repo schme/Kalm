@@ -203,8 +203,9 @@ int main(int, char**)
 				if (item.frameStart <= timeline.currentFrame
 						&& item.frameEnd >= timeline.currentFrame) {
 					Scene *scene = SceneBank::get().find(item.id);
-					if (scene)
+					if (scene) {
 						renderModels(*scene, state, v, p);
+					}
 				}
 			}
 		}

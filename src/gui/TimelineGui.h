@@ -3,13 +3,15 @@
 #include "ImSequencer.h"
 #include "TimelineItem.h"
 
-#include <vector>
-
 namespace ks {
+
+struct Timeline;
 
 class TimelineGui : public ImSequencer::SequenceInterface
 {
 public:
+	void init(Timeline *);
+
 	explicit TimelineGui() {};
 	explicit TimelineGui(TimelineGui *) {};
 
@@ -31,18 +33,11 @@ public:
 	void CustomDrawCompact(int /*index*/, ImDrawList* /*draw_list*/, const ImRect& /*rc*/, const ImRect& /*clippingRect*/) override;
 #endif
 
-	std::vector<TimelineItem> items;
-	int frameMin = 0;
-	int frameMax = 120;
+	Timeline *timeline = nullptr;
 
 	int selectedEntry = -1;
-	int firstFrame = 0;
-	int currentFrame = 0;
 	int sequenceOptions = 0;
 	bool expanded = true;
-
-    float playbackRate = 0.0f;
-    float playbackStartTime = 0.0f;
 };
 
 }

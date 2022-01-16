@@ -57,6 +57,8 @@ bool Gui::init(GLFWwindow *window)
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	}
 
+	timeline.init(&Timeline::get());
+
 	return true;
 }
 
@@ -104,17 +106,18 @@ static void showTimelineWindow(Gui &gui, bool &opt)
 	if (!opt)
 		return;
 
+	TimelineGui &tl = gui.timeline;
+
 	ImGui::Begin("Timeline", &opt, windowFlags);
-	TimelineGui &timeline = Timeline::get();
-	ImGui::InputInt("Max Frames", &timeline.frameMax);
-	ImGui::SameLine(); ImGui::Text("Frame: %d", timeline.currentFrame);
+	ImGui::InputInt("Max Frames", &tl.timeline->frameMax);
+	ImGui::SameLine(); ImGui::Text("Frame: %d", tl.timeline->currentFrame);
 	ImGui::SameLine();
 	if (ImGui::Button("Add Scenes")) {
-		timeline.Add(static_cast<int>(TimelineItem::Type::Scene));
+		tl.Add(static_cast<int>(TimelineItem::Type::Scene));
 	}
 
-	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(&timeline);
-	ImSequencer::Sequencer(sequencer, &timeline.currentFrame, &timeline.expanded, &timeline.selectedEntry, &timeline.firstFrame, timeline.sequenceOptions);
+	auto sequencer = reinterpret_cast<ImSequencer::SequenceInterface*>(&tl);
+	ImSequencer::Sequencer(sequencer, &tl.timeline->currentFrame, &tl.expanded, &tl.selectedEntry, &tl.timeline->firstFrame, tl.sequenceOptions);
 
 	ImGui::End();
 }
@@ -220,7 +223,6 @@ void drawModel(EditorState &state, Model &model)
 		ImGui::SameLine(); ImGui::Text("%s", model.name.c_str());
 
 		ImGui::Checkbox("hidden", &model.isHidden);
-
 		ImGui::InputFloat3("position", math::value_ptr(model.position));
 		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
 		ImGui::InputFloat3("rotation", math::value_ptr(model.rotation));

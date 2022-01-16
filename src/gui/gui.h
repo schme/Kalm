@@ -17,6 +17,7 @@ struct Gui {
 	void terminate();
 
 	GLFWwindow *window = nullptr;
+	TimelineGui timeline;
 
 	bool optShowDemoWindow = false;
 	bool optShowTimeline = true;

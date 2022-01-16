@@ -1,6 +1,7 @@
 #include "TimelineGui.h"
 #include "ResourceStorage.h"
 #include "Scene.h"
+#include "Timeline.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -25,17 +26,29 @@ static ImColor getItemColorByType(TimelineItem::Type type) {
 	}
 }
 
+void TimelineGui::init(Timeline *timeline)
+{
+	this->timeline = timeline;
+
+	sequenceOptions =
+		ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_EDIT_ALL
+		| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_ADD
+		| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_DEL
+		| ImSequencer::SEQUENCER_OPTIONS::SEQUENCER_COPYPASTE
+	;
+}
+
 int TimelineGui::GetFrameMin() const
 {
-	return frameMin;
+	return timeline->frameMin;
 }
 int TimelineGui::GetFrameMax() const
 {
-	return frameMax;
+	return timeline->frameMax;
 }
 int TimelineGui::GetItemCount() const
 {
-	return items.size();
+	return timeline->items.size();
 }
 
 int TimelineGui::GetItemTypeCount() const 
@@ -53,6 +66,8 @@ const char* TimelineGui::GetItemTypeName(int typeIndex) const
 			return "Scene";
 		case Type::Post:
 			return "Post";
+		case Type::Framebuffer:
+			return "Framebuffer";
 		default:
 			return "";
 	}
@@ -62,7 +77,7 @@ const char* TimelineGui::GetItemTypeName(int typeIndex) const
 
 const char* TimelineGui::GetItemLabel(int index) const 
 {
-	return items[index].id.c_str();
+	return timeline->items[index].id.c_str();
 }
 
 void TimelineGui::Add(int typeIndex)
@@ -73,7 +88,7 @@ void TimelineGui::Add(int typeIndex)
 		auto& storage = ResourceStorage<Scene>::get().storage;
 		for (const auto& [key, scene] : storage) {
 			bool sceneInTimeline = false;
-			for (const auto& item : items) {
+			for (const auto& item : timeline->items) {
 				if (item.type == type && item.id == key) {
 					sceneInTimeline = true;
 					break;
@@ -81,7 +96,7 @@ void TimelineGui::Add(int typeIndex)
 			}
 
 			if (!sceneInTimeline) {
-				items.emplace_back(TimelineItem{ResourceId(key), 0, 120, type});
+				timeline->items.emplace_back(TimelineItem{ResourceId(key), 0, 120, type});
 			}
 		}
 	}
@@ -91,12 +106,12 @@ void TimelineGui::Add(int typeIndex)
 
 void TimelineGui::Del(int index)
 {
-	items.erase(items.begin() + index);
+	timeline->items.erase(timeline->items.begin() + index);
 }
 
 void TimelineGui::Get(int index, int** start, int** end, int* type, unsigned int* color)
 {
-	TimelineItem &item = items[index];
+	TimelineItem &item = timeline->items[index];
 	if (color)
 		*color = getItemColorByType(item.type);
 	if (start)

@@ -21,6 +21,7 @@ struct Model {
 	ResourceId material = ResourceId("Matcap");
 	std::vector<Mesh> meshes = {};
 	bool is2D = false;
+	bool isHidden = false;
 };
 
 }

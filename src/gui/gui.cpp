@@ -219,6 +219,8 @@ void drawModel(EditorState &state, Model &model)
 		ImGui::Text("Name:");
 		ImGui::SameLine(); ImGui::Text("%s", model.name.c_str());
 
+		ImGui::Checkbox("hidden", &model.isHidden);
+
 		ImGui::InputFloat3("position", math::value_ptr(model.position));
 		ImGui::InputFloat3("scale", math::value_ptr(model.scale));
 		ImGui::InputFloat3("rotation", math::value_ptr(model.rotation));

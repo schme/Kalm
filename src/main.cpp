@@ -71,6 +71,8 @@ namespace ks {
 		for (size_t i=0; i < scene.models.size(); ++i) {
 
 			const Model *model = scene.models[i];
+			if (model->isHidden)
+				continue;
 
 			math::quat rotation = math::quat(math::radians(model->rotation));
 			math::mat4 m = math::mat4(1.0f);

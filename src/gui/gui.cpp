@@ -410,7 +410,7 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 
 	if (ImGui::Begin("Timeline Preview", &opt))	{
 		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
-		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), state.outputSize.x / state.outputSize.y);
+		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), (float)state.width / state.height);
 
 		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
 				imageSize,

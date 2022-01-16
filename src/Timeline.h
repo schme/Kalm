@@ -37,6 +37,11 @@ struct Timeline
         return time;
     }
 
+	constexpr bool itemActive(const TimelineItem &item)
+	{
+		return item.frameStart <= currentFrame && item.frameEnd >= currentFrame;
+	}
+
     constexpr float getPlaybackTime(float now) {
         return now - playbackStartTime;
     }
@@ -56,7 +61,7 @@ struct Timeline
 	int firstFrame = 0;
 
 	float playbackStartTime = 0.0f;
-	float playbackRate = 1.0f;
+	float playbackRate = 0.0f;
 };
 
 }

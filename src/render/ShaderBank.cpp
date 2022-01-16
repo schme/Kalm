@@ -33,6 +33,10 @@ Shader::Type shaderExtensionToType(std::filesystem::path ext)
 
 void attachShaderFromFile(const std::filesystem::path &shaderPath, Shader *shader, Shader::Type type)
 {
+	// invalid, e.g. "matcap.png" when "matcap.vert" exists
+	if (type == Shader::Type::Count)
+		return;
+
 	std::ifstream shaderFile(shaderPath);
 	std::string shaderString((std::istreambuf_iterator<char>(shaderFile)),
 			(std::istreambuf_iterator<char>()));
@@ -77,7 +81,7 @@ void ShaderBank::init()
 {
 	ResourceStorage<Shader>::get().storage.clear();
 
-	auto dir = std::filesystem::directory_iterator(getEditorState().projectRoot + getEditorState().shaderPrefix);
+	auto dir = std::filesystem::directory_iterator(getEditorState().projectRoot + getEditorState().assetPrefix);
 
 	std::vector<std::filesystem::path> added;
 
@@ -96,7 +100,7 @@ void ShaderBank::init()
 			log_info("Building shader: %s\n", name.c_str());
 
 			Shader* shader = create(name);
-			std::filesystem::path rootDir = getEditorState().projectRoot + getEditorState().shaderPrefix;
+			std::filesystem::path rootDir = getEditorState().projectRoot + getEditorState().assetPrefix;
 
 			attachShadersWhenFound(rootDir, shader, name);
 

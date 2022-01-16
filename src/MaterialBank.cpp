@@ -17,7 +17,16 @@ Material* MaterialBank::load(const std::string &filepath, bool absolutePath)
 	return mat;
 }
 
-void MaterialBank::loadResourcesIfNeeded(const ResourceId &material) {
+void MaterialBank::loadResourcesIfNeeded(ResourceId material) {
+
+	if (!isValid(material)) {
+		auto& rs = ResourceStorage<Material>::get();
+		for (const auto& [id, material] : rs.storage) {
+			loadResourcesIfNeeded(id);
+		}
+		return;
+	}
+
 	Material *mat = find(material);
 
 	if (!mat)

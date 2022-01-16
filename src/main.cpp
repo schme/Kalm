@@ -125,7 +125,9 @@ int main(int, char**)
 
 	EditorState state;
 
-	state.outputSize = math::vec2(width, height);
+	state.width = width;
+	state.height = height;
+
 	render::setupEnvironment(glfwGetProcAddress);
 
 	// Initialize modules
@@ -138,14 +140,11 @@ int main(int, char**)
 
 	{
 		// Create defaults
-
-		TextureBank::get().load("matcap.png");
-
-		Material *matcap = MaterialBank::get().load("Matcap");
+		Material *matcap = MaterialBank::get().load("matcap");
 		matcap->shader = ResourceId("matcap");
 		matcap->texture0 = ResourceId("matcap.png");
 
-		MaterialBank::get().loadResourcesIfNeeded(ResourceId("Matcap"));
+		MaterialBank::get().loadResourcesIfNeeded(ResourceId("matcap"));
 	}
 
 	u32 quadVao, quadVbo;
@@ -180,7 +179,10 @@ int main(int, char**)
 
 		updateCameraFront(camera);
 
+		//
 		// render
+		//
+
 		render::bindFrameBuffer(sceneFboInfo.fboId);
 
 		render::setupFrame(width, height);
@@ -199,9 +201,8 @@ int main(int, char**)
 				camera.lens.aspect, camera.lens.near, camera.lens.far);
 
 		for (const TimelineItem& item : timeline.items) {
-			if (item.type == TimelineItem::Type::Scene) {
-				if (item.frameStart <= timeline.currentFrame
-						&& item.frameEnd >= timeline.currentFrame) {
+			if (timeline.itemActive(item)) {
+				if (item.type == TimelineItem::Type::Scene) {
 					Scene *scene = SceneBank::get().find(item.id);
 					if (scene) {
 						renderModels(*scene, state, v, p);

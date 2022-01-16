@@ -71,7 +71,7 @@ static void setupQuadBuffers(u32 &quadVao, u32 &quadVbo)
 	vPosLocation = VertexAttribLocation::Position;
 	vTexLocation = VertexAttribLocation::Texcoord0;
 
-	u32 stride = (2 + 2) * sizeof(float);
+	const u32 stride = (2 + 2) * sizeof(float);
 
 	glEnableVertexAttribArray(vPosLocation);
 	glVertexAttribPointer(vPosLocation, 2, GL_FLOAT, GL_FALSE, stride, (void*)0);

@@ -13,12 +13,12 @@ struct EditorState {
 	Camera camera;
 
 	u32 sceneTextureId = 0;
-	math::vec2 outputSize = math::vec2(1.f, 1.f);
 	float time = 0.0f;
+	int width = 1920;
+	int height = 1080;
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";
-	std::string shaderPrefix = "shaders/";
 	std::string assetPrefix = "assets/";
 
 	std::vector<ResourceId> reloadMeshes;

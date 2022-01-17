@@ -12,6 +12,8 @@
 #include "SceneBank.h"
 #include "MaterialBank.h"
 
+#include "filesystem/FileWatcher.h"
+
 #include "render/glRendering.h"
 #include "render/gl_model.h"
 #include "render/Rendering.h"
@@ -132,6 +134,7 @@ int main(int, char**)
 
 	// Initialize modules
 
+	FileWatcher::init();
 	ModelBank::get().init();
 	TextureBank::get().init();
 	ShaderBank::get().init();
@@ -218,6 +221,8 @@ int main(int, char**)
 
 		glfwSwapBuffers(window);
 	}
+
+	FileWatcher::destroy();
 
 	Gui::get().terminate();
 	glfwDestroyWindow(window);

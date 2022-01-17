@@ -40,7 +40,7 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(Kalm ${MAIN_SOURCES})
 
-target_link_libraries(Kalm PRIVATE kalm-gui kalm-render)
+target_link_libraries(Kalm PRIVATE kalm-gui kalm-render kalm-filesystem)
 target_link_libraries(Kalm PRIVATE glfw glad)
 target_link_libraries(Kalm PRIVATE assimp)
 target_link_libraries(Kalm PRIVATE stb) # stb_image: TextureBank
@@ -49,3 +49,4 @@ configure_file(include/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
 
 add_subdirectory(render)
 add_subdirectory(gui)
+add_subdirectory(filesystem)

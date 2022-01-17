@@ -18,6 +18,7 @@ float plot(vec2 st, float pct) {
 
 void main()
 {
+    // Hehe
     vec3 colorA = vec3(0.142, 0.852, 0.643);
     vec3 colorB = vec3(0.642, 0.252, 0.643);
 

@@ -1,21 +1,11 @@
 #include "ShaderBank.h"
 
 #include "main.h"
-#include "filesystem/FileWatcher.h"
 
 #include <filesystem>
 #include <fstream>
 
 namespace ks {
-
-/**
- * TODO: Move filewatcher from here
- */
-
-static void shaderFileChanged(FileWatcher::EventParams params)
-{
-	log_info("%s\n", "Changed! Hi from ShaderBank!");
-}
 
 Shader::Type shaderExtensionToType(std::filesystem::path ext)
 {
@@ -117,9 +107,6 @@ void ShaderBank::init()
 			shader->link();
 		}
 	}
-
-	std::string shaderPath = getEditorState().projectRoot + getEditorState().assetPrefix;
-	FileWatcher::addWatcher(shaderPath.c_str(), shaderFileChanged);
 }
 
 }

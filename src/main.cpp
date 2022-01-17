@@ -88,6 +88,20 @@ namespace ks {
 		}
 	}
 
+	std::vector<ResourceId> shaderRecompiles;
+
+	static void shaderFileChanged(FileWatcher::EventParams params)
+	{
+		if (!(params.eventMask & FileWatcher::Event::Modified))
+			return;
+
+		std::string shaderId(params.filename);
+		removeExtension(shaderId);
+
+		shaderRecompiles.push_back(shaderId);
+	}
+
+
 } // namespace ks
 
 
@@ -142,6 +156,11 @@ int main(int, char**)
 	Gui::get().init(window);
 
 	{
+		std::string shaderFolder = getEditorState().projectRoot + getEditorState().assetPrefix;
+		FileWatcher::addWatcher(shaderFolder.c_str(), shaderFileChanged);
+	}
+
+	{
 		// Create defaults
 		Material *matcap = MaterialBank::get().load("matcap");
 		matcap->shader = ResourceId("matcap");
@@ -181,6 +200,12 @@ int main(int, char**)
 		swapInputStates();
 
 		updateCameraFront(camera);
+
+		for (ResourceId &id : shaderRecompiles)
+		{
+			ShaderBank::get().recompileAndLink(id);
+		}
+		shaderRecompiles.clear();
 
 		//
 		// render
@@ -222,10 +247,10 @@ int main(int, char**)
 		glfwSwapBuffers(window);
 	}
 
-	FileWatcher::destroy();
-
 	Gui::get().terminate();
 	glfwDestroyWindow(window);
+
+	FileWatcher::destroy();
 
 	glfwTerminate();
 	exit(EXIT_SUCCESS);

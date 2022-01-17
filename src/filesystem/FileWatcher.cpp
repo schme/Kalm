@@ -4,6 +4,11 @@
 
 #ifdef __linux__
 
+/**
+ * Based on inotify, most referenced from:
+ * https://www.linuxjournal.com/article/8478
+ */
+
 #include <cstdio>
 #include <cstring>
 #include <mutex>
@@ -25,14 +30,19 @@ struct Impl {
 
 	void destroy() {
 
-		std::scoped_lock lock(watchesMutex);
-		observerThread.join();
+		{
+			std::scoped_lock lock(watchesMutex);
 
-		for (const Watch& watch : watches) {
-			inotify_rm_watch(desc, watch.desc);
+			for (const Watch& watch : watches) {
+				inotify_rm_watch(desc, watch.desc);
+			}
+			watches.clear();
 		}
+
 		close(desc);
-		watches.clear();
+		desc = -1;
+
+		observerThread.join();
 	}
 
 	void addWatcher(const char* pathname, void (*callback)(FileWatcher::EventParams))
@@ -75,9 +85,44 @@ struct Impl {
 	}
 
 	void observe() {
-		while(true) {
-			log_info("%s\n", "tick");
-			sleep(1000);
+
+		constexpr size_t eventSize = sizeof(inotify_event);
+		constexpr size_t bufLen = 1024 * (eventSize + 16);
+
+		char buf[bufLen];
+		int len, i=0;
+
+		while((len = read(desc, buf, bufLen)) > 0) {
+			while (i < len) {
+				inotify_event *event = nullptr;
+				event = (inotify_event *) &buf[i];
+
+				FileWatcher::EventParams params = {};
+
+				params.eventMask |= (event->mask & IN_CREATE) > 0 ? FileWatcher::Event::Created : 0;
+				params.eventMask |= (event->mask & IN_MODIFY) > 0 ? FileWatcher::Event::Modified : 0;
+				params.eventMask |= (event->mask & IN_DELETE) > 0 ? FileWatcher::Event::Deleted : 0;
+
+				if (event->len > 0) {
+					params.filename = std::string(event->name);
+				}
+
+				void (*callback) (FileWatcher::EventParams) = nullptr;
+
+				{
+					std::scoped_lock lock(watchesMutex);
+					for (const Watch& watch : watches) {
+						if (watch.desc == event->wd) {
+							callback = watch.callback;
+							break;
+						}
+					}
+				}
+				if (callback)
+					callback(params);
+
+				i += eventSize + event->len;
+			}
 		}
 	}
 
@@ -97,29 +142,20 @@ struct Impl {
 		return impl;
 	}
 
-
+	int desc = 0;
 	std::thread observerThread;
 	std::mutex watchesMutex;
-
-	int desc = 0;
 	std::vector<Watch> watches;
 };
 
 
 
 #elif _WIN32
-
 namespace ks {
-
 	static_assert(false, "not implemented");
-	// TODO: implement
-
 #else
-
 namespace ks {
-
 	static_assert(false, "platform not supported");
-
 #endif
 
 

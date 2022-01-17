@@ -11,31 +11,8 @@ struct Timeline
 {
     void init();
 
-    void togglePlayback(float now) {
-        float &currentPlaybackRate = Timeline::get().playbackRate;
-        if (currentPlaybackRate > 0.0f)
-            playbackRate = 0.0f;
-        else {
-            currentPlaybackRate = 1.0f;
-
-            // Calculate relative to start frame
-            playbackStartTime = now - (currentFrame * oneFrameTime);
-        }
-    }
-
-    float advanceTimestep(float now) {
-        if (math::isAboutZero(playbackRate))
-            return currentFrame * oneFrameTime;
-
-        float maxTime = frameMax * oneFrameTime;
-        float time = (now - playbackStartTime);
-
-        // float modulo
-        time = time - maxTime * std::floor(time / maxTime);
-        currentFrame = int(time / maxTime * frameMax);
-
-        return time;
-    }
+    void togglePlayback(float now);
+    float advanceTimestep(float now);
 
 	constexpr bool itemActive(const TimelineItem &item)
 	{

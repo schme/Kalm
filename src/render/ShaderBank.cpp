@@ -56,6 +56,11 @@ void attachShadersWhenFound(const std::filesystem::path &shaderPath, Shader *sha
 	}
 }
 
+Shader::Type ShaderBank::extensionToType(const std::string& extension)
+{
+	return shaderExtensionToType(extension);
+}
+
 void ShaderBank::recompileAndLink(const ResourceId &id)
 {
 	Shader *shader = find(id);
@@ -64,7 +69,6 @@ void ShaderBank::recompileAndLink(const ResourceId &id)
 		return;
 	}
 
-	log_info("Compiling shader: %s\n", id.c_str());
 	std::string sourceFile;
 
 	for (int i=Shader::Type::Vert; i < (int)Shader::Type::Count; ++i) {

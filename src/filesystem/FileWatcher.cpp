@@ -47,7 +47,7 @@ struct Impl {
 
 	void addWatcher(const char* pathname, void (*callback)(FileWatcher::EventParams))
 	{
-		log_debug("%s: %s\n", "Adding watcher for", pathname);
+		log_debug("Adding watcher for: %s\n", pathname);
 
 		std::scoped_lock lock(watchesMutex);
 		Watch watch;
@@ -123,6 +123,7 @@ struct Impl {
 
 				i += eventSize + event->len;
 			}
+			i = 0;
 		}
 	}
 

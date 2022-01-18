@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <mutex>
 
 namespace ks {
 
@@ -88,6 +89,7 @@ namespace ks {
 		}
 	}
 
+	std::mutex shaderRecompilesMutex;
 	std::vector<ResourceId> shaderRecompiles;
 
 	static void shaderFileChanged(FileWatcher::EventParams params)
@@ -96,9 +98,16 @@ namespace ks {
 			return;
 
 		std::string shaderId(params.filename);
-		removeExtension(shaderId);
+		std::string ext = removeExtension(shaderId);
 
-		shaderRecompiles.push_back(shaderId);
+		if (ShaderBank::extensionToType(ext) == Shader::Type::Count)
+			return;
+
+		std::scoped_lock lock(shaderRecompilesMutex);
+
+		/** Edits often produce double MODIFY events, so here we filter duplicates to avoid multiple compiles */
+		if (std::find(shaderRecompiles.begin(), shaderRecompiles.end(), shaderId) == shaderRecompiles.end())
+			shaderRecompiles.push_back(shaderId);
 	}
 
 
@@ -201,11 +210,16 @@ int main(int, char**)
 
 		updateCameraFront(camera);
 
-		for (ResourceId &id : shaderRecompiles)
 		{
-			ShaderBank::get().recompileAndLink(id);
+			std::scoped_lock lock(shaderRecompilesMutex);
+			if (shaderRecompiles.size() > 0)
+				log_debug("Shaders to recompile: %zu\n", shaderRecompiles.size());
+
+			for (ResourceId &id : shaderRecompiles)	{
+				ShaderBank::get().recompileAndLink(id);
+			}
+			shaderRecompiles.clear();
 		}
-		shaderRecompiles.clear();
 
 		//
 		// render

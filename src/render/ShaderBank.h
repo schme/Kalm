@@ -26,6 +26,8 @@ struct ShaderBank : public ResourceBank<Shader, ShaderBank>
 		ks_unused(absolutePath);
 		return find(ResourceId(filepath));
 	}
+
+	static Shader::Type extensionToType(const std::string& extension);
 };
 
 }

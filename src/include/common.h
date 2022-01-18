@@ -45,7 +45,16 @@ static inline void removePath(std::string& filename)
 	filename = filename.substr(pos + 1);
 }
 
-static inline void removeExtension(std::string &filename)
+/** returns extension */
+static inline std::string removeExtension(std::string &filename)
 {
-	filename = filename.substr(0, filename.find_last_of("."));
+	int dotPos = filename.find_last_of(".");
+	std::string ext = filename.substr(dotPos, filename.size());
+	filename = filename.substr(0, dotPos);
+	return ext;
+}
+
+static inline std::string getExtension(const std::string &filename)
+{
+	return filename.substr(filename.find_last_of("."), filename.size());
 }

@@ -127,8 +127,8 @@ int main(int, char**)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	int width = 1440;
-	int height = 900;
+	int width = 1920;
+	int height = 1080;
 
 	GLFWwindow* window = nullptr;
 
@@ -212,9 +212,6 @@ int main(int, char**)
 
 		{
 			std::scoped_lock lock(shaderRecompilesMutex);
-			if (shaderRecompiles.size() > 0)
-				log_debug("Shaders to recompile: %zu\n", shaderRecompiles.size());
-
 			for (ResourceId &id : shaderRecompiles)	{
 				ShaderBank::get().recompileAndLink(id);
 			}
@@ -225,7 +222,10 @@ int main(int, char**)
 		// render
 		//
 
-		render::bindFrameBuffer(sceneFboInfo.fboId);
+		if (state.drawOnViewport)
+			render::bindFrameBuffer(0);
+		else
+			render::bindFrameBuffer(sceneFboInfo.fboId);
 
 		render::setupFrame(width, height);
 

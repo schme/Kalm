@@ -57,7 +57,7 @@ bool Gui::init(GLFWwindow *window)
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	}
 
-	timeline.init(&Timeline::get());
+	timelineGui.init(&Timeline::get());
 
 	return true;
 }
@@ -77,7 +77,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
 			ImGui::Checkbox("Shaders Window", &gui.optShowShadersWindow);
-			ImGui::Checkbox("Timeline Window", &gui.optShowTimeline);
+			ImGui::Checkbox("timelineGui Window", &gui.optShowTimeline);
 			ImGui::Checkbox("Material Window", &gui.optShowMaterialWindow);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
@@ -86,6 +86,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		if (ImGui::BeginMenu("Rendering"))
 		{
 			ImGui::Checkbox("Wireframe", &state.renderWireframe);
+			ImGui::Checkbox("Use viewport", &state.drawOnViewport);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Settings"))
@@ -106,9 +107,9 @@ static void showTimelineWindow(Gui &gui, bool &opt)
 	if (!opt)
 		return;
 
-	TimelineGui &tl = gui.timeline;
+	TimelineGui &tl = gui.timelineGui;
 
-	ImGui::Begin("Timeline", &opt, windowFlags);
+	ImGui::Begin("timelineGui", &opt, windowFlags);
 	ImGui::InputInt("Max Frames", &tl.timeline->frameMax);
 	ImGui::SameLine(); ImGui::Text("Frame: %d", tl.timeline->currentFrame);
 	ImGui::SameLine();
@@ -408,7 +409,7 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 	if (!opt)
 		return;
 
-	if (ImGui::Begin("Timeline Preview", &opt))	{
+	if (ImGui::Begin("timelineGui Preview", &opt))	{
 		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
 		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), (float)state.width / state.height);
 
@@ -485,7 +486,8 @@ void Gui::run(EditorState &state)
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+	u32 dockingFlags = getEditorState().drawOnViewport ? ImGuiDockNodeFlags_PassthruCentralNode : 0u;
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), dockingFlags);
 
 	showMainMenuBar(*this, state);
 	showTimelineWindow(*this, optShowTimeline);

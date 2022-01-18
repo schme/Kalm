@@ -13,6 +13,7 @@ struct EditorState {
 	Camera camera;
 
 	u32 sceneTextureId = 0;
+	bool drawOnViewport = false;
 	float time = 0.0f;
 	int width = 1920;
 	int height = 1080;

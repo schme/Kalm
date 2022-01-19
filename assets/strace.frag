@@ -47,35 +47,84 @@ vec3 hsb2rgb( in vec3 c ) {
     return c.z * mix( vec3(1.0), rgb, c.y);
 }
 
+struct Material {
+    vec3 diff;
+    float metallic;
+    float roughness;
+};
 
-vec3 sphereTrace(vec3 rayOrigin, vec3 rayDirection)
-{
-    return vec3();
+struct SceneResult {
+    float d;
+    Material mat;
+};
+
+Material dummyMaterial() {
+    return Material(vec3(0.3), 0.0, 0.5);
 }
+
+Material nullMaterial() {
+    return Material(vec3(0), 0.0, 0.0);
+}
+
+float plane(in vec3 from, in vec3 point, in vec3 norm)
+{
+    return dot(norm, from - point);
+}
+
+float sphere(in vec3 from, in vec3 center, in float rad)
+{
+    return length(from - center) - rad;
+}
+
+float scene(in vec3 from, float maxDistance)
+{
+    float d = min( maxDistance + 1.0,
+        min(
+            min(sphere(from, vec3(0.0, 0.0, -5.), 1.0),
+            sphere(from, vec3(-2.0, 2.0, -7.), 2.0)),
+        min(
+            plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
+            plane(from, vec3(0.0, -10.0, 0.0), vec3(0.0, 1.0, 0.0))))
+    );
+    return d;
+}
+
+SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
+{
+    const float maxDistance = 100;
+    const float eps = 10e-6;
+
+    float t = 0;
+
+    while (t < maxDistance) {
+        vec3 from = rayOrigin + t * rayDirection;
+        float d = scene(from, maxDistance);
+
+        t += d;
+        if (d <= eps * t) {
+            float hue = smoothstep(0.0, 1.0, sqrt(t / maxDistance));
+            Material mat = Material(hsb2rgb(vec3(hue, 1.0, 1.0)), 0.0, 0.5);
+            return SceneResult(t, mat);
+        }
+    }
+
+    return SceneResult(t, nullMaterial());
+}
+
 
 void main()
 {
-    float aspect = resolution.x/resolution.y;
-    float fov = 90;
+    vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / resolution.y;
+    float fov = 45.0;
+    float fovTan = tan(radians(fov) / 2.0);
 
-    vec2 uv = (gl_FragCoord.xy + vec2(0.5))/resolution/4.0;
-    uv.x = (uv.x * 2.0 - 1.0) * aspect;
-    uv.y = 1.0 - uv.y * 2.0; // flip y as well
-    uv = uv * tan(radians(fov) / 2);
+    vec3 rayDirection = normalize(vec3(uv * fovTan, -1.0));
+    vec3 rayOrigin = vec3(0.0, 0.0, 0.0);
 
-    vec3 p = vec3(gl_FragCoord.x - resolution.x / 2,
-            resolution.y / 2 - gl_FragCoord.y,
-            -(resolution.y/2) / tan(radians(fov) * 0.5));
+    SceneResult res = trace(rayOrigin, rayDirection);
 
-    p = normalize(p);
+    vec3 color = res.mat.diff;
 
-    vec3 rayOrigin = vec3(0., 0., 0.);
-    vec3 rayDirection = vec3(uv, -1.) - rayOrigin;
-    rayDirection = normalize(rayDirection);
-
-    vec3 outputColor = vec3(0.0);
-    outputColor = sphereTrace();
-
-    vec3 gammaCorrectedColor = pow(outputColor, vec3(1.0 / 2.2));
+    vec3 gammaCorrectedColor = pow(color, vec3(1.0 / 2.2));
     fragColor = vec4(gammaCorrectedColor, 1.0);
 }

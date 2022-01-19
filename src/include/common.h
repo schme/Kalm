@@ -18,6 +18,26 @@ enum LogLevel : int {
 	Highest,
 };
 
+static inline const char* toStr(LogLevel level)
+{
+	switch (level) {
+		case LogLevel::Fatal:
+			return "Fatal";
+		case LogLevel::Error:
+			return "Error";
+		case LogLevel::Warning:
+			return "Warning";
+		case LogLevel::Info:
+			return "Info";
+		case LogLevel::Debug:
+			return "Debug";
+		case LogLevel::Trace:
+			return "Trace";
+		case LogLevel::Highest:
+			return "Highest";
+	}
+}
+
 #define ks_unused(x) (void(x))
 
 #define ks_likely(x) ([[likely]] x)

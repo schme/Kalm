@@ -13,6 +13,7 @@
 #include "Timeline.h"
 #include "gui/FileBrowser.h"
 #include "include/common.h"
+#include "include/config.h"
 #include "main.h"
 #include "render/Rendering.h"
 #include "render/gl_shader.h"
@@ -91,6 +92,17 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		}
 		if (ImGui::BeginMenu("Settings"))
 		{
+			Config& conf = Config::get();
+			if (ImGui::BeginCombo("Log level", toStr(conf.logLevel))) {
+				for (int i=LogLevel::Fatal; i < LogLevel::Highest; ++i) {
+					LogLevel level = static_cast<LogLevel>(i);
+					ImGui::PushID(toStr(level));
+					if (ImGui::Selectable(toStr(level), conf.logLevel == i))
+						conf.logLevel = level;
+					ImGui::PopID();
+				}
+				ImGui::EndPopup();
+			}
 			ImGui::EndMenu();
 		}
 

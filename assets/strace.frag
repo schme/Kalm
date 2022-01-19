@@ -47,6 +47,12 @@ vec3 hsb2rgb( in vec3 c ) {
     return c.z * mix( vec3(1.0), rgb, c.y);
 }
 
+struct Light {
+    vec3 pos;
+    vec3 color;
+    float intensity;
+};
+
 struct Material {
     vec3 diff;
     float metallic;
@@ -89,6 +95,33 @@ float scene(in vec3 from, float maxDistance)
     return d;
 }
 
+float traceShadow(vec3 p, vec3 lightDir, float distance)
+{
+    return 0.0f;
+}
+
+vec3 shade(in vec3 p, in vec3 n)
+{
+    Light[2] lights = Light[](
+            Light(vec3(-4.0, 4.0, 0.0), vec3(1.0), 1.0),
+            Light(vec3(4.0, -4.0, -3.0), vec3(0.7, 0.2, 0.3), 10.5));
+
+    vec3 R = vec3(0);
+
+    for (int i=0; i < lights.length(); ++i) {
+        vec3 lightDir = lights[i].pos - p;
+        if (dot(lightDir, n) > 0) {
+            float dist2 = dot(lightDir, lightDir);
+            normalize(lightDir);
+            float shadow = 1.0 - traceShadow(p, lightDir, sqrt(dist2));
+            R += shadow * dot(lightDir, n) * lights[i].color * lights[i].intensity / (4.0 * PI * dist2);
+        }
+    }
+
+    return R;
+}
+
+
 SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
 {
     const float maxDistance = 100;
@@ -102,10 +135,22 @@ SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
 
         t += d;
         if (d <= eps * t) {
-            float hue = smoothstep(0.0, 1.0, sqrt(t / maxDistance));
-            Material mat = Material(hsb2rgb(vec3(hue, 1.0, 1.0)), 0.0, 0.5);
-            return SceneResult(t, mat);
+            break;
         }
+    }
+
+    if (t < maxDistance) {
+        vec3 from = rayOrigin + t * rayDirection;
+        float delta = 10e-5;
+        vec3 n = vec3(
+                scene(from + vec3(delta, 0, 0), maxDistance) - scene(from + vec3(-delta, 0, 0), maxDistance),
+                scene(from + vec3(0, delta, 0), maxDistance) - scene(from + vec3(0, -delta, 0), maxDistance),
+                scene(from + vec3(0, 0, delta), maxDistance) - scene(from + vec3(0, 0, -delta), maxDistance)
+            );
+        n = normalize(n);
+
+        Material mat = Material(shade(from, n), 0.0, 0.5);
+        return SceneResult(t, mat);
     }
 
     return SceneResult(t, nullMaterial());

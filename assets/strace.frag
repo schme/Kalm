@@ -47,12 +47,34 @@ vec3 hsb2rgb( in vec3 c ) {
     return c.z * mix( vec3(1.0), rgb, c.y);
 }
 
+
+vec3 sphereTrace(vec3 rayOrigin, vec3 rayDirection)
+{
+    return vec3();
+}
+
 void main()
 {
-    vec2 st = gl_FragCoord.xy/resolution;
-    vec3 outputColor = vec3(0.0);
+    float aspect = resolution.x/resolution.y;
+    float fov = 90;
 
-    outputColor = hsb2rgb(vec3(fbm(vec3(st, time*0.2)), 1.0, st.y));
+    vec2 uv = (gl_FragCoord.xy + vec2(0.5))/resolution/4.0;
+    uv.x = (uv.x * 2.0 - 1.0) * aspect;
+    uv.y = 1.0 - uv.y * 2.0; // flip y as well
+    uv = uv * tan(radians(fov) / 2);
+
+    vec3 p = vec3(gl_FragCoord.x - resolution.x / 2,
+            resolution.y / 2 - gl_FragCoord.y,
+            -(resolution.y/2) / tan(radians(fov) * 0.5));
+
+    p = normalize(p);
+
+    vec3 rayOrigin = vec3(0., 0., 0.);
+    vec3 rayDirection = vec3(uv, -1.) - rayOrigin;
+    rayDirection = normalize(rayDirection);
+
+    vec3 outputColor = vec3(0.0);
+    outputColor = sphereTrace();
 
     vec3 gammaCorrectedColor = pow(outputColor, vec3(1.0 / 2.2));
     fragColor = vec4(gammaCorrectedColor, 1.0);

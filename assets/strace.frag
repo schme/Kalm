@@ -84,10 +84,10 @@ struct Light {
 };
 
 struct Material {
-    vec3 diff;
-    float metallic;
+    vec3 albedo;
+    float metalness;
     float roughness;
-    float emissive;
+    vec3 emissive;
 };
 
 struct SceneResult {
@@ -100,11 +100,11 @@ Light[2] lights = Light[](
         Light(vec3(-3.0, 2.0, -3.0), hsb2rgb(vec3(0.14, 1.0, 1.0)), 9.5));
 
 Material dummyMaterial() {
-    return Material(vec3(0.3), 0.0, 0.5, 0.0);
+    return Material(vec3(0.3), 0.0, 0.5, vec3(0.0));
 }
 
 Material nullMaterial() {
-    return Material(vec3(0), 0.0, 0.0, 0.0);
+    return Material(vec3(0), 0.0, 0.0, vec3(0.0));
 }
 
 float plane(in vec3 from, in vec3 point, in vec3 norm)
@@ -120,7 +120,7 @@ float sphere(in vec3 from, in vec3 center, in float rad)
 float scene(in vec3 from, float maxDistance)
 {
     float d = min( maxDistance + 1.0, min( //min(
-        min(sphere(from, vec3(0.0, 0.0, -5.), 1.0),
+        min(sphere(from, vec3(0.2, 0.0, -5.), 1.0),
             sphere(from, vec3(-2.0, 1.0, -7.), 2.0)),
         min(plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
             plane(from, vec3(0.0, -1.0, 0.0), vec3(0.0, 1.0, 0.0))))/*,
@@ -149,26 +149,113 @@ float traceShadow(vec3 rayOrigin, vec3 rayDirection, float maxDistance)
     return 0.0f;
 }
 
-vec3 shade(in vec3 p, in vec3 n)
+/**
+ * This section is code from:
+ * https://learnopengl.com/PBR/Theory
+ * By: Joey de Vries
+ * License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)
+ */
+
+
+// Trowbridge-Reitz GGX
+float DistributionGGX(in vec3 N, in vec3 H, in float a)
 {
-    vec3 R = vec3(0);
+    float a2     = a*a;
+    float NdotH  = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH*NdotH;
+	
+    float nom    = a2;
+    float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+    denom        = PI * denom * denom;
+	
+    return nom / denom;
+}
+
+float GeometrySchlickGGX(in float NdotV, in float k)
+{
+    float nom   = NdotV;
+    float denom = NdotV * (1.0 - k) + k;
+	
+    return nom / denom;
+}
+  
+float GeometrySmith(in vec3 N, in vec3 V, in vec3 L, in float k)
+{
+    float NdotV = max(dot(N, V), 0.0);
+    float NdotL = max(dot(N, L), 0.0);
+    float ggx1 = GeometrySchlickGGX(NdotV, k);
+    float ggx2 = GeometrySchlickGGX(NdotL, k);
+	
+    return ggx1 * ggx2;
+}
+
+vec3 fresnelSchlick(in float cosTheta, in vec3 F0)
+{
+    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+}
+
+vec3 getF0(in Material mat)
+{
+    vec3 F0 = vec3(0.04);
+    F0      = mix(F0, mat.albedo.rgb, mat.metalness);
+    return F0;
+}
+
+/** 
+ * End of section
+ */
+
+vec3 kDiff(in Material mat)
+{
+    return mat.albedo / PI;
+}
+
+// Cook-Torrance specular
+vec3 kSpec(in vec3 p, in vec3 N, in vec3 V, in vec3 L, in vec3 H, in Material mat)
+{
+    float cosTheta = dot(L, N);
+
+    float kDirect = pow(mat.roughness + 1, 2) / 8;
+    /*float kIBL = pow(mat.roughness, 2) * 0.5;*/
+
+    float D = DistributionGGX( N, H, mat.roughness);
+    float G = GeometrySmith( N, V, L, kDirect);
+    vec3 F = fresnelSchlick( cosTheta, getF0(mat));
+
+    vec3 nom = D * G * F;
+    vec3 denom = vec3(4 * dot(V, N) * dot(V, N));
+
+    return nom / denom;
+}
+
+vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N)
+{
+    Material mat = Material(vec3(1.0), 0.0, 0.5, vec3(0.0));
+
+    vec3 R = mat.emissive;
+
+    // Cook-Torrance BRDF
 
     for (int i=0; i < lights.length(); ++i) {
-        vec3 lightDir = lights[i].pos - p;
-        if (dot(lightDir, n) > 0) {
-            float dist2 = distance(lights[i].pos, p);
-            lightDir = normalize(lightDir);
-            //float shadow = 1.0 - traceShadow(p, lightDir, sqrt(dist2));
-            float shadow = 1.0;
-            R += shadow * dot(lightDir, n) * lights[i].color * lights[i].intensity / (4.0 * PI * dist2);
-        }
+
+        vec3 L = normalize(lights[i].pos - p);
+        vec3 V = -eyeDir;
+        vec3 H = normalize(V + L);
+
+        vec3 diff = kDiff(mat);
+        vec3 spec = kSpec(p, N, V, L, H, mat);
+
+        vec3 fR = diff + spec;
+        
+        R += diff + spec;
     }
+
 
     return R;
 }
 
 
-SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
+vec3 trace(in vec3 rayOrigin, in vec3 rayDirection)
 {
     const float maxDistance = 100;
     const float eps = 10e-6;
@@ -195,12 +282,11 @@ SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
             );
         n = normalize(n);
 
-        vec3 col = shade(from, n);
-        Material mat = Material(col, 0.0, 0.5, 0.0);
-        return SceneResult(t, mat);
+        vec3 col = shade(from, rayDirection, n);
+        return col;
     }
 
-    return SceneResult(t, nullMaterial());
+    return vec3(0);
 }
 
 
@@ -218,9 +304,7 @@ void main()
 
     vec3 rayOrigin = cameraPos;
 
-    SceneResult res = trace(rayOrigin, rayDirection);
-
-    vec3 color = res.mat.diff;
+    vec3 color = trace(rayOrigin, rayDirection);
 
     vec3 gammaCorrectedColor = pow(color, vec3(1.0 / 2.2));
     fragColor = vec4(gammaCorrectedColor, 1.0);

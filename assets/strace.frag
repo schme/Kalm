@@ -1,4 +1,5 @@
 #version 460
+
 uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform float time;
@@ -6,6 +7,9 @@ uniform vec2 resolution;
 uniform vec3 cameraPos;
 uniform vec3 cameraDir;
 uniform float cameraFov;
+uniform float cameraYaw;
+uniform float cameraPitch;
+uniform float cameraRoll;
 
 in vec2 tex0;
 in vec3 pos;
@@ -13,6 +17,29 @@ in vec3 norm;
 out vec4 fragColor;
 
 #define PI 3.14159265359
+
+#define saturate(x) (clamp((x), 0.0, 1.0))
+
+vec3 rotateX(vec3 x, float ang)
+{
+    float c = cos(ang);
+    float s = sin(ang);
+    return vec3(x.x, x.y * c - x.z * s, x.z * c + x.y * s);
+}
+
+vec3 rotateY(vec3 x, float ang)
+{
+    float c = cos(ang);
+    float s = sin(ang);
+    return vec3(x.x * c - x.z * s, x.y, x.z * c + x.x * s);
+}
+
+vec3 rotateZ(vec3 x, float ang)
+{
+    float c = cos(ang);
+    float s = sin(ang);
+    return vec3(x.x * c - x.y * s, x.y * c + x.x * s, x.z);
+}
 
 // Noise by iq
 float hash( float n ) { return fract(sin(n)*753.5453123); }
@@ -184,6 +211,11 @@ void main()
     float fovTan = tan(radians(fov) / 2.0);
 
     vec3 rayDirection = normalize(vec3(uv * fovTan, -1.0));
+
+    rayDirection = rotateX(rayDirection, radians(cameraPitch));
+    rayDirection = rotateY(rayDirection, radians(cameraYaw));
+    rayDirection = rotateZ(rayDirection, radians(cameraRoll));
+
     vec3 rayOrigin = cameraPos;
 
     SceneResult res = trace(rayOrigin, rayDirection);

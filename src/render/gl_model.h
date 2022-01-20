@@ -213,6 +213,9 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 			->bind("cameraPos", state.camera.position)
 			->bind("cameraDir", state.camera.front)
 			->bind("cameraFov", state.camera.lens.fov)
+			->bind("cameraYaw", state.camera.yaw)
+			->bind("cameraPitch", state.camera.pitch)
+			->bind("cameraRoll", state.camera.roll)
 		;
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);

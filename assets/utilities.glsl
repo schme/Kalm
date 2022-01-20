@@ -1,6 +1,27 @@
 
 #define PI 3.14159265359
 
+vec3 rotateX(vec3 x, float an)
+{
+    float c = cos(an);
+    float s = sin(an);
+    return vec3(x.x, x.y * c - x.z * s, x.z * c + x.y * s);
+}
+
+vec3 rotateY(vec3 x, float an)
+{
+    float c = cos(an);
+    float s = sin(an);
+    return vec3(x.x * c - x.z * s, x.y, x.z * c + x.x * s);
+}
+
+vec3 rotateZ(vec3 x, float an)
+{
+    float c = cos(an);
+    float s = sin(an);
+    return vec3(x.x * c - x.y * s, x.y * c + x.x * s, x.z);
+}
+
 //  Function from Iñigo Quiles
 //  https://www.shadertoy.com/view/MsS3Wc
 vec3 hsb2rgb( in vec3 c ) {

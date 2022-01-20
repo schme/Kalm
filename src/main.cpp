@@ -171,11 +171,18 @@ int main(int, char**)
 
 	{
 		// Create defaults
-		Material *matcap = MaterialBank::get().load("matcap");
-		matcap->shader = ResourceId("matcap");
-		matcap->texture0 = ResourceId("matcap.png");
+		/*
+		 * Basically this is the part we'd need some sort of project load for
+		 */
+		Material *matcap = MaterialBank::get().load("strace");
+		matcap->shader = ResourceId("strace");
 
-		MaterialBank::get().loadResourcesIfNeeded(ResourceId("matcap"));
+		MaterialBank::get().loadResourcesIfNeeded();
+
+		Scene *scene = SceneBank::get().load("main");
+		Model *model = ModelBank::get().addPrimitive(PrimitiveType::ScreenQuad);
+		model->material = ResourceId("strace");
+		scene->addModel(model->name);
 	}
 
 	u32 quadVao, quadVbo;

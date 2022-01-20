@@ -210,6 +210,9 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 			->bind("MV", modelView)
 			->bind("mNormal", normalMatrix)
 			->bind("resolution", math::vec2(state.width, state.height))
+			->bind("cameraPos", state.camera.position)
+			->bind("cameraDir", state.camera.front)
+			->bind("cameraFov", state.camera.lens.fov)
 		;
 
 		glDrawElements(GL_TRIANGLES, attr.indexCount, GL_UNSIGNED_INT, 0);

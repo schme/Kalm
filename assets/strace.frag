@@ -3,6 +3,9 @@ uniform sampler2D texture0;
 uniform sampler2D texture1;
 uniform float time;
 uniform vec2 resolution;
+uniform vec3 cameraPos;
+uniform vec3 cameraDir;
+uniform float cameraFov;
 
 in vec2 tex0;
 in vec3 pos;
@@ -57,6 +60,7 @@ struct Material {
     vec3 diff;
     float metallic;
     float roughness;
+    float emissive;
 };
 
 struct SceneResult {
@@ -64,12 +68,16 @@ struct SceneResult {
     Material mat;
 };
 
+Light[2] lights = Light[](
+        Light(vec3(2.0, 1.0, 5.0), vec3(1.0), 3.0),
+        Light(vec3(-3.0, 2.0, -3.0), hsb2rgb(vec3(0.14, 1.0, 1.0)), 9.5));
+
 Material dummyMaterial() {
-    return Material(vec3(0.3), 0.0, 0.5);
+    return Material(vec3(0.3), 0.0, 0.5, 0.0);
 }
 
 Material nullMaterial() {
-    return Material(vec3(0), 0.0, 0.0);
+    return Material(vec3(0), 0.0, 0.0, 0.0);
 }
 
 float plane(in vec3 from, in vec3 point, in vec3 norm)
@@ -84,36 +92,47 @@ float sphere(in vec3 from, in vec3 center, in float rad)
 
 float scene(in vec3 from, float maxDistance)
 {
-    float d = min( maxDistance + 1.0,
-        min(
-            min(sphere(from, vec3(0.0, 0.0, -5.), 1.0),
-            sphere(from, vec3(-2.0, 2.0, -7.), 2.0)),
-        min(
-            plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
-            plane(from, vec3(0.0, -10.0, 0.0), vec3(0.0, 1.0, 0.0))))
-    );
+    float d = min( maxDistance + 1.0, min( //min(
+        min(sphere(from, vec3(0.0, 0.0, -5.), 1.0),
+            sphere(from, vec3(-2.0, 1.0, -7.), 2.0)),
+        min(plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
+            plane(from, vec3(0.0, -1.0, 0.0), vec3(0.0, 1.0, 0.0))))/*,
+        min(sphere(from, lights[0].pos, 0.1),
+            sphere(from, lights[1].pos, 0.1)))*/);
+
     return d;
 }
 
-float traceShadow(vec3 p, vec3 lightDir, float distance)
+float traceShadow(vec3 rayOrigin, vec3 rayDirection, float maxDistance)
 {
+    const float eps = 10e-5;
+    float t = 0;
+
+    while (t < maxDistance) {
+        float minDistance = maxDistance + 1;
+        vec3 from = rayOrigin + t * rayDirection;
+
+        float d = scene(from, maxDistance);
+        if (d <= eps * t) {
+            return 1.0;
+        }
+        t += d;
+    }
+
     return 0.0f;
 }
 
 vec3 shade(in vec3 p, in vec3 n)
 {
-    Light[2] lights = Light[](
-            Light(vec3(-4.0, 4.0, 0.0), vec3(1.0), 1.0),
-            Light(vec3(4.0, -4.0, -3.0), vec3(0.7, 0.2, 0.3), 10.5));
-
     vec3 R = vec3(0);
 
     for (int i=0; i < lights.length(); ++i) {
         vec3 lightDir = lights[i].pos - p;
         if (dot(lightDir, n) > 0) {
-            float dist2 = dot(lightDir, lightDir);
-            normalize(lightDir);
-            float shadow = 1.0 - traceShadow(p, lightDir, sqrt(dist2));
+            float dist2 = distance(lights[i].pos, p);
+            lightDir = normalize(lightDir);
+            //float shadow = 1.0 - traceShadow(p, lightDir, sqrt(dist2));
+            float shadow = 1.0;
             R += shadow * dot(lightDir, n) * lights[i].color * lights[i].intensity / (4.0 * PI * dist2);
         }
     }
@@ -133,10 +152,10 @@ SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
         vec3 from = rayOrigin + t * rayDirection;
         float d = scene(from, maxDistance);
 
-        t += d;
         if (d <= eps * t) {
             break;
         }
+        t += d;
     }
 
     if (t < maxDistance) {
@@ -149,7 +168,8 @@ SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
             );
         n = normalize(n);
 
-        Material mat = Material(shade(from, n), 0.0, 0.5);
+        vec3 col = shade(from, n);
+        Material mat = Material(col, 0.0, 0.5, 0.0);
         return SceneResult(t, mat);
     }
 
@@ -160,11 +180,11 @@ SceneResult trace(in vec3 rayOrigin, in vec3 rayDirection)
 void main()
 {
     vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / resolution.y;
-    float fov = 45.0;
+    float fov = cameraFov;
     float fovTan = tan(radians(fov) / 2.0);
 
     vec3 rayDirection = normalize(vec3(uv * fovTan, -1.0));
-    vec3 rayOrigin = vec3(0.0, 0.0, 0.0);
+    vec3 rayOrigin = cameraPos;
 
     SceneResult res = trace(rayOrigin, rayDirection);
 

@@ -88,6 +88,11 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		{
 			ImGui::Checkbox("Wireframe", &state.renderWireframe);
 			ImGui::Checkbox("Use viewport", &state.drawOnViewport);
+			int resolution[] = {getEditorState().width, getEditorState().height};
+			if (ImGui::InputInt2("Buffer resolution", resolution)) {
+				getEditorState().width = resolution[0];
+				getEditorState().height = resolution[1];
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Settings"))

@@ -80,7 +80,6 @@ vec3 hsb2rgb( in vec3 c ) {
 struct Light {
     vec3 pos;
     vec3 color;
-    float intensity;
 };
 
 struct Material {
@@ -95,9 +94,12 @@ struct SceneResult {
     Material mat;
 };
 
-Light[2] lights = Light[](
-        Light(vec3(2.0, 1.0, 5.0), vec3(1.0), 3.0),
-        Light(vec3(-3.0, 2.0, -3.0), hsb2rgb(vec3(0.14, 1.0, 1.0)), 9.5));
+const int numLights = 3;
+Light[numLights] lights = Light[](
+        Light(vec3(cos(time) + 2.0, sin(time) * 1.5 + 1.0, -3.0), vec3(0.8, 0.62, 0.32)),
+        Light(vec3(cos(time) * 5.0, 2.0, sin(time) * 5.0), vec3(0.2, 0.82, 0.88)),
+        Light(vec3(-3.0, 9.0, -8.0), vec3(0.8, 0.82, 0.88))
+);
 
 Material dummyMaterial() {
     return Material(vec3(0.3), 0.0, 0.5, vec3(0.0));
@@ -117,36 +119,57 @@ float sphere(in vec3 from, in vec3 center, in float rad)
     return length(from - center) - rad;
 }
 
-float scene(in vec3 from, float maxDistance)
+Material getMaterial(int indx)
 {
-    float d = min( maxDistance + 1.0, min( //min(
-        min(sphere(from, vec3(0.2, 0.0, -5.), 1.0),
-            sphere(from, vec3(-2.0, 1.0, -7.), 2.0)),
-        min(plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
-            plane(from, vec3(0.0, -1.0, 0.0), vec3(0.0, 1.0, 0.0))))/*,
-        min(sphere(from, lights[0].pos, 0.1),
-            sphere(from, lights[1].pos, 0.1)))*/);
+    // 0 - room
+    // 1 - sphere1
+    // 2 - sphere2
+    const Material[3] materials = Material[](
+        Material(vec3(0.05), 1.0, 0.01, vec3(0.0)),
+        Material(vec3(0.0, 0.38, 0.78), 0.0, 0.3, vec3(0.0)),
+        Material(vec3(1.0, 0.782, 0.344), 1.0, 0.02, vec3(0.0))
+    );
 
-    return d;
+    return materials[indx];
 }
 
-float traceShadow(vec3 rayOrigin, vec3 rayDirection, float maxDistance)
+SceneResult scene(in vec3 from, float maxDistance)
 {
-    const float eps = 10e-5;
-    float t = 0;
+    float dSphere1 = min( maxDistance + 1.0, sphere(from, vec3(0.2, 0.0, -5.), 1.0));
+    float dSphere2 = min( maxDistance + 1.0, sphere(from, vec3(-2.0, 1.0, -7.), 2.0));
 
-    while (t < maxDistance) {
-        float minDistance = maxDistance + 1;
-        vec3 from = rayOrigin + t * rayDirection;
+    float dPlane = min( maxDistance + 1.0, 
+        min(min(plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
+            plane(from, vec3(0.0, -1.0, 0.0), vec3(0.0, 1.0, 0.0))),
+            plane(from, vec3(0.0, 0.0, -20.0), vec3(0.0, 0.0, 1.0))));
 
-        float d = scene(from, maxDistance);
-        if (d <= eps * t) {
-            return 1.0;
-        }
-        t += d;
-    }
+    float dLight1 = min(maxDistance + 1.0, sphere(from, lights[0].pos, 0.2));
+    float dLight2 = min(maxDistance + 1.0, sphere(from, lights[1].pos, 0.2));
+    float dLight3 = min(maxDistance + 1.0, sphere(from, lights[2].pos, 0.2));
 
-    return 0.0f;
+    float d = min(min(min(dSphere1, dSphere2), dPlane), min(dLight1, min(dLight2, dLight3)));
+
+    if (d == dPlane)
+        return SceneResult(d, getMaterial(0));
+
+    if (d == dSphere1)
+        return SceneResult(d, getMaterial(1));
+
+    if (d == dSphere2)
+        return SceneResult(d, getMaterial(2));
+
+    Light light = Light(vec3(0), vec3(0));
+    if (d == dLight1)
+         light = lights[0];
+    else if (d == dLight2)
+        light = lights[1];
+    else if (d == dLight3)
+        light = lights[2];
+    else
+        return SceneResult(d, nullMaterial());
+
+    Material mat = Material(light.color, 0.0, 1.0, light.color);
+    return SceneResult(d, mat);
 }
 
 /**
@@ -211,15 +234,21 @@ vec3 kDiff(in Material mat)
 }
 
 // Cook-Torrance specular
-vec3 kSpec(in vec3 p, in vec3 N, in vec3 V, in vec3 L, in vec3 H, in Material mat)
+vec3 brdf(in vec3 p, in vec3 N, in vec3 V, in vec3 Li, in Material mat)
 {
-    float cosTheta = dot(L, N);
+    float cosTheta = dot(Li, N);
+    vec3 H = normalize(V + Li);
 
-    float kDirect = pow(mat.roughness + 1, 2) / 8;
-    /*float kIBL = pow(mat.roughness, 2) * 0.5;*/
+    // bias roughness to avoid complete 0
+    float roughness = mat.roughness + 0.001;
 
-    float D = DistributionGGX( N, H, mat.roughness);
-    float G = GeometrySmith( N, V, L, kDirect);
+    float kDirect = pow(roughness + 1, 2) / 8;
+    float kIBL = pow(roughness, 2) * 0.5;
+
+    float k = kDirect;
+
+    float D = DistributionGGX( N, H, roughness);
+    float G = GeometrySmith( N, V, Li, k);
     vec3 F = fresnelSchlick( cosTheta, getF0(mat));
 
     vec3 nom = D * G * F;
@@ -228,61 +257,55 @@ vec3 kSpec(in vec3 p, in vec3 N, in vec3 V, in vec3 L, in vec3 H, in Material ma
     return nom / denom;
 }
 
-vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N)
+vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N, in Material mat)
 {
-    Material mat = Material(vec3(1.0), 0.0, 0.5, vec3(0.0));
-
-    vec3 R = mat.emissive;
+    vec3 Lo = mat.emissive;
 
     // Cook-Torrance BRDF
-
     for (int i=0; i < lights.length(); ++i) {
+        vec3 Li = normalize(lights[i].pos - p);
+        vec3 V = normalize(eyeDir);
 
-        vec3 L = normalize(lights[i].pos - p);
-        vec3 V = -eyeDir;
-        vec3 H = normalize(V + L);
+        vec3 kS = brdf(p, N, V, Li, mat);
+        vec3 kD = vec3(1.0) - kS;
 
-        vec3 diff = kDiff(mat);
-        vec3 spec = kSpec(p, N, V, L, H, mat);
-
-        vec3 fR = diff + spec;
-        
-        R += diff + spec;
+        Lo += (kD * mat.albedo / PI + kS) * lights[i].color * max(dot(N, Li), 0.0);
     }
 
 
-    return R;
+    return Lo;
 }
 
 
 vec3 trace(in vec3 rayOrigin, in vec3 rayDirection)
 {
-    const float maxDistance = 100;
-    const float eps = 10e-6;
+    const float maxDistance = 200;
+    const float eps = 10e-5;
 
     float t = 0;
 
+    SceneResult res = SceneResult(maxDistance + 1, nullMaterial());
+
     while (t < maxDistance) {
         vec3 from = rayOrigin + t * rayDirection;
-        float d = scene(from, maxDistance);
+        res = scene(from, maxDistance);
 
-        if (d <= eps * t) {
+        if (res.d <= eps * t) {
             break;
         }
-        t += d;
+        t += res.d;
     }
 
     if (t < maxDistance) {
         vec3 from = rayOrigin + t * rayDirection;
         float delta = 10e-5;
-        vec3 n = vec3(
-                scene(from + vec3(delta, 0, 0), maxDistance) - scene(from + vec3(-delta, 0, 0), maxDistance),
-                scene(from + vec3(0, delta, 0), maxDistance) - scene(from + vec3(0, -delta, 0), maxDistance),
-                scene(from + vec3(0, 0, delta), maxDistance) - scene(from + vec3(0, 0, -delta), maxDistance)
-            );
-        n = normalize(n);
+        vec3 n = normalize(vec3(
+                scene(from + vec3(delta, 0, 0), maxDistance).d - scene(from + vec3(-delta, 0, 0), maxDistance).d,
+                scene(from + vec3(0, delta, 0), maxDistance).d - scene(from + vec3(0, -delta, 0), maxDistance).d,
+                scene(from + vec3(0, 0, delta), maxDistance).d - scene(from + vec3(0, 0, -delta), maxDistance).d
+            ));
 
-        vec3 col = shade(from, rayDirection, n);
+        vec3 col = shade(from, -rayDirection, n, res.mat);
         return col;
     }
 

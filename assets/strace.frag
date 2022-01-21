@@ -135,6 +135,7 @@ Material getMaterial(int indx)
 
 SceneResult scene(in vec3 from, float maxDistance)
 {
+    float noise = fbm(from);
     float dSphere1 = min( maxDistance + 1.0, sphere(from, vec3(0.2, 0.0, -5.), 1.0));
     float dSphere2 = min( maxDistance + 1.0, sphere(from, vec3(-2.0, 1.0, -7.), 2.0));
 
@@ -271,7 +272,6 @@ vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N, in Material mat)
 
         Lo += (kD * mat.albedo / PI + kS) * lights[i].color * max(dot(N, Li), 0.0);
     }
-
 
     return Lo;
 }

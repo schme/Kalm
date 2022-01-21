@@ -161,8 +161,8 @@ static void drawCameraWindow(Camera &camera, bool &opt)
 		ImGui::SliderFloat("camera.pitch", &camera.pitch, -89.f, 89.f);
 		ImGui::SliderFloat("camera.roll", &camera.roll, -179.9f, 179.9f);
 
-		ImGui::End();
 	}
+	ImGui::End();
 }
 
 void drawMesh(EditorState &state, Mesh &mesh)

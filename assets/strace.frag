@@ -96,9 +96,9 @@ struct SceneResult {
 
 const int numLights = 3;
 Light[numLights] lights = Light[](
-        Light(vec3(cos(time) + 2.0, sin(time) * 1.5 + 1.0, -3.0), vec3(0.8, 0.62, 0.32)),
+        Light(vec3(cos(time) + 2.0, sin(time) * 1.5 + 1.0, -3.0), vec3(1.9, 1.32, 0.32)),
         Light(vec3(cos(time) * 5.0, 2.0, sin(time) * 5.0), vec3(0.2, 0.82, 0.88)),
-        Light(vec3(-3.0, 9.0, -8.0), vec3(0.8, 0.82, 0.88))
+        Light(vec3(-3.0, 9.0, -4.0), vec3(22, 22, 21))
 );
 
 Material dummyMaterial() {
@@ -119,24 +119,49 @@ float sphere(in vec3 from, in vec3 center, in float rad)
     return length(from - center) - rad;
 }
 
+float box(in vec3 from, in vec3 pos, in vec3 bounds)
+{
+    vec3 q = abs(from - pos) - bounds;
+    return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+}
+
+float roundedBox(in vec3 from, in vec3 pos, in vec3 bounds, float rad)
+{
+    return box(from, pos, bounds) - rad;
+}
+
 Material getMaterial(int indx)
 {
     // 0 - room
-    // 1 - sphere1
-    // 2 - sphere2
-    const Material[3] materials = Material[](
-        Material(vec3(0.05), 1.0, 0.01, vec3(0.0)),
-        Material(vec3(0.0, 0.38, 0.78), 0.0, 0.3, vec3(0.0)),
-        Material(vec3(1.0, 0.782, 0.344), 1.0, 0.02, vec3(0.0))
+    // 1 - blue
+    // 2 - gold
+    // 3 - ground
+    // 4 - atmoshpere
+    const Material[5] materials = Material[](
+        Material(vec3(0.05), 1.0, 0.00, vec3(0.0)),
+        Material(vec3(0.0, 0.38, 0.78), 0.0, 0.72, vec3(0.0)),
+        Material(vec3(1.0, 0.782, 0.344), 1.0, 0.02, vec3(0.0)),
+        Material(vec3(0.26, 0.75, 0.344), 0.0, 0.92, vec3(0)),
+        Material(vec3(1), 0.0, 0.1, hsb2rgb(vec3(0.29, 1.9, 1.0)))
     );
 
     return materials[indx];
 }
 
-SceneResult scene(in vec3 from, float maxDistance)
+Material mixMaterial(Material a, Material b, float t)
 {
-    float noise = fbm(from);
+    t = saturate(t);
+    return Material(
+        mix(a.albedo, b.albedo, t),
+        mix(a.metalness, b.metalness, t),
+        mix(a.roughness, b.roughness, t),
+        mix(a.emissive, b.emissive, t));
+}
+
+SceneResult scene(in vec3 from, in float maxDistance)
+{
     float dSphere1 = min( maxDistance + 1.0, sphere(from, vec3(0.2, 0.0, -5.), 1.0));
+
     float dSphere2 = min( maxDistance + 1.0, sphere(from, vec3(-2.0, 1.0, -7.), 2.0));
 
     float dPlane = min( maxDistance + 1.0, 
@@ -144,11 +169,15 @@ SceneResult scene(in vec3 from, float maxDistance)
             plane(from, vec3(0.0, -1.0, 0.0), vec3(0.0, 1.0, 0.0))),
             plane(from, vec3(0.0, 0.0, -20.0), vec3(0.0, 0.0, 1.0))));
 
+    vec3 barSize = vec3(1.0, 0.17, 0.28);
+
+    float dBox = roundedBox(from, vec3(-2.0, -1.0 + barSize.y + 0.02, -4.0), barSize, 0.04);
+
     float dLight1 = min(maxDistance + 1.0, sphere(from, lights[0].pos, 0.2));
     float dLight2 = min(maxDistance + 1.0, sphere(from, lights[1].pos, 0.2));
     float dLight3 = min(maxDistance + 1.0, sphere(from, lights[2].pos, 0.2));
 
-    float d = min(min(min(dSphere1, dSphere2), dPlane), min(dLight1, min(dLight2, dLight3)));
+    float d = min(min(min(dSphere1, dSphere2), min(dPlane, dBox)), min(dLight1, min(dLight2, dLight3)));
 
     if (d == dPlane)
         return SceneResult(d, getMaterial(0));
@@ -156,7 +185,7 @@ SceneResult scene(in vec3 from, float maxDistance)
     if (d == dSphere1)
         return SceneResult(d, getMaterial(1));
 
-    if (d == dSphere2)
+    if (d == dSphere2 ||  d == dBox)
         return SceneResult(d, getMaterial(2));
 
     Light light = Light(vec3(0), vec3(0));
@@ -169,7 +198,7 @@ SceneResult scene(in vec3 from, float maxDistance)
     else
         return SceneResult(d, nullMaterial());
 
-    Material mat = Material(light.color, 0.0, 1.0, light.color);
+    Material mat = Material(light.color, 0.0, 1.0, saturate(light.color));
     return SceneResult(d, mat);
 }
 
@@ -215,7 +244,7 @@ float GeometrySmith(in vec3 N, in vec3 V, in vec3 L, in float k)
 
 vec3 fresnelSchlick(in float cosTheta, in vec3 F0)
 {
-    return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
+    return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
 vec3 getF0(in Material mat)
@@ -229,33 +258,32 @@ vec3 getF0(in Material mat)
  * End of section
  */
 
-vec3 kDiff(in Material mat)
-{
-    return mat.albedo / PI;
-}
-
 // Cook-Torrance specular
-vec3 brdf(in vec3 p, in vec3 N, in vec3 V, in vec3 Li, in Material mat)
+vec3 brdf(in vec3 p, in vec3 N, in vec3 V, in vec3 Li, in float cosTheta, in Material mat)
 {
-    float cosTheta = dot(Li, N);
     vec3 H = normalize(V + Li);
 
-    // bias roughness to avoid complete 0
-    float roughness = mat.roughness + 0.001;
+    float roughness = mat.roughness;
 
-    float kDirect = pow(roughness + 1, 2) / 8;
+    float kDirect = (roughness * roughness);
     float kIBL = pow(roughness, 2) * 0.5;
 
     float k = kDirect;
 
-    float D = DistributionGGX( N, H, roughness);
+    float D = DistributionGGX( N, H, k);
     float G = GeometrySmith( N, V, Li, k);
     vec3 F = fresnelSchlick( cosTheta, getF0(mat));
 
     vec3 nom = D * G * F;
-    vec3 denom = vec3(4 * dot(V, N) * dot(V, N));
+    float denom = 4.0 * max(dot(V, N), 0.0) * max(dot(V, N), 0.0);
 
     return nom / denom;
+}
+
+float lightAttenuation(in vec3 p, in vec3 lightPos)
+{
+    float d = distance(p, lightPos);
+    return 1.0 / (d * d);
 }
 
 vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N, in Material mat)
@@ -266,11 +294,15 @@ vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N, in Material mat)
     for (int i=0; i < lights.length(); ++i) {
         vec3 Li = normalize(lights[i].pos - p);
         vec3 V = normalize(eyeDir);
+        float cosTheta = max(dot(N, Li), 0.0);
 
-        vec3 kS = brdf(p, N, V, Li, mat);
+        vec3 kS = brdf(p, N, V, Li, cosTheta, mat);
         vec3 kD = vec3(1.0) - kS;
 
-        Lo += (kD * mat.albedo / PI + kS) * lights[i].color * max(dot(N, Li), 0.0);
+        float attenuation = lightAttenuation(p, lights[i].pos);
+        vec3 radiance = lights[i].color * attenuation * cosTheta;
+
+        Lo += (kD * mat.albedo / PI + kS) * radiance;
     }
 
     return Lo;

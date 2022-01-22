@@ -79,7 +79,7 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 			ImGui::Checkbox("Editor Camera", &gui.optShowCameraWindow);
 			ImGui::Checkbox("Texture Window", &gui.optShowTextureWindow);
 			ImGui::Checkbox("Shaders Window", &gui.optShowShadersWindow);
-			ImGui::Checkbox("timelineGui Window", &gui.optShowTimeline);
+			ImGui::Checkbox("Timeline Window", &gui.optShowTimeline);
 			ImGui::Checkbox("Material Window", &gui.optShowMaterialWindow);
 
 			ImGui::Checkbox("Demo Window", &gui.optShowDemoWindow);
@@ -138,7 +138,7 @@ static void showTimelineWindow(Gui &gui, bool &opt)
 
 	TimelineGui &tl = gui.timelineGui;
 
-	ImGui::Begin("timelineGui", &opt, windowFlags);
+	ImGui::Begin("Timeline", &opt, windowFlags);
 	ImGui::InputInt("Max Frames", &tl.timeline->frameMax);
 	ImGui::SameLine(); ImGui::Text("Frame: %d", tl.timeline->currentFrame);
 	ImGui::SameLine();
@@ -442,7 +442,7 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
 		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), (float)state.bufferWidth / state.bufferHeight);
 
-		ImGui::Image(reinterpret_cast<void*>(state.fboId),
+		ImGui::Image(reinterpret_cast<void*>(state.colorTextureId),
 				imageSize,
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),

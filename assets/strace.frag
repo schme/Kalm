@@ -362,5 +362,5 @@ void main()
     vec3 color = trace(rayOrigin, rayDirection);
 
     vec3 gammaCorrectedColor = pow(color, vec3(1.0 / 2.2));
-    fragColor = vec4(gammaCorrectedColor, 1.0);
+	fragColor = vec4(gammaCorrectedColor, 1.0);
 }

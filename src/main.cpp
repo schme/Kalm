@@ -260,6 +260,16 @@ int main(int, char**)
 		}
 
 		render::bindFrameBuffer(0);
+		render::setViewport(0, 0, state.width, state.height);
+
+		if (state.drawOnViewport) {
+			render::SceneFboInfo info;
+			info.fboId = state.fboId;
+			info.colorTextureId = state.colorTextureId;
+			info.stencilDepthBufferId = state.stencilDepthBufferId;
+
+			render::renderSceneFboToScreen(info, quadVao);
+		}
 
 		Gui::get().run(state);
 		Gui::get().render();

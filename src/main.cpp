@@ -31,6 +31,7 @@ namespace ks {
 	static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	{
 		ks_unused(window);
+		render::bindFrameBuffer(0);
 		render::setViewport(0, 0, width, height);
 	}
 
@@ -52,8 +53,8 @@ namespace ks {
 		}
 
 		if (input.rmb) {
-			float cameraSpeed = input.shift ? 5.f : 2.f;
-			updateFreeCameraLook(camera, -input.mouseDelta);
+			float cameraSpeed = input.shift ? 8.f : 2.f;
+			updateFreeCameraFromMouseInput(camera, -input.mouseDelta);
 			updateCameraPos(camera, input.forward, input.right, input.up, cameraSpeed * delta);
 		}
 	}
@@ -155,18 +156,19 @@ int main(int, char**)
 
 	render::setupEnvironment(glfwGetProcAddress);
 
-	// Initialize modules
-
-	FileWatcher::init();
-	ModelBank::get().init();
-	TextureBank::get().init();
-	ShaderBank::get().init();
-	Timeline::get().init();
-	Gui::get().init(window);
+	{
+		// Initialize modules
+		FileWatcher::init();
+		ModelBank::get().init();
+		TextureBank::get().init();
+		ShaderBank::get().init();
+		Timeline::get().init();
+		Gui::get().init(window);
+	}
 
 	{
-		std::string shaderFolder = getEditorState().projectRoot + getEditorState().assetPrefix;
-		FileWatcher::addWatcher(shaderFolder.c_str(), shaderFileChanged);
+		std::string assetFolder = getEditorState().projectRoot + getEditorState().assetPrefix;
+		FileWatcher::addWatcher(assetFolder.c_str(), shaderFileChanged);
 	}
 
 	{
@@ -187,10 +189,12 @@ int main(int, char**)
 
 	u32 quadVao, quadVbo;
 
-	render::SceneFboInfo sceneFboInfo = render::setupSceneFbo(width, height);
-	render::setupQuadBuffers(quadVao, quadVbo);
+	render::SceneFboInfo info = render::setupSceneFbo(state.bufferWidth, state.bufferHeight);
+	state.fboId = info.fboId;
+	state.colorTextureId = info.colorTextureId;
+	state.stencilDepthBufferId = info.stencilDepthBufferId;
 
-	state.sceneTextureId = sceneFboInfo.colorTextureId;
+	render::setupQuadBuffers(quadVao, quadVbo);
 
 	float delta = 0.0f;
 	float frameStart = 0.0f;
@@ -228,13 +232,8 @@ int main(int, char**)
 		//
 		// render
 		//
-
-		if (state.drawOnViewport)
-			render::bindFrameBuffer(0);
-		else
-			render::bindFrameBuffer(sceneFboInfo.fboId);
-
-		render::setupFrame(width, height);
+		render::bindFrameBuffer(state.fboId);
+		render::setupFrame(state.bufferHeight, state.bufferWidth);
 
 		if (state.renderWireframe) {
 			render::setPolygonMode(render::PolygonMode::Line);

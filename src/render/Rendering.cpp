@@ -51,6 +51,13 @@ void bindFrameBuffer(u32 id)
     glBindFramebuffer(GL_FRAMEBUFFER, id);
 }
 
+void deleteFrameBuffer(u32 fboId, u32 colorTextureId, u32 stencilDepthBufferId)
+{
+	glDeleteFramebuffers(1, &fboId);
+	glDeleteTextures(1, &colorTextureId);
+	glDeleteRenderbuffers(1, &stencilDepthBufferId);
+}
+
 u32 generateTexture()
 {
     u32 id;
@@ -95,9 +102,9 @@ void loadTexture(u32 id, int width, int height, int channels, void *data, bool m
 	bindTexture(0);
 }
 
-void setFramebufferAttachment(u32 texture)
+void setFramebufferAttachment(u32 textureId)
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
 }
 
 bool checkFramebufferStatus()
@@ -114,8 +121,8 @@ void setupFrame(int fbWidth, int fbHeight)
 {
 	static const math::vec4 clearColor = math::vec4(0.f, 0.f, 0.f, 1.f);
 
-	clearColorAndDepthBuffer(clearColor);
 	setViewport(0, 0, fbWidth, fbHeight);
+	clearColorAndDepthBuffer(clearColor);
 }
 
 void setupEnvironment(GLADloadfunc loadFunc)

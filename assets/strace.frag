@@ -96,8 +96,8 @@ struct SceneResult {
 
 const int numLights = 3;
 Light[numLights] lights = Light[](
-        Light(vec3(cos(time) + 2.0, sin(time) * 1.5 + 1.0, -3.0), vec3(1.9, 1.32, 0.32)),
-        Light(vec3(cos(time) * 5.0, 2.0, sin(time) * 5.0), vec3(0.2, 0.82, 0.88)),
+        Light(vec3(1.0, sin(time) * 0.5 + 0.2, -3.0), vec3(1.9, 1.32, 0.32)),
+        Light(vec3(-4.0, sin(time * 0.5) * 0.5, cos(time * 0.5) * 0.5 + -5.0), vec3(1.4, 0.92, 0.58)),
         Light(vec3(-3.0, 9.0, -4.0), vec3(22, 22, 21))
 );
 
@@ -185,7 +185,7 @@ SceneResult scene(in vec3 from, in float maxDistance)
     if (d == dSphere1)
         return SceneResult(d, getMaterial(1));
 
-    if (d == dSphere2 ||  d == dBox)
+    if (d == dSphere2 || d == dBox)
         return SceneResult(d, getMaterial(2));
 
     Light light = Light(vec3(0), vec3(0));

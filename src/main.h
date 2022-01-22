@@ -12,11 +12,17 @@ struct SimulationState {
 struct EditorState {
 	Camera camera;
 
-	u32 sceneTextureId = 0;
+	// scene fbo info
+	u32 fboId = 0;
+	u32 colorTextureId = 0;
+	u32 stencilDepthBufferId = 0;
+
 	bool drawOnViewport = false;
 	float time = 0.0f;
 	int width = 1920;
 	int height = 1080;
+	int bufferWidth = 512;
+	int bufferHeight = 512;
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";

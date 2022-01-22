@@ -10,7 +10,7 @@ struct CameraLens {
 		Ortho,
 	};
     float fov = 45.f;
-    float aspect = 1440.f/900.f;
+    float aspect = 1920.f/1080.f;
     float near = 0.1f;
     float far = 100.f;
 	Type type = Type::Perspective;
@@ -30,8 +30,9 @@ struct Camera {
     CameraLens lens;
 };
 
-void updateFreeCameraLook(Camera &camera, math::vec2 offset);
+void updateFreeCameraFromMouseInput(Camera &camera, math::vec2 offset);
 void updateCameraFront(Camera &camera);
+void updateCameraView(Camera &camera, float aspect);
 void cameraLookAt(Camera &camera, math::vec3 position);
 
 void updateCameraPos(Camera &camera, float forward, float right, float up, float magnitude);

@@ -32,20 +32,20 @@ struct SceneFboInfo {
 	u32 stencilDepthBufferId = 0;
 };
 
-static SceneFboInfo setupSceneFbo(u32 width, u32 height)
+static SceneFboInfo setupSceneFbo(u32 bufferWidth, u32 bufferHeight)
 {
 	SceneFboInfo info;
 	info.fboId = generateFrameBuffer();
 	bindFrameBuffer(info.fboId);
 
 	info.colorTextureId = generateTexture();
-	loadTexture(info.colorTextureId, width, height, 3, nullptr, false);
+	loadTexture(info.colorTextureId, bufferWidth, bufferHeight, 3, nullptr, false);
 	setFramebufferAttachment(info.colorTextureId);
 
 	glGenRenderbuffers(1, &info.stencilDepthBufferId);
 	glBindRenderbuffer(GL_RENDERBUFFER, info.stencilDepthBufferId);
 	glRenderbufferStorage(GL_RENDERBUFFER,
-			GL_DEPTH24_STENCIL8_EXT, width, height);
+			GL_DEPTH24_STENCIL8_EXT, bufferWidth, bufferHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER,
 			GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, info.stencilDepthBufferId);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -209,7 +209,7 @@ inline void renderModel(EditorState &state, const ResourceId &matId, ModelRender
 			->bind("P", perspectiveMat)
 			->bind("MV", modelView)
 			->bind("mNormal", normalMatrix)
-			->bind("resolution", math::vec2(state.width, state.height))
+			->bind("resolution", math::vec2(state.bufferWidth, state.bufferHeight))
 			->bind("cameraPos", state.camera.position)
 			->bind("cameraDir", state.camera.front)
 			->bind("cameraFov", state.camera.lens.fov)

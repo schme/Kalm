@@ -2,7 +2,7 @@
 
 namespace ks {
 
-void updateFreeCameraLook(Camera &camera, math::vec2 offset)
+void updateFreeCameraFromMouseInput(Camera &camera, math::vec2 offset)
 {
 	float sensitivity = 0.1f;
 	offset *= sensitivity;
@@ -14,6 +14,11 @@ void updateFreeCameraLook(Camera &camera, math::vec2 offset)
 		camera.pitch = 89.f;
 	if (camera.pitch < -89.f)
 		camera.pitch = -89.f;
+
+	if (camera.yaw > 180.f)
+		camera.yaw -= 180.f;
+	if (camera.yaw < -180.f)
+		camera.yaw += 180.f;
 }
 
 void updateCameraFront(Camera &camera)
@@ -54,6 +59,11 @@ void updateCameraPos(Camera &camera, float forward, float right, float up, float
 	}
 
 	camera.position += cameraVec * magnitude;
+}
+
+void updateCameraView(Camera &camera, float aspect)
+{
+	camera.lens.aspect = aspect;
 }
 
 void cameraLookAt(Camera &camera, math::vec3 target) {

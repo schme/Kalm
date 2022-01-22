@@ -16,6 +16,7 @@
 #include "include/config.h"
 #include "main.h"
 #include "render/Rendering.h"
+#include "render/gl_model.h"
 #include "render/gl_shader.h"
 #include "render/ShaderBank.h"
 
@@ -88,10 +89,21 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 		{
 			ImGui::Checkbox("Wireframe", &state.renderWireframe);
 			ImGui::Checkbox("Use viewport", &state.drawOnViewport);
-			int resolution[] = {getEditorState().width, getEditorState().height};
-			if (ImGui::InputInt2("Buffer resolution", resolution)) {
-				getEditorState().width = resolution[0];
-				getEditorState().height = resolution[1];
+
+			static int resolution[] = {state.bufferWidth, state.bufferHeight};
+			ImGui::InputInt2("Buffer resolution", resolution); ImGui::SameLine();
+			if (ImGui::Button("Apply")) {
+				state.bufferWidth = resolution[0];
+				state.bufferHeight = resolution[1];
+
+				render::deleteFrameBuffer(state.fboId, state.colorTextureId, state.stencilDepthBufferId);
+
+				render::SceneFboInfo info = render::setupSceneFbo(resolution[0], resolution[1]);
+				state.fboId = info.fboId;
+				state.colorTextureId = info.colorTextureId;
+				state.stencilDepthBufferId = info.stencilDepthBufferId;
+
+				updateCameraView(state.camera, (float)resolution[0] / (float)resolution[1]);
 			}
 			ImGui::EndMenu();
 		}
@@ -347,7 +359,7 @@ void drawSceneWindow(EditorState &state, bool &opt)
 void drawTexturePreview(const Texture &txtr, bool &opt)
 {
 	ImGui::Begin("Texture Preview", &opt, ImGuiWindowFlags_HorizontalScrollbar);
-	ImGui::Image((void*)txtr.id,
+	ImGui::Image(reinterpret_cast<void*>(txtr.id),
 			ImVec2(txtr.width, txtr.height),
 			ImVec2(0.0f, 1.0f),
 			ImVec2(1.0f, 0.0f),
@@ -375,7 +387,7 @@ void drawTextureWindow(EditorState &state, bool &opt)
 		auto &tb = ResourceStorage<Texture>::get();
 		for (const auto &[id, txtr] : tb.storage) {
 			ImGui::Text("Id: %s", id.c_str());
-			if (ImGui::ImageButton((void*)txtr.id, ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
+			if (ImGui::ImageButton(reinterpret_cast<void*>(txtr.id), ImVec2(txtr.width / 20.0f, txtr.height / 20.0f), ImVec2(0.0f, 1.0f), ImVec2(1.0f, 0.0f), ImColor(1.0f, 1.0f, 1.0f, 1.0f), ImColor(0.0f, 0.3f, 0.0f, 1.0f))) {
 				texturePreview = true;
 				inPreview = &txtr;
 			}
@@ -426,11 +438,11 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 	if (!opt)
 		return;
 
-	if (ImGui::Begin("timelineGui Preview", &opt))	{
+	if (ImGui::Begin("Timeline Preview", &opt))	{
 		ImVec2 windowSize = ImGui::GetWindowContentRegionMax();
-		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), (float)state.width / state.height);
+		ImVec2 imageSize = fitRectInRectKeepAspect(ImVec2(windowSize.x - 10.f, windowSize.y - 30.f), (float)state.bufferWidth / state.bufferHeight);
 
-		ImGui::Image(reinterpret_cast<void*>(state.sceneTextureId),
+		ImGui::Image(reinterpret_cast<void*>(state.fboId),
 				imageSize,
 				ImVec2(0.0f, 1.0f),
 				ImVec2(1.0f, 0.0f),

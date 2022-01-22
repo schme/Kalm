@@ -33,6 +33,7 @@ void bindVAO(u32 id);
 
 u32 generateFrameBuffer();
 void bindFrameBuffer(u32 id);
+void deleteFrameBuffer(u32 fboId, u32 colorTextureId, u32 stencilDepthBufferId);
 void setFramebufferAttachment(u32 texture);
 bool checkFramebufferStatus();
 

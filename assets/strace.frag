@@ -138,9 +138,9 @@ Material getMaterial(int indx)
     // 3 - ground
     // 4 - atmoshpere
     const Material[5] materials = Material[](
-        Material(vec3(0.05), 1.0, 0.00, vec3(0.0)),
+        Material(vec3(0.35), 1.0, 0.90, vec3(0.0)),
         Material(vec3(0.0, 0.38, 0.78), 0.0, 0.72, vec3(0.0)),
-        Material(vec3(1.0, 0.782, 0.344), 1.0, 0.02, vec3(0.0)),
+        Material(vec3(1.0, 0.782, 0.344), 1.0, 0.37, vec3(0.0)),
         Material(vec3(0.26, 0.75, 0.344), 0.0, 0.92, vec3(0)),
         Material(vec3(1), 0.0, 0.1, hsb2rgb(vec3(0.29, 1.9, 1.0)))
     );
@@ -162,7 +162,7 @@ SceneResult scene(in vec3 from, in float maxDistance)
 {
     float dSphere1 = min( maxDistance + 1.0, sphere(from, vec3(0.2, 0.0, -5.), 1.0));
 
-    float dSphere2 = min( maxDistance + 1.0, sphere(from, vec3(-2.0, 1.0, -7.), 2.0));
+    float dSphere2 = min( maxDistance + 1.0, sphere(from, vec3(-2.0, 1.0, -7.), 1.5));
 
     float dPlane = min( maxDistance + 1.0, 
         min(min(plane(from, vec3(0.0, 10.0, 0.0), vec3(0.0, -1.0, 0.0)),
@@ -198,7 +198,7 @@ SceneResult scene(in vec3 from, in float maxDistance)
     else
         return SceneResult(d, nullMaterial());
 
-    Material mat = Material(light.color, 0.0, 1.0, saturate(light.color));
+    Material mat = Material(vec3(1.0), 0.0, 1.0, light.color);
     return SceneResult(d, mat);
 }
 
@@ -298,11 +298,12 @@ vec3 shade(in vec3 p, in vec3 eyeDir, in vec3 N, in Material mat)
 
         vec3 kS = brdf(p, N, V, Li, cosTheta, mat);
         vec3 kD = vec3(1.0) - kS;
+		kD *= 1.0 - mat.metalness;
 
         float attenuation = lightAttenuation(p, lights[i].pos);
-        vec3 radiance = lights[i].color * attenuation * cosTheta;
+        vec3 radiance = lights[i].color * attenuation;
 
-        Lo += (kD * mat.albedo / PI + kS) * radiance;
+        Lo += (kD * mat.albedo / PI + kS) * radiance * cosTheta;
     }
 
     return Lo;
@@ -361,6 +362,8 @@ void main()
 
     vec3 color = trace(rayOrigin, rayDirection);
 
-    vec3 gammaCorrectedColor = pow(color, vec3(1.0 / 2.2));
+	// Reinhard
+	vec3 tonemappedColor = color / (color + vec3(1.0));
+    vec3 gammaCorrectedColor = pow(tonemappedColor, vec3(1.0 / 2.2));
 	fragColor = vec4(gammaCorrectedColor, 1.0);
 }

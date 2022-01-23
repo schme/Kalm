@@ -2,6 +2,7 @@
 
 #include "include/common.h"
 #include "include/maths.h"
+#include "render/RenderTypes.h"
 
 namespace ks::render {
 

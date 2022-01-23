@@ -16,9 +16,9 @@ void updateFreeCameraFromMouseInput(Camera &camera, math::vec2 offset)
 		camera.pitch = -89.f;
 
 	if (camera.yaw > 180.f)
-		camera.yaw -= 180.f;
+		camera.yaw -= 360.f;
 	if (camera.yaw < -180.f)
-		camera.yaw += 180.f;
+		camera.yaw += 360.f;
 }
 
 void updateCameraFront(Camera &camera)

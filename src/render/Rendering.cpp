@@ -2,9 +2,7 @@
 
 #include "glad/gl.h"
 
-#if 1
-#include "glRendering.h"
-#endif
+#include "render/gl_utils.h"
 
 namespace ks::render {
 
@@ -122,7 +120,8 @@ void setupFrame(int fbWidth, int fbHeight)
 	static const math::vec4 clearColor = math::vec4(0.f, 0.f, 0.f, 1.f);
 
 	setViewport(0, 0, fbWidth, fbHeight);
-	clearColorAndDepthBuffer(clearColor);
+	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void setupEnvironment(GLADloadfunc loadFunc)

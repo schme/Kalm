@@ -21,8 +21,8 @@ struct EditorState {
 	float time = 0.0f;
 	int width = 1920;
 	int height = 1080;
-	int bufferWidth = 512;
-	int bufferHeight = 512;
+	int bufferWidth = 1920;
+	int bufferHeight = 1080;
 	bool renderWireframe = false;
 
 	std::string projectRoot = "";

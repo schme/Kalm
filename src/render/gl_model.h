@@ -81,15 +81,16 @@ static void setupQuadBuffers(u32 &quadVao, u32 &quadVbo)
 	glBindVertexArray(0);
 }
 
-static void renderSceneFboToScreen(const SceneFboInfo &info, u32 quadVao)
+static void renderScreenQuad(u32 textureId, const ResourceId &shader, u32 quadVao)
 {
-	clearColorBuffer(math::vec4(1.0f, 0.50f, 0.10f, 1.f));
+	glClearColor(1.0f, 0.5, 0.1, 1.0);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	ShaderBank::get().find("pass")->use();
+	ShaderBank::get().find(shader)->use();
 
 	glBindVertexArray(quadVao);
 	glDisable(GL_DEPTH_TEST);
-	glBindTexture(GL_TEXTURE_2D, info.colorTextureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

@@ -31,8 +31,12 @@ namespace ks {
 	static void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 	{
 		ks_unused(window);
+		log_info("Framebuffersize callback!: %d, %d\n", width, height);
 		render::bindFrameBuffer(0);
 		render::setViewport(0, 0, width, height);
+
+		getEditorState().width = width;
+		getEditorState().height = height;
 	}
 
 	void handleInput(GLFWwindow *window, InputState &input, InputState &last, Camera &camera, float delta)
@@ -187,6 +191,8 @@ int main(int, char**)
 		scene->addModel(model->name);
 	}
 
+	updateCameraView(state.camera, (float)state.bufferWidth / (float)state.bufferHeight);
+
 	u32 quadVao, quadVbo;
 
 	render::SceneFboInfo info = render::setupSceneFbo(state.bufferWidth, state.bufferHeight);
@@ -233,7 +239,7 @@ int main(int, char**)
 		// render
 		//
 		render::bindFrameBuffer(state.fboId);
-		render::setupFrame(state.bufferHeight, state.bufferWidth);
+		render::setupFrame(state.bufferWidth, state.bufferHeight);
 
 		if (state.renderWireframe) {
 			render::setPolygonMode(render::PolygonMode::Line);
@@ -261,14 +267,9 @@ int main(int, char**)
 
 		render::bindFrameBuffer(0);
 		render::setViewport(0, 0, state.width, state.height);
-
 		if (state.drawOnViewport) {
-			render::SceneFboInfo info;
-			info.fboId = state.fboId;
-			info.colorTextureId = state.colorTextureId;
-			info.stencilDepthBufferId = state.stencilDepthBufferId;
 
-			render::renderSceneFboToScreen(info, quadVao);
+			render::renderScreenQuad(state.colorTextureId, "pass", quadVao);
 		}
 
 		Gui::get().run(state);

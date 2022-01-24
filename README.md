@@ -1,6 +1,20 @@
 # Kalm
 
-A graphics tool for messing around
+A graphics tool for messing around. Secretly a WIP demotool!
+
+## Build tool
+```bash
+cmake -B build -S src
+cmake --build build -j12
+./build/src/Kalm
+```
+
+## Build demo
+```bash
+cmake -B demo -S src/demo
+cmake --build demo -j12
+./demo/src/Demo
+```
 
 ## Getting started
 

@@ -13,7 +13,6 @@ struct Scene {
 
 	Model *addModel(const std::string &name);
 
-	Camera camera = {};
 	std::string name = "";
 	std::vector<Model*> models;
 	std::vector<ModelRenderAttributes> attributes;

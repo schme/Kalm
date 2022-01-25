@@ -3,12 +3,30 @@
 #include <X11/Xlib.h>
 
 #include <cstdio>
+#include <time.h>
 
 #include "player/player.h"
 
-namespace ks
-{
 
+/**
+ * Time
+ */
+
+static const long nsInSecond = 1000000000L;
+constexpr uint64_t timespecToNs(const timespec &ts)
+{
+	return ts.tv_sec * nsInSecond + ts.tv_nsec;
+}
+
+static inline uint64_t getTime() {
+	timespec ts = {0};
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return timespecToNs(ts);
+}
+
+static inline uint64_t getTimeSince(uint64_t sinceNs) {
+	uint64_t nowNs = getTime();
+	return nowNs - sinceNs;
 }
 
 typedef GLXContext (*glXCreateContextAttribsARBProc)
@@ -111,19 +129,25 @@ int main()
 	ks::Player player;
 	player.init(width, height);
 
+
 	int status = 0;
+
+	uint64_t demoStart = getTime();
+	uint64_t demoTime = 0;
+
 	while (!shouldQuit) {
+		demoTime = getTime() - demoStart;
 
 		bool hasEvent = XCheckWindowEvent(disp, win, KeyPressMask, &ev);
 		if (hasEvent) {
-			KeySym keysym = XLookupKeysym(&ev.xkey, 0);
 
+			KeySym keysym = XLookupKeysym(&ev.xkey, 0);
 			if (keysym == XK_Escape) {
 				shouldQuit = true;
 			}
 		}
 
-		status = player.play(&shouldQuit);
+		status = player.play(demoTime, &shouldQuit);
 	}
 
 	return status;

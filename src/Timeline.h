@@ -14,8 +14,7 @@ struct Timeline
     void togglePlayback(float now);
     float advanceTimestep(float now);
 
-	constexpr bool itemActive(const TimelineItem &item)
-	{
+	constexpr bool itemActive(const TimelineItem &item)	{
 		return item.frameStart <= currentFrame && item.frameEnd >= currentFrame;
 	}
 

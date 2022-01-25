@@ -445,9 +445,7 @@ void drawTimelinePreview(EditorState &state, bool &opt)
 		ImGui::Image(reinterpret_cast<void*>(state.colorTextureId),
 				imageSize,
 				ImVec2(0.0f, 1.0f),
-				ImVec2(1.0f, 0.0f),
-				ImColor(1.0f, 1.0f, 1.0f, 1.0f),
-				ImColor(1.0f, 1.0f, 1.0f, 1.0f));
+				ImVec2(1.0f, 0.0f));
 	}
 	ImGui::End();
 }

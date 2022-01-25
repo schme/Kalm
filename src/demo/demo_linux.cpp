@@ -19,14 +19,13 @@ constexpr uint64_t timespecToNs(const timespec &ts)
 }
 
 static inline uint64_t getTime() {
-	timespec ts = {0};
+	timespec ts = {};
 	clock_gettime(CLOCK_MONOTONIC, &ts);
 	return timespecToNs(ts);
 }
 
 static inline uint64_t getTimeSince(uint64_t sinceNs) {
-	uint64_t nowNs = getTime();
-	return nowNs - sinceNs;
+	return getTime() - sinceNs;
 }
 
 typedef GLXContext (*glXCreateContextAttribsARBProc)
@@ -127,16 +126,16 @@ int main()
 	bool shouldQuit = false;
 
 	ks::Player player;
+
+	// TODO: Allow exit during init
 	player.init(width, height);
 
-
-	int status = 0;
 
 	uint64_t demoStart = getTime();
 	uint64_t demoTime = 0;
 
 	while (!shouldQuit) {
-		demoTime = getTime() - demoStart;
+		demoTime = getTimeSince(demoStart);
 
 		bool hasEvent = XCheckWindowEvent(disp, win, KeyPressMask, &ev);
 		if (hasEvent) {
@@ -147,8 +146,8 @@ int main()
 			}
 		}
 
-		status = player.play(demoTime, &shouldQuit);
+		player.play(demoTime, &shouldQuit);
 	}
 
-	return status;
+	return 0;
 }

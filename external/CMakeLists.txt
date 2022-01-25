@@ -36,7 +36,14 @@ FetchContent_Declare(
     GIT_TAG 05115b07b4d7ca12a52b9fd0e0534029ac8f2cb6 #5.1.0
 )
 
-FetchContent_MakeAvailable(glfw glm assimp)
+message( STATUS "Fetching tinyxml2...")
+FetchContent_Declare(
+	tinyxml2
+    GIT_REPOSITORY git@github.com:leethomason/tinyxml2.git
+    GIT_TAG a9773976845b19e89020c1215781e71116477ef1 # master @ 25.1.2022
+)
+
+FetchContent_MakeAvailable(glfw glm assimp tinyxml2)
 
 message( STATUS "Fetching stb libraries...")
 FetchContent_Declare(

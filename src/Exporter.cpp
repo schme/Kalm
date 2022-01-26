@@ -3,6 +3,7 @@
 #include "ExportXml.h"
 #include "Timeline.h"
 #include "filesystem/Filesystem.h"
+#include "include/log.h"
 
 #include <string>
 
@@ -17,7 +18,9 @@ void Exporter::saveProject(const char *projectDir)
 	projFile += "/";
 	projFile += "demo.xml";
 
-	writeToFile(exporter.getContent(), exporter.getContentSize(), projFile.c_str());
+	int ret = writeToFile(exporter.getContent(), exporter.getContentSize(), projFile.c_str());
+	if (ret >= 0)
+		log_info("Project saved to: %s\n", projectDir);
 }
 
 }

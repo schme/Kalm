@@ -5,6 +5,7 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+#include "Exporter.h"
 #include "MaterialBank.h"
 #include "ModelBank.h"
 #include "ResourceStorage.h"
@@ -16,9 +17,9 @@
 #include "include/config.h"
 #include "main.h"
 #include "render/Rendering.h"
+#include "render/ShaderBank.h"
 #include "render/gl_model.h"
 #include "render/gl_shader.h"
-#include "render/ShaderBank.h"
 
 #include <sstream>
 
@@ -70,6 +71,9 @@ static void showMainMenuBar(Gui &gui, EditorState &state)
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::Button("Save Project")) {
+				Exporter::saveProject("Project");
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Windows"))

@@ -25,6 +25,14 @@ struct XmlExporter
 	void push(const Model& model);
 	void push(const TimelineItem &item);
 
+	const char* getContent() const {
+		return printer.CStr();
+	}
+
+	size_t getContentSize() const {
+		return printer.CStrSize();
+	}
+
 	tinyxml2::XMLPrinter printer;
 };
 

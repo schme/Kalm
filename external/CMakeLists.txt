@@ -12,7 +12,7 @@ message( STATUS "Fetching glad...")
 FetchContent_Declare(
     glad
     GIT_REPOSITORY git@github.com:Dav1dde/glad.git
-    GIT_TAG 5fc92d7057913ddab9d9e4565502067dff1dcb9e
+    GIT_TAG d08b1aa01f8fe57498f04d47b5fa8c48725be877 # 2.0.4
 )
 FetchContent_Populate(glad)
 include(${glad_SOURCE_DIR}/cmake/CMakeLists.txt)
@@ -26,14 +26,15 @@ message( STATUS "Fetching glm...")
 FetchContent_Declare(
     glm
     GIT_REPOSITORY git@github.com:g-truc/glm.git
-    GIT_TAG bf71a834948186f4097caa076cd2663c69a10e1e #0.9.8
+    GIT_TAG bf71a834948186f4097caa076cd2663c69a10e1e # 0.9.9.8
 )
 
 message( STATUS "Fetching assimp...")
 FetchContent_Declare(
     assimp
     GIT_REPOSITORY git@github.com:assimp/assimp.git
-    GIT_TAG 05115b07b4d7ca12a52b9fd0e0534029ac8f2cb6 #5.1.0
+    GIT_TAG 9519a62dd20799c5493c638d1ef5a6f484e5faf1 # 5.2.5 Bugfixes
+
 )
 
 message( STATUS "Fetching tinyxml2...")
@@ -61,13 +62,13 @@ message( STATUS "Fetching imgui...")
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY git@github.com:ocornut/imgui.git
-    GIT_TAG dc8c3618e8f8e2dada23daa1aa237626af341fd8 #1.86 wip docking
+    GIT_TAG e25e4526cd41cd6536194de098540d54244f54e9 # docking @ 1.3.2023
 )
 message( STATUS "Fetching imgui extension ImGuizmo...")
 FetchContent_Declare(
     imgui-imguizmo
     GIT_REPOSITORY git@github.com:CedricGuillemet/ImGuizmo.git
-    GIT_TAG 82a626f9db7dbc0c8c7a3c9353e2104cb75d8749
+    GIT_TAG fbc3614abcc642de7f3868cc0d68a35503ca9a4e # 1.3.2023
 )
 
 FetchContent_Populate(imgui)

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <mutex>
+#include <algorithm>
 
 namespace ks {
 

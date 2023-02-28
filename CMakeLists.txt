@@ -5,9 +5,9 @@ project(
 	VERSION 0.1
 	LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-
 add_subdirectory(external)
+
+set(CMAKE_CXX_STANDARD 17)
 
 add_compile_options(-Wall -Wextra)
 
